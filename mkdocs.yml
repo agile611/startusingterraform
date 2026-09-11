@@ -42,6 +42,8 @@ nav:
   - Terraform con Azure:
       - Introducción: azure/index.md
       - "1.1 Infraestructura como código": azure/01-01-introduccion-iac.md
+      - "1.2 Terraform frente a otras herramientas": azure/01-02-comparativa-herramientas.md
+      - "1.3 Declarativo frente a imperativo": azure/01-03-declarativo-imperativo.md
 
 markdown_extensions:
   - admonition
