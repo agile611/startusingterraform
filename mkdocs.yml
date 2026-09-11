@@ -1,0 +1,52 @@
+site_name: Curso de Terraform
+site_description: Documentación y prácticas del curso de Terraform
+site_author: Guillem Hernandez Sola
+
+repo_name: agile611/startusingterraform
+repo_url: https://github.com/agile611/startusingterraform
+
+theme:
+  name: material
+  language: es
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - content.code.copy
+    - content.code.annotate
+    - search.suggest
+    - search.highlight
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Cambiar al modo oscuro
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Cambiar al modo claro
+
+nav:
+  - Inicio: index.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+
+plugins:
+  - search

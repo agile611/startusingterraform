@@ -1,0 +1,13 @@
+# Entorno virtual de Python
+.venv/
+
+# Sitio generado por MkDocs
+site/
+
+# Caché de Python
+__pycache__/
+*.py[cod]
+
+# Editores
+.vscode/
+.idea/
