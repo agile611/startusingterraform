@@ -72,6 +72,12 @@ nav:
       - "7.2 Módulos de la comunidad": azure/07-02-bloqueo-de-estado.md
       - "7.3 Buenas prácticas en módulos": azure/07-03-comandos-de-estado.md
       - "7.4 Módulos de ejemplo": azure/07-04-workspaces.md
+      - "8.1 Módulos personalizados": azure/08-01-modulos-personalizados.md
+      - "8.2 CI/CD": azure/08-02-ci-cd.md
+      - "8.3 Seguridad avanzada": azure/08-03-seguridad-avanzada.md
+      - "8.4 Optimización": azure/08-04-optimizacion.md
+      - "8.5 Monitorización y logging": azure/08-05-monitorizacion-y-logging.md
+
 
 markdown_extensions:
   - admonition
