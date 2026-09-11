@@ -50,6 +50,13 @@ nav:
       - "1.7 Configuración Azure Cli": azure/01-07-configuracion-azure-cli.md
       - "1.8 Prueba de humo del entorno": azure/01-08-prueba-de-humo.md
       - "1.9 Desplegar una VM en el Azure Emulator con Terraform": azure/01-09-Desplegar-una-VM-en-el-Azure-Emulator-con-Terraform.md
+      - "2.1 Creación de grupos de recursos y recursos con Terraform": azure/02-01-Creacion-de-grupos-de-recursos-y-recursos-con-Terraform.md
+      - "2.2 Verificación y validación de recursos en Azure": azure/02-02-Verificacion-y-validacion-de-recursos-en-Azure.md
+      - "3.1 Sintaxis del lenguaje HCL en Terraform": azure/03-03-Sintaxis-del-lenguaje-HCL-en-Terraform.md
+      - "3.2 Bloques principales de Terraform": azure/03-02-Bloques-principales-de-Terraform.md
+      - "3.3 Configuración del provider azurerm": azure/03-03-Configuracion-del-provider-azurerm.md
+      - "3.4 Crear tu primer Resource Group con Terraform": azure/03-04-Crear-tu-primer-Resource-Group-con-Terraform.md
+
 
 markdown_extensions:
   - admonition
