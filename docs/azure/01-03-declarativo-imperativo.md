@@ -618,7 +618,3 @@ az monitor metrics list \
   y
   [`azurerm_chaos_studio_experiment`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/chaos_studio_experiment).
 - [Métricas de máquinas virtuales en Azure Monitor](https://learn.microsoft.com/es-es/azure/azure-monitor/essentials/metrics-supported#microsoftcomputevirtualmachines).
-
----
-
-*Última actualización: septiembre de 2026.*

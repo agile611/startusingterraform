@@ -49,6 +49,7 @@ nav:
       - "1.6 Introducción a Azure y Terraform": azure/01-06-Introduccion-a-Azure-y-Terraform.md
       - "1.7 Configuración Azure Cli": azure/01-07-configuracion-azure-cli.md
       - "1.8 Prueba de humo del entorno": azure/01-08-prueba-de-humo.md
+      - "1.9 Desplegar una VM en el Azure Emulator con Terraform": azure/01-09-Desplegar-una-VM-en-el-Azure-Emulator-con-Terraform.md
 
 markdown_extensions:
   - admonition

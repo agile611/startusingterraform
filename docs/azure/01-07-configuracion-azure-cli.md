@@ -285,7 +285,3 @@ az account clear                                                    # borra toda
 - [Provider azurerm: autenticación con Azure CLI](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/azure_cli), [con OIDC](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/service_principal_oidc) y [variables `ARM_*`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs#argument-reference)
 - [Depuración de Terraform (`TF_LOG`)](https://developer.hashicorp.com/terraform/internals/debugging)
 - [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
-
----
-
-*Última actualización: septiembre de 2026.*

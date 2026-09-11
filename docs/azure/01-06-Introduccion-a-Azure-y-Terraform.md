@@ -325,9 +325,3 @@ Acabas de recorrer el ciclo completo: describir, planificar, aplicar, cambiar, d
 - [`azurerm_resource_group`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) y [`azurerm_virtual_network`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_network)
 - [Referencia de Azure CLI](https://learn.microsoft.com/es-es/cli/azure/)
 - [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
-
----
-
-*Última actualización: septiembre de 2026.*
-
-*Esta página forma parte del curso "Terraform con Azure" y está adaptada al emulador Topaz. El ejemplo `tf-intro` funciona en una suscripción real eliminando `metadata_host` y `resource_provider_registrations` del provider, sustituyendo `subscription_id` por el de tu suscripción (o la variable de entorno `ARM_SUBSCRIPTION_ID`) y quitando el `lifecycle { ignore_changes = [tags] }` del grupo, que solo es necesario en el emulador. La siguiente página, "Variables básicas", parte del mismo código.*

@@ -172,3 +172,6 @@ Con el entorno validado, ya puedes pasar a la práctica principal en `/home/curs
 
 > 💡 **Para llevar.** Antes de desplegar algo complejo contra un entorno nuevo, despliega primero lo más simple que exista. Un recurso sin dependencias aísla los problemas de *entorno* (red, TLS, credenciales, endpoints) de los problemas de *código*. Es la misma idea que un `ping` antes de un `ssh`: barato, rápido y te dice exactamente dónde mirar.
 
+---
+
+*Última actualización: septiembre de 2026.*

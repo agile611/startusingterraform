@@ -605,7 +605,3 @@ sed -i '/name: Storage de moodledata/,$d' storage.yml &&
 - [Colección `azure.azcollection`](https://docs.ansible.com/ansible/latest/collections/azure/azcollection/)
   y [modo check y diff](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_checkmode.html).
 - [Azure Local Emulator —Topaz—](https://github.com/Azure/azure-local-emulator).
-
----
-
-*Última actualización: septiembre de 2026.*

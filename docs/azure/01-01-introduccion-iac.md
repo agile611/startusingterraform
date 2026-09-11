@@ -489,6 +489,3 @@ cd ~ && rm -rf ~/tf-iac
 - [Azure Resource Manager](https://learn.microsoft.com/es-es/azure/azure-resource-manager/management/overview)
   —el plano de control con el que hablan Terraform y Topaz—.
 - [Azure Local Emulator —Topaz—](https://github.com/Azure/azure-local-emulator).
----
-
-*Última actualización: septiembre de 2026.*

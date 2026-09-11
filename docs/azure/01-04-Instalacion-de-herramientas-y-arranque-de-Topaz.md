@@ -249,7 +249,3 @@ export TF_VAR_subscription_id=$(az account show --query id -o tsv) TF_VAR_tenant
 - [Instalar WSL2](https://learn.microsoft.com/es-es/windows/wsl/install) (Microsoft Learn)
 - [Extensión HashiCorp Terraform para VS Code](https://marketplace.visualstudio.com/items?itemName=HashiCorp.terraform)
 - [Manual de jq](https://jqlang.github.io/jq/manual/)
-
----
-
-*Última actualización: septiembre de 2026.*
