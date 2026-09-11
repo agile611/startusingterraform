@@ -1,6 +1,7 @@
 site_name: Curso de Terraform
 site_description: Documentación y prácticas del curso de Terraform
 site_author: Guillem Hernandez Sola
+site_url: https://agile611.github.io/startusingterraform/
 
 repo_name: agile611/startusingterraform
 repo_url: https://github.com/agile611/startusingterraform
@@ -8,6 +9,7 @@ repo_url: https://github.com/agile611/startusingterraform
 theme:
   name: material
   language: es
+
   features:
     - navigation.sections
     - navigation.top
@@ -16,6 +18,7 @@ theme:
     - content.code.annotate
     - search.suggest
     - search.highlight
+
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
@@ -24,6 +27,7 @@ theme:
       toggle:
         icon: material/brightness-7
         name: Cambiar al modo oscuro
+
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
       primary: indigo
@@ -35,17 +39,25 @@ theme:
 nav:
   - Inicio: index.md
 
+  - Terraform con Azure:
+      - Introducción: azure/index.md
+      - "1.1 Infraestructura como código": azure/01-01-introduccion-iac.md
+
 markdown_extensions:
   - admonition
   - attr_list
   - md_in_html
   - tables
+
   - toc:
       permalink: true
+
   - pymdownx.details
   - pymdownx.superfences
+
   - pymdownx.highlight:
       anchor_linenums: true
+
   - pymdownx.inlinehilite
 
 plugins:
