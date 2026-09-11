@@ -58,7 +58,7 @@ nav:
       - "3.4 Crear tu primer Resource Group con Terraform": azure/03-04-Crear-tu-primer-Resource-Group-con-Terraform.md
       - "4.1 Comandos clave de Terraform": azure/04-01-Comandos-clave-de-Terraform.md
       - "4.2 Almacenamiento y bloqueo del state": azure/04-02-Almacenamiento-y-bloqueo-del-state.md
-      - "5.1 Variables en Terraform": azure/05-01-variables-en-Terraform.md
+      - "5.1 Variables en Terraform": azure/05-01-variables-en-terraform.md
       - "5.2 Variables básicas en Terraform": azure/05-02-variables-basicas-en-terraform.md
       - "5.3 Variables avanzadas en Terraform": azure/05-03-variables-avanzadas-en-terraform.md
       - "5.4 Salidas (outputs) en Terraform": azure/05-04-Salidas-outputs-en-Terraform.md
