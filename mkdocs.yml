@@ -68,6 +68,10 @@ nav:
       - "6.3 Bases de datos": azure/06-03-bases-de-datos.md
       - "6.4 Almacenamiento": azure/06-04-almacenamiento.md
       - "6.5 Buenas prácticas": azure/06-05-buenas-practicas.md
+      - "7.1 Módulos en Terraform": azure/07-01-estado-remoto-en-azure-storage.md
+      - "7.2 Módulos de la comunidad": azure/07-02-bloqueo-de-estado.md
+      - "7.3 Buenas prácticas en módulos": azure/07-03-comandos-de-estado.md
+      - "7.4 Módulos de ejemplo": azure/07-04-workspaces.md
 
 markdown_extensions:
   - admonition
