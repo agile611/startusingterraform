@@ -284,9 +284,3 @@ docs/azure/
 - [Azure CLI](https://learn.microsoft.com/cli/azure/)
 - [Terraform best practices](https://developer.hashicorp.com/terraform/cloud-docs/recommended-practices)
 - [Documentación de Docker](https://docs.docker.com/)
-
-## Navegación
-
-- [Página inicial del proyecto](../../README.md)
-- [Índice general de la documentación](../index.md)
-- [Índice de Terraform con Azure](index.md)
