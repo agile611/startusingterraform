@@ -84,7 +84,7 @@ nav:
       - "10.1 Key Vault": azure/10-01-key-vault.md
       - "10.2 Valores sensibles": azure/10-02-valores-sensibles.md
       - "10.3 Managed Identities": azure/10-03-managed-identities.md
-      - "11.1 Automatización y CI/CD": azure/11-01-automatizacion-y-ci-cd.md
+      - "11.1 Automatización y CI/CD": azure/11-01-automatizacion-y-ci-cd-terraform.md
       - "11.2 Pipeline y Apply": azure/11-02-pipeline-y-apply.md
       - "11.3 Aprobaciones y puertas": azure/11-03-aprobaciones-y-puertas.md
 
