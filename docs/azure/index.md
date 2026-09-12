@@ -275,8 +275,6 @@ docs/azure/
 └── 11-*.md                           # CI/CD y aprobaciones
 ```
 
-El sitio de MkDocs utiliza [`docs/azure/index.md`](index.md) como portada de la sección y enlaza las lecciones desde [`mkdocs.yml`](../../mkdocs.yml). Este README está pensado también para consultar la carpeta directamente desde el repositorio.
-
 ## Recursos oficiales
 
 - [Documentación de Terraform](https://developer.hashicorp.com/terraform/docs)
