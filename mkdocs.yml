@@ -77,7 +77,16 @@ nav:
       - "8.3 Seguridad avanzada": azure/08-03-seguridad-avanzada.md
       - "8.4 Optimización": azure/08-04-optimizacion.md
       - "8.5 Monitorización y logging": azure/08-05-monitorizacion-y-logging.md
-
+      - "9.1 Dependencias de recursos": azure/09-01-dependencias-de-recursos.md
+      - "9.2 Metaargumentos": azure/09-02-metaargumentos.md
+      - "9.3 Provisioners": azure/09-03-provisioners.md
+      - "9.4 Validación": azure/09-04-validacion.md
+      - "10.1 Key Vault": azure/10-01-key-vault.md
+      - "10.2 Valores sensibles": azure/10-02-valores-sensibles.md
+      - "10.3 Managed Identities": azure/10-03-managed-identities.md
+      - "11.1 Automatización y CI/CD": azure/11-01-automatizacion-y-ci-cd.md
+      - "11.2 Pipeline y Apply": azure/11-02-pipeline-y-apply.md
+      - "11.3 Aprobaciones y puertas": azure/11-03-aprobaciones-y-puertas.md
 
 markdown_extensions:
   - admonition
