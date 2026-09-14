@@ -389,6 +389,7 @@ Orden inverso al de creación: primero la red, luego el grupo.
 > # terraform init -migrate-state
 > ```
 > **🔷 En Topaz.** El backend `azurerm` depende del plano de datos de Storage del emulador y no está pensado para guardar estado. En el curso el estado es local; este bloque es para tu primera suscripción real en equipo, donde aporta bloqueo y un único estado compartido.
+{ .topaz-note }
 
 > ⚠️ **Errores comunes por fase**
 > 
