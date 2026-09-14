@@ -334,212 +334,7 @@ curl --noproxy '*' \
 
 Una respuesta `HTTP/1.1 200 OK` seguida de un JSON con los endpoints confirma que el emulador está operativo y el certificado es válido. Si obtienes otro resultado, localiza tu error en la tabla:
 
-| Error de curl | En qué fase falla | Qué revisar |
-|---|---|---|
-| `(77) error setting certificate file` | Antes de conectar | El archivo `.crt`: existe, no vacío, formato PEM |
-| `(28) Timeout was reached` | Conectando | `/etc/hosts`, contenedor en marcha, puerto 8899 |
-| `(60) SSL certificate problem` | Negociación TLS | El `.crt` es de otro contenedor; repetir el paso 4 |
-
-#### 🛠️ Solución de problemas: `curl: (77) error setting certificate file`
-
-Este error aparece *antes* de intentar la conexión: curl no ha podido leer el archivo indicado en `--cacert`. El problema está en el disco local, no en la red ni en el contenedor:
-
-```text
-curl: (77) error setting certificate file: /home/curso/topaz-certs/topaz.crt
-```
-
-Las causas posibles son tres: el archivo **no existe** en este host (típico si los certificados solo se exportaron en otra máquina), está **vacío o corrupto**, o **no está en formato PEM** (un `.pfx` o DER renombrado). Diagnóstico:
-
-```bash
-ls -l "$PWD/topaz-certs/topaz.crt"
-file "$PWD/topaz-certs/topaz.crt"
-head -1 "$PWD/topaz-certs/topaz.crt"
-# Correcto: -----BEGIN CERTIFICATE-----
-
-openssl x509 -in "$PWD/topaz-certs/topaz.crt" -noout -subject -dates
-```
-
-**Solución:** repite el **paso 4** completo (exportación con `openssl s_client`). Si el archivo existe pero está en otro formato, conviértelo a PEM:
-
-```bash
-# DER → PEM
-openssl x509 -inform DER -in topaz.crt -out topaz.pem && mv topaz.pem topaz.crt
-
-# PFX → PEM (solo el certificado público, sin clave privada)
-openssl pkcs12 -in topaz.pfx -clcerts -nokeys -out "$PWD/topaz-certs/topaz.crt"
-```
-
-#### 🛠️ Solución de problemas: `curl: (28) Timeout`
-
-Si en lugar de la respuesta HTTP obtienes esto, el problema está en la red o en el contenedor, *no* en el certificado (la conexión TLS ni siquiera llega a iniciarse):
-
-```text
-curl: (28) Failed to connect to topaz.local.dev port 8899 after 5001 ms: Timeout was reached
-```
-
-Un *timeout* (a diferencia de `Connection refused`, que es inmediato) significa que los paquetes se envían a una dirección que no responde. Revisa estas causas, por orden de probabilidad:
-
-**a) `topaz.local.dev` no resuelve a `127.0.0.1`.** Es la causa más frecuente: si falta la línea en `/etc/hosts`, el nombre puede resolverse por DNS externo a una IP inalcanzable, y la conexión se queda esperando.
-
-```bash
-getent hosts topaz.local.dev
-# Correcto:   127.0.0.1       topaz.local.dev
-# Incorrecto: (sin salida) o cualquier otra IP
-
-# Corrección:
-echo '127.0.0.1 topaz.local.dev' | sudo tee -a /etc/hosts
-```
-
-**b) El contenedor no está en ejecución o no publica el puerto.**
-
-```bash
-docker ps -a --filter name=azure-environment --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
-# Esperado: Up ...   0.0.0.0:8899->8899/tcp
-
-docker start azure-environment       # si el estado es "Exited"
-docker logs --tail 30 azure-environment
-```
-
-**c) Nada escucha en el puerto 8899 del host.**
-
-```bash
-sudo ss -ltnp | grep 8899
-# Debe aparecer docker-proxy escuchando en *:8899 o 0.0.0.0:8899
-```
-
-**d) Un cortafuegos local bloquea la conexión.**
-
-```bash
-sudo ufw status
-sudo iptables -L INPUT -n | grep -i drop
-```
-
-Para aislar el fallo, prueba directamente contra la IP local, ignorando el nombre y la validación del certificado:
-
-```bash
-curl -k --noproxy '*' --connect-timeout 5 -i \
-  'https://127.0.0.1:8899/metadata/endpoints?api-version=2022-09-01'
-```
-
-> **Interpretación:** si esta llamada funciona pero la original no, el problema es la resolución de nombres (caso **a**). Si tampoco funciona, el problema está en el contenedor o el puerto (casos **b** y **c**). Tras aplicar la corrección, repite el `curl` original con `--cacert` para confirmar que también valida el certificado.
-
-### 6. Registrar el Emulador como Nube en Azure CLI
-
-Por defecto, Azure CLI trabaja contra la nube pública (`AzureCloud`) y envía la autenticación a `login.microsoft.com`. Para que hable con el emulador hay que **registrar Topaz como una nube personalizada** y activarla. Primero, comprueba qué nube está activa:
-
-```bash
-az cloud show --query '{nube:name, arm:endpoints.resourceManager, login:endpoints.activeDirectory}' -o json
-```
-
-Si devuelve `AzureCloud` y `login.microsoftonline.com`, sigue los tres subpasos **en este orden**.
-
-#### 6a. Confianza TLS para Azure CLI (antes de registrar)
-
-`az cloud register` se conecta por sí mismo al endpoint de metadatos. La CLI está escrita en Python y **no lee `--cacert` ni el almacén de OpenSSL**: solo confía en el bundle que indique `REQUESTS_CA_BUNDLE`. Por eso la variable debe estar exportada *antes* del registro:
-
-```bash
-# El certificado debe estar en el almacén del sistema (paso 4)
-openssl verify -CAfile /etc/ssl/certs/ca-certificates.crt "$PWD/topaz-certs/topaz.crt"
-# Esperado: .../topaz-certs/topaz.crt: OK
-
-export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
-grep -q REQUESTS_CA_BUNDLE ~/.bashrc || echo 'export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt' >> ~/.bashrc
-```
-
-#### 6b. Registrar y activar la nube
-
-Los valores se obtienen del endpoint de metadatos del paso 5:
-
-```bash
-META="$(curl -s --noproxy '*' --cacert "$PWD/topaz-certs/topaz.crt" \
-  'https://topaz.local.dev:8899/metadata/endpoints?api-version=2022-09-01')"
-
-echo "$META" | jq '{login: .authentication.loginEndpoint, audiences: .authentication.audiences, storage: .suffixes.storage, keyvault: .suffixes.keyVaultDns}'
-
-az cloud register --name Topaz \
-  --endpoint-resource-manager "https://topaz.local.dev:8899" \
-  --endpoint-active-directory "$(echo "$META" | jq -r '.authentication.loginEndpoint')" \
-  --endpoint-active-directory-resource-id "$(echo "$META" | jq -r '.authentication.audiences[0]')" \
-  --endpoint-active-directory-graph-resource-id "$(echo "$META" | jq -r '.authentication.audiences[0]')" \
-  --suffix-storage-endpoint "$(echo "$META" | jq -r '.suffixes.storage')" \
-  --suffix-keyvault-dns "$(echo "$META" | jq -r '.suffixes.keyVaultDns')"
-
-az cloud set --name Topaz
-az cloud show --query '{nube:name, arm:endpoints.resourceManager, login:endpoints.activeDirectory}' -o json
-# Esperado: "nube": "Topaz", "login": "https://topaz.local.dev:8899/"
-```
-
-#### 🛠️ Solución de problemas: `Unable to get endpoints from the cloud`
-
-```text
-Unable to get endpoints from the cloud.
-Please ensure you have network connection. Error detail: HTTPSConnectionPool(host='topaz.local.dev', port=8899): ... SSLCertVerificationError ... self-signed certificate
-The cloud 'Topaz' is not registered.
-```
-
-La red funciona (el `curl` lo demuestra) pero **Python no confía en el certificado**: el paso 6a no se ejecutó, o se ejecutó *después* del registro. Comprueba `echo $REQUESTS_CA_BUNDLE` y repite 6b. Mientras la nube no esté registrada, `az cloud set` fallará y `az login` seguirá redirigiendo a `login.microsoft.com`. El procedimiento completo de reparación está en el [**caso resuelto**](#caso-cert) al final de este apartado.
-
-#### 6c. Desactivar la *instance discovery* de MSAL
-
-Azure CLI autentica mediante la biblioteca MSAL, que antes de usar cualquier *authority* consulta a `login.microsoftonline.com` si ese host es una instancia conocida de Microsoft Entra ID. El emulador no lo es, así que MSAL lo rechaza. El ajuste (el mismo que se usa con Azure Stack Hub) se guarda en `~/.azure/config`:
-
-```bash
-az config set core.instance_discovery=false
-az config get core.instance_discovery
-# Esperado: "value": "false"
-```
-
-Verifica que el emulador sirve su configuración OpenID Connect y anuncia el endpoint de *device code*:
-
-```bash
-curl -s --noproxy '*' --cacert "$PWD/topaz-certs/topaz.crt" \
-  'https://topaz.local.dev:8899/organizations/v2.0/.well-known/openid-configuration' \
-  | jq '{issuer, authorization_endpoint, token_endpoint, device_authorization_endpoint}'
-```
-
-#### 🛠️ Solución de problemas: `invalid_instance: The authority you provided ... is not known`
-
-```text
-ValueError: invalid_instance: The authority you provided, https://topaz.local.dev:8899/organizations, is not known.
-If it is a valid domain name known to you, you can turn off this check by passing in instance_discovery=False
-```
-
-La nube está bien registrada pero **el paso 6c no se ha ejecutado**. Cualquier comando que inicialice MSAL (incluso `az account clear`) fallará hasta aplicar `az config set core.instance_discovery=false`.
-
-> **Nota:** `az cloud set` cambia la nube activa para *toda* la CLI en este host. Para volver a trabajar con Azure real: `az cloud set --name AzureCloud`. Si el emulador no expone alguno de los campos consultados con `jq` (aparece `null`), sustitúyelo por `https://topaz.local.dev:8899`. Como último recurso, solo en prácticas, puedes desactivar la validación TLS con `export AZURE_CLI_DISABLE_CONNECTION_VERIFICATION=1`.
-
-<a id="caso-cert"></a>
-
-### 🛠️ Caso resuelto: `az cloud register` falla con `CERTIFICATE_VERIFY_FAILED`
-
-```text
-Unable to get endpoints from the cloud.
-Please ensure you have network connection. Error detail: HTTPSConnectionPool(host='topaz.local.dev', port=8899):
-Max retries exceeded with url: /metadata/endpoints?api-version=2022-09-01
-(Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate')))
-```
-
-**Qué está pasando.** Azure CLI está escrita en Python y **no consulta el almacén de certificados del sistema** salvo que se lo indiques con la variable `REQUESTS_CA_BUNDLE`. Que `curl` funcione no garantiza que `az` funcione. Las dos causas habituales, que a menudo se dan juntas:
-
-- El certificado del emulador **no está instalado en esta máquina** (o es el de un contenedor anterior: cambia con cada `docker run`).
-- La variable **no está exportada en la shell actual**. Caso típico: trabajas como `root` pero añadiste las líneas a `/home/curso/.bashrc`; tu shell lee `/root/.bashrc`.
-
-#### Diagnóstico (20 segundos)
-
-```bash
-# ¿Está la variable en ESTA shell?
-echo "REQUESTS_CA_BUNDLE=$REQUESTS_CA_BUNDLE"
-# vacío → la CLI no sabe dónde buscar el certificado
-
-# ¿Está el certificado instalado en el sistema?
-ls -l /usr/local/share/ca-certificates/topaz.crt
-curl --noproxy '*' -s -o /dev/null -w 'HTTP %{http_code}\n' \
-  'https://topaz.local.dev:8899/metadata/endpoints?api-version=2022-09-01'
-# HTTP 200      → el certificado está bien; solo falta la variable
-# curl: (60)    → el certificado no está instalado o es de otro contenedor
-```
-
-#### Arreglo completo
+#### 6. Despliegue total de los certificados
 
 El bloque es idempotente: puedes ejecutarlo entero aunque parte ya esté hecha.
 
@@ -585,7 +380,7 @@ az cloud set --name Topaz
 az config set core.instance_discovery=false
 ```
 
-> **Si la CLI dice que `Topaz` ya existe** (el intento fallido llegó a crear la entrada a medias), elimínala y vuelve a registrarla:
+> **IMPORTANTE: Si la CLI dice que `Topaz` ya existe** (el intento fallido llegó a crear la entrada a medias), elimínala y vuelve a registrarla:
 >
 > ```bash
 > az cloud set --name AzureCloud && az cloud unregister --name Topaz
@@ -635,7 +430,7 @@ Abre esa URL, introduce el código y autentícate con `topazadmin@topaz.local.de
 }
 ```
 
-#### 🛠️ Solución de problemas: `az login` redirige a `login.microsoft.com`
+# 🛠️ Solución de problemas: `az login` redirige a `login.microsoft.com`
 
 ```text
 To sign in, use a web browser to open the page https://login.microsoft.com/device and enter the code LV6E3G5BB to authenticate.
@@ -655,15 +450,13 @@ az cloud list --query '[].{nube:name, activa:isActive}' -o table
 
 > **Nota:** Si `az login` ya muestra la URL del emulador pero falla con `CERTIFICATE_VERIFY_FAILED`, la nube está bien registrada y el problema es la confianza TLS: comprueba `echo $REQUESTS_CA_BUNDLE` y que el certificado del paso 4 corresponde al contenedor en marcha. Si el login completa sin suscripciones, usa `--allow-no-subscriptions` y fija la suscripción con `az account set`.
 
-<a id="caso-login"></a>
-
-#### 🛠️ Caso resuelto: la nube `Topaz` no está registrada o activa en este host
+# 🛠️ Caso resuelto: la nube `Topaz` no está registrada o activa en este host
 
 ```text
-root@terraform02:/home/curso# export ARM_METADATA_HOSTNAME=topaz.local.dev:8899
-root@terraform02:/home/curso# export ARM_TENANT_ID=50717675-3E5E-4A1E-8CB5-C62D8BE8CA48
-root@terraform02:/home/curso# export ARM_SUBSCRIPTION_ID=00000000-0000-0000-0000-000000000001
-root@terraform02:/home/curso# az login --use-device-code
+export ARM_METADATA_HOSTNAME=topaz.local.dev:8899
+export ARM_TENANT_ID=50717675-3E5E-4A1E-8CB5-C62D8BE8CA48
+export ARM_SUBSCRIPTION_ID=00000000-0000-0000-0000-000000000001
+az login --use-device-code
 To sign in, use a web browser to open the page https://login.microsoft.com/device and enter the code L65MYKUFP to authenticate.
 ```
 
