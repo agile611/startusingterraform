@@ -1,0 +1,140 @@
+/* Estilos corporativos Agile611 */
+:root {
+  --md-primary-fg-color: #057eb5;
+  --md-primary-fg-color--light: #057eb5;
+  --md-primary-fg-color--dark: #057eb5;
+  --md-accent-fg-color: #057eb5;
+  --md-accent-fg-color--transparent: rgba(5, 126, 181, 0.12);
+  --md-default-bg-color: #ffffff;
+  --md-default-fg-color: #242424;
+  --md-default-fg-color--light: #9ca3af;
+  --md-code-bg-color: #f5f5f5;
+  --md-code-fg-color: #242424;
+  --md-footer-bg-color: #057eb5;
+  --md-footer-fg-color: #ffffff;
+  --md-typeset-color: #242424;
+  --md-typeset-a-color: #057eb5;
+  --md-shadow-z1: 0 0 0 rgba(0, 0, 0, 0);
+}
+
+html {
+  font-family: "Nunito", sans-serif;
+}
+
+body {
+  background: #ffffff;
+  color: #242424;
+}
+
+.md-main,
+.md-content,
+.md-sidebar--primary,
+.md-sidebar--secondary {
+  background: #ffffff;
+}
+
+.md-sidebar__scrollwrap {
+  background: #f5f5f5 !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+.md-header,
+.md-tabs,
+.md-footer {
+  background: #057eb5;
+  color: #f5f5f5;
+}
+
+.md-tabs__item,
+.md-tabs__item:hover,
+.md-tabs__item--active,
+.md-nav__link,
+.md-nav__title,
+.md-search-result__link,
+.md-content h1,
+.md-content h2,
+.md-content h3,
+.md-content h4,
+.md-content h5,
+.md-content h6,
+.md-content p,
+.md-content li,
+.md-content strong,
+.md-content em,
+.md-content span {
+  color: #242424 !important;
+}
+
+.md-tabs__item,
+.md-tabs__item:hover,
+.md-tabs__item--active,
+.md-nav__link--active,
+.md-nav__item .md-nav__link--active,
+.md-nav__item--active > .md-nav__link,
+.md-nav__item--nested > .md-nav__link--active,
+.md-typeset a:active,
+.md-typeset a:visited {
+  background: transparent !important;
+  color: #057eb5 !important;
+  box-shadow: none !important;
+  font-weight: 700;
+}
+
+.md-typeset a,
+.md-typeset a:hover,
+.md-typeset a:focus,
+.md-content__button {
+  color: #057eb5;
+}
+
+.md-typeset code {
+  background: #f5f5f5;
+  color: #242424;
+}
+
+.md-nav__link,
+.md-nav__link--active,
+.md-nav__item .md-nav__link--active,
+.md-nav__item--active > .md-nav__link,
+.md-nav__item--nested > .md-nav__link--active {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.md-tabs__link,
+.md-tabs__link:hover,
+.md-tabs__link:focus,
+.md-tabs__link:active,
+.md-tabs__link:visited,
+.md-nav__title,
+.md-nav__title:hover,
+.md-nav__title:focus,
+.md-nav__title:active,
+.md-nav__title:visited {
+  color: #f5f5f5 !important;
+}
+
+.md-nav__title {
+  background: #057eb5 !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --md-default-bg-color: #ffffff;
+    --md-default-fg-color: #242424;
+    --md-default-fg-color--light: #9ca3af;
+    --md-typeset-color: #242424;
+    --md-code-bg-color: #f5f5f5;
+    --md-code-fg-color: #242424;
+    --md-footer-bg-color: #057eb5;
+    --md-footer-fg-color: #ffffff;
+  }
+
+  body {
+    background: #ffffff;
+    color: #242424;
+  }
+}

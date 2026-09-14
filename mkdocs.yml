@@ -6,38 +6,50 @@ site_url: https://agile611.github.io/startusingterraform/
 repo_name: agile611/startusingterraform
 repo_url: https://github.com/agile611/startusingterraform
 
+docs_dir: docs
+site_dir: site
+
 theme:
   name: material
   language: es
-  logo: https://www.agile611.com/wp-content/uploads/2020/09/cropped-logo-header.png
+  logo: https://www.agile611.com/wp-content/uploads/2020/09/Variante2_Uso1.png
+  favicon: https://www.agile611.com/wp-content/uploads/2020/09/Variante2_Uso1.png
   font:
     text: Nunito
-    code: Roboto Mono
+    code: Nunito
 
   features:
+    - navigation.tabs
     - navigation.sections
+    - navigation.expand
     - navigation.top
     - navigation.footer
+    - navigation.indexes
     - content.code.copy
     - content.code.annotate
-    - search.suggest
     - search.highlight
+    - search.suggest
 
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
+      primary: custom
+      accent: custom
       toggle:
         icon: material/brightness-7
-        name: Cambiar al modo oscuro
+        name: Cambiar a modo oscuro
 
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
+      primary: custom
+      accent: custom
       toggle:
         icon: material/brightness-4
-        name: Cambiar al modo claro
+        name: Cambiar a modo claro
 
-extra_css:
-  - stylesheets/extra.css
+  icon:
+    logo: material/chart-timeline-variant
+    repo: fontawesome/brands/github
 
 nav:
   - Inicio: index.md
@@ -96,17 +108,34 @@ markdown_extensions:
   - attr_list
   - md_in_html
   - tables
-
+  - footnotes
+  - def_list
   - toc:
       permalink: true
-
+      toc_depth: 3
   - pymdownx.details
   - pymdownx.superfences
-
   - pymdownx.highlight:
       anchor_linenums: true
-
+      line_spans: __span
   - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
 plugins:
-  - search
+  - search:
+      lang: es
+
+extra_css:
+  - assets/css/custom.css
+
+extra_javascript:
+  - assets/js/custom.js
+
+copyright: >
+  Licencia CC BY-SA 4.0. Compartir y adaptar con atribución.

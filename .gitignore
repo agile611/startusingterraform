@@ -11,3 +11,12 @@ __pycache__/
 # Editores
 .vscode/
 .idea/
+
+.DS_Store
+# Archivos de configuración de VS Code
+.vscode/settings.json
+.vscode/launch.json
+# Archivos de configuración de PyCharm
+.idea/workspace.xml
+.idea/modules.xml
+.idea/misc.xml
