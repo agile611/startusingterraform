@@ -117,9 +117,9 @@ body {
   border: 1px solid #499497;
 }
 
-.md-typeset blockquote.topaz-note,
-.md-typeset blockquote.topaz-note * {
-  color: #057eb5 !important;
+.md-typeset blockquote,
+.md-typeset blockquote * {
+  color: #242424 !important;
 }
 
 .md-nav__link,
