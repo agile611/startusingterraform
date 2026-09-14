@@ -242,83 +242,11 @@ Tareas automáticas para mantener el entorno:
 - Sincronización de Storage: cada 30 segundos.
 - Expiración de mensajes en Service Bus: cada 30 segundos.
 
-<a id="ejemplos"></a>
-
-## 🛠️ Ejemplos Prácticos
-
-### 1. Configurar Backend de Terraform para el Emulador
-
-Agrega la configuración del backend en un archivo como `backend.tf` o al inicio de tu `main.tf`:
-
-```hcl
-terraform {
-  backend "azurerm" {
-    subscription_id      = "00000000-0000-0000-0000-000000000000" # ID genérico del emulador
-    resource_group_name  = "defaultRG"
-    storage_account_name = "localstorage"
-    container_name       = "tfstate"
-    key                  = "terraform.tfstate"
-  }
-}
-```
-
-### 2. Provisionar Recurso e Infraestructura Virtual
-
-Definición de infraestructura en `main.tf`:
-
-```hcl
-provider "azurerm" {
-  features {}
-}
-
-resource "azurerm_resource_group" "ejemplo" {
-  name     = "rg-declarativo-topaz"
-  location = "eastus"
-}
-
-resource "azurerm_network_interface" "ejemplo" {
-  name                = "nic-resiliente"
-  location            = azurerm_resource_group.ejemplo.location
-  resource_group_name = azurerm_resource_group.ejemplo.name
-}
-
-resource "azurerm_virtual_machine" "ejemplo" {
-  name                  = "vm-resiliente"
-  location              = azurerm_resource_group.ejemplo.location
-  resource_group_name   = azurerm_resource_group.ejemplo.name
-  vm_size               = "Standard_B1s"
-  network_interface_ids = [azurerm_network_interface.ejemplo.id]
-
-  storage_image_reference {
-    publisher = "Canonical"
-    offer     = "UbuntuServer"
-    sku       = "18.04-LTS"
-    version   = "latest"
-  }
-
-  storage_os_disk {
-    name          = "disk-resiliente"
-    caching       = "ReadWrite"
-    create_option = "FromImage"
-  }
-
-  os_profile {
-    computer_name  = "vm-resiliente"
-    admin_username = "adminuser"
-    admin_password = "P@ssw0rd1234!"
-  }
-}
-```
-
-> **Nota:** Estos dos archivos solo *definen* la infraestructura. Los comandos de despliegue (`terraform init`, `plan` y `apply`) se ejecutan más adelante, en la sección [**Desplegar la Infraestructura con Terraform**](#desplegar), una vez que el entorno esté montado, verificado y la CLI de Azure autenticada.
-
-### 3. Acceder a los Servicios
+### 4. Acceder a los Servicios
 
 Todos los endpoints están disponibles en `https://topaz.local.dev:8899` (usa el ID de suscripción genérico).
 
 Para el **Forward Proxy de Topaz**, usa el puerto `8900`.
-
-<a id="operaciones"></a>
 
 ## 🔄 Operaciones sobre el Contenedor
 
@@ -799,89 +727,73 @@ az account show --query '{nombre:name,id:id,tenant:tenantId,cloud:environmentNam
 
 > **💡 Las variables `ARM_*` no estorban.** Déjalas exportadas: Terraform las leerá más adelante para el provider y el backend. Simplemente no sirven para redirigir a Azure CLI. Cada herramienta tiene su propio "mando": `az cloud set` para la CLI, `metadata_host` / `ARM_METADATA_HOSTNAME` para Terraform.
 
-<a id="desplegar"></a>
+# Resolución de problemas: Acceso a Topaz Azure Emulator en Firefox
 
-## ▶️ Desplegar la Infraestructura con Terraform
+## Descripción del problema
+Al intentar acceder a la interfaz de autenticación del emulador Topaz mediante la URL por defecto:
+`https://topaz.local.dev:8899/devicelogin`
+
+Firefox bloquea la conexión o no permite cargar la página debido a restricciones de seguridad en los certificados SSL autofirmados y las políticas HSTS aplicadas a los dominios `.dev`.
+
+### Causa raíz
+- **Certificados autofirmados**: Firefox utiliza su propio almacén de certificados aislado y no confía automáticamente en la entidad emisora (CA) local generada por Topaz.
+- **Restricciones de dominio .dev**: Los dominios con la extensión .dev fuerzan conexiones HTTPS mediante HSTS (HTTP Strict Transport Security), lo que impide a Firefox añadir excepciones manuales de seguridad para esos nombres de dominio.
+
+## Solución
+Sustituir el nombre de host `topaz.local.dev` por la dirección IP de bucle invertido (loopback) `127.0.0.1`.
+
+### Cambio de URL:
+❌ **URL original (bloqueada)**:  
+`https://topaz.local.dev:8899/devicelogin`  
+✅ **URL corregida**:  
+`https://127.0.0.1:8899/devicelogin`
+
+## Pasos para acceder
+1. Abre Firefox e introduce en la barra de direcciones:  
+   `https://127.0.0.1:8899/devicelogin`
+2. Si Firefox muestra la pantalla "Advertencia: Riesgo potencial de seguridad a continuación":
+   - Haz clic en **Avanzado...**
+   - Haz clic en **Aceptar el riesgo y continuar**.
+3. La página de inicio de sesión del emulador se cargará correctamente.
+4. Debes poner el device code que te genera el az login y de usuario `topazadmin@topaz.local.dev`
+
+## ▶️ Desplegar la Infraestructura de prueba con Terraform para probar el entorno
 
 Con el contenedor en ejecución, el endpoint de metadatos respondiendo `200 OK` y la CLI autenticada en la nube `Topaz`, ya puedes trabajar con Terraform. Pero hay un matiz importante: **Terraform no hereda la configuración de `az cloud set`**. El provider `azurerm` y el backend `azurerm` apuntan por defecto a la nube pública (`management.azure.com`), así que hay que indicarles explícitamente dónde está el emulador.
 
-### 1. Adaptar el Provider y el Backend al Emulador
+## 🛠️ Ejemplos Prácticos
 
-La clave es el argumento `metadata_host`: el provider consulta `https://<metadata_host>/metadata/endpoints` para descubrir los endpoints de una nube personalizada, exactamente el mismo endpoint que verificaste en el paso 5. Sustituye los bloques `terraform` y `provider` de `main.tf` por estos (usa el `tenant` que devolvió `az account show`):
+### 1. Provisionar un Grupo de Recursos
+
+Definición de infraestructura en `main.tf`:
 
 ```hcl
 terraform {
-  backend "azurerm" {
-    metadata_host        = "topaz.local.dev:8899"
-    tenant_id            = "50717675-3E5E-4A1E-8CB5-C62D8BE8CA48"
-    subscription_id      = "00000000-0000-0000-0000-000000000001"
-    resource_group_name  = "defaultRG"
-    storage_account_name = "localstorage"
-    container_name       = "tfstate"
-    key                  = "terraform.tfstate"
-    use_azuread_auth     = true
+  required_providers {
+    azurerm = { source = "hashicorp/azurerm", version = "~> 4.0" }
   }
 }
 
 provider "azurerm" {
   features {}
-
-  metadata_host   = "topaz.local.dev:8899"
-  tenant_id       = "50717675-3E5E-4A1E-8CB5-C62D8BE8CA48"
-  subscription_id = "00000000-0000-0000-0000-000000000001"
-
-  # El emulador no soporta el registro automático de resource providers
-  resource_provider_registrations = "none"   # azurerm >= 4.0
-  # skip_provider_registration = true        # equivalente en azurerm 3.x
-}
-```
-
-Alternativamente, puedes dejar `main.tf` limpio y pasar estos valores por variables de entorno, que el provider y el backend leen automáticamente:
-
-```bash
-export ARM_METADATA_HOSTNAME=topaz.local.dev:8899
-export ARM_TENANT_ID=50717675-3E5E-4A1E-8CB5-C62D8BE8CA48
-export ARM_SUBSCRIPTION_ID=00000000-0000-0000-0000-000000000001
-```
-
-> **Nota sobre TLS:** Terraform está escrito en Go y sí usa el almacén del sistema, así que el `update-ca-certificates` del paso 4 le basta. Si aun así aparece `x509: certificate signed by unknown authority`, fuerza el bundle con `export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt`.
-
-### 2. Preparar el Almacenamiento del Backend Remoto
-
-El backend `azurerm` **no crea** el storage account: debe existir antes de `terraform init`. Compruébalo y créalo si falta, usando la CLI ya autenticada contra el emulador:
-
-```bash
-az storage account show -g defaultRG -n localstorage -o table 2>/dev/null || {
-  az group create -n defaultRG -l eastus
-  az storage account create -n localstorage -g defaultRG -l eastus --sku Standard_LRS
-}
-
-az storage container create -n tfstate --account-name localstorage --auth-mode login
-```
-
-> **Nota:** Según los metadatos, el sufijo de Storage del emulador es `storage.topaz.local.dev:8891`, así que el backend intentará conectar a `https://localstorage.storage.topaz.local.dev:8891`. Para que funcione, ese nombre debe resolver a `127.0.0.1` en `/etc/hosts` y el contenedor debe publicar el puerto 8891 (`-p 8891:8891` en el `docker run`; si lo recreas, repite el paso 4 del certificado). Si no quieres complicar la práctica con esto, usa la alternativa del paso 3.
-
-### 3. Alternativa: Backend Local
-
-El objetivo de la práctica es desplegar recursos en el emulador, no gestionar el estado remoto. Si el backend remoto da problemas, elimina (o comenta) el bloque `backend "azurerm"` y Terraform guardará el estado en `terraform.tfstate` dentro del directorio del proyecto. El provider sigue necesitando `metadata_host`:
-
-```hcl
-terraform {
-  # backend "azurerm" { ... }   # desactivado: estado local
-}
-
-provider "azurerm" {
-  features {}
   metadata_host                   = "topaz.local.dev:8899"
-  tenant_id                       = "50717675-3E5E-4A1E-8CB5-C62D8BE8CA48"
-  subscription_id                 = "00000000-0000-0000-0000-000000000001"
   resource_provider_registrations = "none"
+  subscription_id                 = "00000000-0000-0000-0000-000000000001"
+}
+
+resource "azurerm_resource_group" "rg" {
+  name     = "rg-humo"
+  location = "eastus"
+}
+
+output "rg_id" {
+  value = azurerm_resource_group.rg.id
 }
 ```
 
-Si ya habías ejecutado `terraform init` con el backend remoto, vuelve a inicializar con `terraform init -reconfigure`.
+> **Nota:** Esto solo *define* la infraestructura. Los comandos de despliegue (`terraform init`, `plan` y `apply`) se ejecutan más adelante, en la sección [**Desplegar la Infraestructura con Terraform**](#desplegar), una vez que el entorno esté montado, verificado y la CLI de Azure autenticada.
 
-### 4. Desplegar
+### 2. Desplegar
 
 ```bash
 cd /home/curso/<directorio-del-proyecto>

@@ -45,7 +45,7 @@ nav:
       - "1.2 Terraform frente a otras herramientas": azure/01-02-comparativa-herramientas.md
       - "1.3 Declarativo frente a imperativo": azure/01-03-declarativo-imperativo.md
       - "1.4 Instalación de herramientas y arranque de Topaz": azure/01-04-Instalacion-de-herramientas-y-arranque-de-Topaz.md
-      - "1.5 Entorno Práctico: Terraform con Azure Emulator Topaz en Docker": azure/01-05-Entorno-Práctico-Terraform-Azure-Emulator-Topaz-en-Docker.md
+      - "1.5 Entorno Práctico: Terraform con Azure Emulator Topaz en Docker": azure/01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md
       - "1.6 Introducción a Azure y Terraform": azure/01-06-Introduccion-a-Azure-y-Terraform.md
       - "1.7 Configuración Azure Cli": azure/01-07-configuracion-azure-cli.md
       - "1.8 Prueba de humo del entorno": azure/01-08-prueba-de-humo.md
