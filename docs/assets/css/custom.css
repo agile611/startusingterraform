@@ -93,6 +93,10 @@ body {
   color: #242424;
 }
 
+.admonition {
+  background-color: #9ca3af;
+}
+
 .md-nav__link,
 .md-nav__link--active,
 .md-nav__item .md-nav__link--active,
