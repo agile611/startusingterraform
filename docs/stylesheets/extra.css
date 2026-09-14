@@ -1,32 +1,33 @@
 :root {
-  /* Colors primaris i d'accent adaptats per a llegibilitat */
-  --md-primary-fg-color:        #01003f; /* Dark Blue profund per a la barra superior */
+  /* Header i barra superior */
+  --md-primary-fg-color:        #01003f; /* Dark Blue principal */
   --md-primary-fg-color--light: #057EB5; /* Dark Blue secundari */
   --md-primary-fg-color--dark:  #01003f;
   
-  --md-accent-fg-color:         #00B2E9; /* Blue clar per a enllaços i botons */
+  /* Enllaços i botons */
+  --md-accent-fg-color:         #00B2E9; /* Blue clar */
   --md-accent-fg-color--transparent: rgba(0, 178, 233, 0.1);
 
-  /* Text i fons */
-  --md-default-fg-color:        #242424; /* Black principal per a lectura còmoda */
+  /* Lectura de text sobre fons clar */
+  --md-default-fg-color:        #242424; /* Black principal (alt contrast) */
   --md-default-fg-color--light: #9ca3af; /* Gris web per a text secundari */
   --md-default-bg-color:        #F5F5F5; /* White/Off-white de fons */
 }
 
-/* Ajustos de fons i elements secundaris */
+/* Configuració de colors per al tema clar */
 [data-md-color-scheme="default"] {
   --md-typeset-color: #242424;
-  --md-typeset-a-color: #057EB5; /* Color dels enllaços en el cos de text */
+  --md-typeset-a-color: #057EB5; /* Blau fosc per als enllaços per a millor llegibilitat */
 }
 
-/* Detalls visual dels blocs destacats (Admonitions) utilitzant el turquesa i verd */
+/* Blocs d'avís / Notificacions (Admonitions) amb tons verd i turquesa */
 .md-typeset .admonition.note,
 .md-typeset details.note {
   border-color: #4CB8C9;
 }
 .md-typeset .note > .admonition-title,
 .md-typeset .note > summary {
-  background-color: rgba(76, 184, 201, 0.1);
+  background-color: rgba(76, 184, 201, 0.12);
 }
 
 .md-typeset .admonition.tip,
@@ -35,5 +36,5 @@
 }
 .md-typeset .tip > .admonition-title,
 .md-typeset .tip > summary {
-  background-color: rgba(73, 148, 151, 0.1);
+  background-color: rgba(73, 148, 151, 0.12);
 }
