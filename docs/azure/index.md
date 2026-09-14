@@ -98,7 +98,7 @@ Objetivo: entender por qué se utiliza Terraform y dejar preparado un laboratori
 2. [Terraform frente a otras herramientas](01-02-comparativa-herramientas.md)
 3. [Modelo declarativo y modelo imperativo](01-03-declarativo-imperativo.md)
 4. [Instalación de herramientas y arranque de Topaz](01-04-Instalacion-de-herramientas-y-arranque-de-Topaz.md)
-5. [Entorno práctico: Terraform, Azure Emulator Topaz y Docker](01-05-Entorno-Práctico-Terraform-Azure-Emulator-Topaz-en-Docker.md)
+5. [Entorno práctico: Terraform, Azure Emulator Topaz y Docker](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)
 6. [Introducción a Azure y Terraform](01-06-Introduccion-a-Azure-y-Terraform.md)
 7. [Configuración de Azure CLI](01-07-configuracion-azure-cli.md)
 8. [Prueba de humo del entorno](01-08-prueba-de-humo.md)
