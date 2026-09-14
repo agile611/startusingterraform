@@ -201,7 +201,7 @@ docker run -d --name azure-environment -p 8899:8899 thecloudtheory/topaz-host
 
 ### Credenciales del Emulador
 
-El emulador incluye una identidad de administrador predefinida. Se utiliza al iniciar sesión desde la página de autenticación por código de dispositivo (`https://topaz.local.dev:8899/device`):
+El emulador incluye una identidad de administrador predefinida. Se utiliza al iniciar sesión desde la página de autenticación por código de dispositivo (`https://topaz.local.dev:8899/devicelogin`):
 
 | Campo | Valor |
 |---|---|
