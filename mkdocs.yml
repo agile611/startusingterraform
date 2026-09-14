@@ -9,6 +9,10 @@ repo_url: https://github.com/agile611/startusingterraform
 theme:
   name: material
   language: es
+  logo: https://www.agile611.com/wp-content/uploads/2020/09/cropped-logo-header.png
+  font:
+    text: Nunito
+    code: Roboto Mono
 
   features:
     - navigation.sections
@@ -22,19 +26,18 @@ theme:
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: indigo
-      accent: blue
       toggle:
         icon: material/brightness-7
         name: Cambiar al modo oscuro
 
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: indigo
-      accent: blue
       toggle:
         icon: material/brightness-4
         name: Cambiar al modo claro
+
+extra_css:
+  - stylesheets/extra.css
 
 nav:
   - Inicio: index.md
