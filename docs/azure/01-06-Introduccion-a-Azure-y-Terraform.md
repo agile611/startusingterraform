@@ -168,7 +168,28 @@ Un grupo de recursos y una red virtual, los dos recursos del ejemplo original, a
 mkdir -p ~/tf-intro && cd ~/tf-intro
 ```
 
-Crea `providers.tf` con el bloque de la sección 1.4 y después estos dos archivos:
+Crea `providers.tf`:
+
+```hcl
+# providers.tf
+terraform {
+  required_version = ">= 1.5.0"
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 4.0"
+    }
+  }
+}
+
+provider "azurerm" {
+  features {}                                                     # obligatorio aunque esté vacío
+  metadata_host                   = "topaz.local.dev:8899"        # endpoint del emulador
+  resource_provider_registrations = "none"                        # no registrar providers al arrancar
+  subscription_id                 = "00000000-0000-0000-0000-000000000001"
+}
+```
+Crea `main.tf`:
 
 ```hcl
 # main.tf
@@ -194,6 +215,7 @@ resource "azurerm_virtual_network" "lab" {
 }
 ```
 
+Crea `outputs.tf`:
 ```hcl
 # outputs.tf
 output "grupo_recursos" {
