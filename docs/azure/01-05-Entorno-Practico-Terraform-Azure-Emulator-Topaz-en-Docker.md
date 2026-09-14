@@ -57,9 +57,9 @@ sudo docker run --rm hello-world
 
 ### 2. Repositorios APT Configurados
 
-Tras la instalación, el host `terraform00` dispone de los siguientes orígenes de paquetes en `/etc/apt/sources.list.d/`:
+Tras la instalación, el host `terraform00` dispone de los siguientes orígenes de paquetes en `/etc/apt/sources.list.d/azure-cli.sources`:
 
-**Azure CLI** — `azure-cli.sources` (formato DEB822):
+**Azure CLI** — `/etc/apt/sources.list.d/azure-cli.sources` (formato DEB822):
 
 ```text
 Types: deb
@@ -70,19 +70,19 @@ Architectures: amd64
 Signed-by: /etc/apt/keyrings/microsoft.gpg
 ```
 
-**Docker** — `docker.list`:
+**Docker** — `/etc/apt/sources.list.d/docker.list`:
 
 ```text
 deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu noble stable
 ```
 
-**HashiCorp (Terraform)** — `hashicorp.list`:
+**HashiCorp (Terraform)** — `/etc/apt/sources.list.d/hashicorp.list`:
 
 ```text
 deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com noble main
 ```
 
-**Ubuntu** — `ubuntu.sources` (formato DEB822, réplica española + seguridad):
+**Ubuntu** — `/etc/apt/sources.list.d/ubuntu.sources` (formato DEB822, réplica española + seguridad):
 
 ```text
 Types: deb
