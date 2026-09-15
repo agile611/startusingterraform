@@ -12,8 +12,8 @@ site_dir: site
 theme:
   name: material
   language: es
-  logo: https://www.agile611.com/wp-content/uploads/2020/09/Variante2_Uso1.png
-  favicon: https://www.agile611.com/wp-content/uploads/2020/09/Variante2_Uso1.png
+  logo: https://www.agile611.com/wp-content/uploads/2020/09/Negativo.png
+  favicon: https://www.agile611.com/wp-content/uploads/2020/09/Negativo.png
   font:
     text: Nunito
     code: Nunito
