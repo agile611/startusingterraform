@@ -101,8 +101,7 @@ Objetivo: entender por qué se utiliza Terraform y dejar preparado un laboratori
 5. [Entorno práctico: Terraform, Azure Emulator Topaz y Docker](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)
 6. [Introducción a Azure y Terraform](01-06-Introduccion-a-Azure-y-Terraform.md)
 7. [Configuración de Azure CLI](01-07-configuracion-azure-cli.md)
-8. [Prueba de humo del entorno](01-08-prueba-de-humo.md)
-9. [Desplegar una máquina virtual con Terraform](01-09-Desplegar-una-VM-en-el-Azure-Emulator-con-Terraform.md)
+8. [Desplegar una máquina virtual con Terraform](01-08-Desplegar-una-VM-en-el-Azure-Emulator-con-Terraform.md)
 
 ### 2. Recursos y verificación
 
