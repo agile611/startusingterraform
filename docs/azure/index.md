@@ -10,6 +10,7 @@ Esta carpeta contiene el recorrido completo del curso para aprender **Terraform 
 - [Requisitos previos](#requisitos-previos)
 - [Entorno de prácticas](#entorno-de-prácticas)
 - [Itinerario del curso](#itinerario-del-curso)
+- [Bloques del curso](#bloques-del-curso)
 - [Guía de trabajo recomendada](#guía-de-trabajo-recomendada)
 - [Comandos esenciales](#comandos-esenciales)
 - [Validación antes de aplicar](#validación-antes-de-aplicar)
@@ -89,6 +90,20 @@ az account list --output table
 ```
 
 ## Itinerario del curso
+
+## Bloques del curso
+
+1. [Fundamentos y primer entorno](#1-fundamentos-y-primer-entorno)
+2. [Recursos y verificación](#2-recursos-y-verificación)
+3. [HCL y configuración del proveedor](#3-hcl-y-configuración-del-provider)
+4. [Ciclo de vida y estado](#4-ciclo-de-vida-y-estado)
+5. [Variables, salidas y buenas prácticas](#5-variables-outputs-y-buenas-prácticas)
+6. [Servicios de Azure](#6-servicios-de-azure)
+7. [Estado remoto y operaciones sobre el estado](#7-estado-remoto-y-operaciones-sobre-el-estado)
+8. [Módulos, automatización y operación](#8-módulos-automatización-y-operación)
+9. [Dependencias, metaargumentos y validación](#9-dependencias-metaargumentos-y-validación)
+10. [Secretos e identidad](#10-secretos-e-identidad)
+11. [CI/CD con controles](#11-cicd-con-controles)
 
 ### 1. Fundamentos y primer entorno
 

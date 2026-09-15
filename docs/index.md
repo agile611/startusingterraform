@@ -10,16 +10,17 @@ El proyecto explica los conceptos esenciales de Terraform y muestra cómo aplica
 
 La documentación se organiza en los siguientes bloques:
 
-- **Fundamentos:** infraestructura como código, Terraform, herramientas alternativas y modelos declarativos.
-- **Entorno práctico:** instalación, Azure CLI, Docker y Azure Emulator Topaz.
-- **Terraform y Azure:** providers, recursos, grupos de recursos y máquinas virtuales.
-- **HCL y configuración:** sintaxis, bloques principales, variables, locals y outputs.
-- **Estado y operaciones:** comandos, estado remoto, bloqueo, workspaces y migraciones.
-- **Servicios de Azure:** redes, máquinas virtuales, bases de datos y almacenamiento.
-- **Reutilización:** módulos personalizados y buenas prácticas de organización.
-- **Operación y calidad:** dependencias, metaargumentos, provisioners, validación y monitorización.
-- **Seguridad:** Key Vault, valores sensibles e identidades gestionadas.
-- **Automatización:** pipelines, aplicaciones controladas, aprobaciones y puertas de calidad.
+1. [Fundamentos y primer entorno](azure/index.md#1-fundamentos-y-primer-entorno)
+2. [Recursos y verificación](azure/index.md#2-recursos-y-verificación)
+3. [HCL y configuración del proveedor](azure/index.md#3-hcl-y-configuración-del-provider)
+4. [Ciclo de vida y estado](azure/index.md#4-ciclo-de-vida-y-estado)
+5. [Variables, salidas y buenas prácticas](azure/index.md#5-variables-outputs-y-buenas-prácticas)
+6. [Servicios de Azure](azure/index.md#6-servicios-de-azure)
+7. [Estado remoto y operaciones sobre el estado](azure/index.md#7-estado-remoto-y-operaciones-sobre-el-estado)
+8. [Módulos, automatización y operación](azure/index.md#8-módulos-automatización-y-operación)
+9. [Dependencias, metaargumentos y validación](azure/index.md#9-dependencias-metaargumentos-y-validación)
+10. [Secretos e identidad](azure/index.md#10-secretos-e-identidad)
+11. [CI/CD con controles](azure/index.md#11-cicd-con-controles)
 
 ## Cómo empezar
 
