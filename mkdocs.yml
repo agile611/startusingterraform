@@ -85,7 +85,7 @@ nav:
       - "7.1 Módulos en Terraform": azure/07-01-estado-remoto-en-azure-storage.md
       - "7.2 Módulos de la comunidad": azure/07-02-bloqueo-de-estado.md
       - "7.3 Buenas prácticas en módulos": azure/07-03-comandos-de-estado.md
-      - "7.4 Módulos de ejemplo": azure/07-04-workspaces.md
+      - "7.4 Workspaces": azure/07-04-workspaces.md
       - "8.1 Módulos personalizados": azure/08-01-modulos-personalizados.md
       - "8.2 CI/CD": azure/08-02-ci-cd.md
       - "8.3 Seguridad avanzada": azure/08-03-seguridad-avanzada.md
