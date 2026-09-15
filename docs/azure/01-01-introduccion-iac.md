@@ -1,51 +1,5 @@
 # 📘 Infraestructura como código: qué problema resuelve y a qué precio
 
-!!! abstract
-    Este curso despliega un Moodle en Azure sin tocar el portal: red,
-    almacenamiento, base de datos, identidades, secretos y el pipeline que lo
-    aplica. Antes de escribir la primera línea conviene entender por qué hacerlo
-    así, porque la infraestructura como código no es "scripts en Git": es un
-    cambio en *quién* decide qué hay que hacer. Con un script, lo decides
-    tú cada vez: qué existe ya, qué falta, qué cambió, en qué orden. Con una
-    declaración, describes cómo quieres que quede y una herramienta calcula la
-    diferencia con lo que hay. Esa diferencia se llama **plan**, la
-    memoria de lo que hay se llama **estado**, y la propiedad que
-    lo hace posible se llama **idempotencia**. La página presenta
-    esos conceptos, los límites que traen consigo —el estado es un activo nuevo
-    que proteger; la deriva no desaparece, se detecta— y el mapa del curso. El
-    laboratorio ejecuta un script dos veces y una declaración dos veces contra
-    **Topaz**, el emulador local de Azure, y deja ver la diferencia
-    sin gastar un céntimo.
-
-!!! success "🎯 Objetivos de aprendizaje"
-    - Definir infraestructura como código por sus tres propiedades —texto,
-      versionado, ejecutable— y distinguirla de la automatización con scripts.
-    - Explicar la diferencia entre enfoque imperativo y declarativo en
-      términos de quién calcula la diferencia.
-    - Usar con precisión cuatro términos: idempotencia, estado, plan,
-      provider; y un quinto, deriva.
-    - Nombrar lo que IaC no resuelve y el coste que añade.
-    - Situar cada beneficio prometido en la página del curso que lo hace
-      real.
-
-!!! info "🔷 Requisitos previos"
-    Ninguno para leer. Para el laboratorio: Terraform `1.11.x`, Azure CLI, Git,
-    y Topaz en marcha con `az` apuntando al emulador:
-
-    ```bash
-    az account show --query environmentName -o tsv
-    ```
-
-    El comando debe devolver:
-
-    ```text
-    Topaz
-    ```
-
-    También necesitas un `providers.tf` configurado para él. La instalación
-    está en la página 2: si aún no la has hecho, lee esta página completa y
-    vuelve al laboratorio después.
-
 ## 1. Qué es (y qué no es) infraestructura como código
 
 Dos definiciones de referencia. La primera es la que el original atribuye a

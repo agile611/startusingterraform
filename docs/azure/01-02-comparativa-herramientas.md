@@ -1,39 +1,5 @@
 # 🆚 Terraform frente a ARM, Bicep, Pulumi y Ansible: tres preguntas que deciden
 
-!!! abstract
-    Las comparativas de herramientas suelen ser tablas de ticks: multi-cloud sí
-    o no, lenguaje, curva de aprendizaje. Sirven de poco, porque las diferencias
-    que importan en el día a día no son de sintaxis sino de **modelo**, y se
-    reducen a tres preguntas: *¿dónde vive el estado?*, *¿quién calcula la
-    diferencia entre lo que quieres y lo que hay?* y *¿qué pasa cuando quitas un
-    recurso del código?*
-
-    Con esas tres respuestas, todo lo demás —borrar entornos, revisar cambios en
-    una PR, mezclar Azure con GitHub o Entra ID— se deduce. La página responde a
-    las tres para cada herramienta, muestra el mismo storage de `moodledata`
-    escrito en las cinco, y explica por qué este curso usa Terraform sin
-    pretender que sea la respuesta universal: hay escenarios donde Bicep es
-    mejor, y se dicen.
-
-    El laboratorio despliega el mismo recurso con Terraform y con Bicep contra
-    Topaz, lo quita del código en ambos y observa los resultados opuestos.
-
-!!! success "🎯 Objetivos de aprendizaje"
-    - Responder las tres preguntas —estado, diferencia, borrado— para Terraform,
-      ARM/Bicep, Pulumi y Ansible.
-    - Leer el mismo recurso en cinco sintaxis y reconocer qué es igual y qué no.
-    - Elegir herramienta por escenario con razones que se puedan defender,
-      incluidas las que no favorecen a Terraform.
-    - Conocer la situación de licencias: BSL, OpenTofu, Pulumi Cloud.
-    - Comprobar en Topaz la diferencia entre `terraform apply` y
-      `az deployment group create` al retirar un recurso.
-
-!!! info "🔷 Requisitos previos"
-    Página 1 —los cinco términos—. Para el laboratorio: Terraform `1.11.x`,
-    Azure CLI con `az bicep`, Topaz en marcha y el `providers.tf` del curso.
-
-    Pulumi y Ansible son opcionales y van al bloque de Azure real.
-
 ## 1. Las tres preguntas, herramienta por herramienta
 
 ARM y Bicep comparten fila: Bicep es un lenguaje que compila a ARM JSON y se

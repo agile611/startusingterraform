@@ -1,43 +1,5 @@
 # 🔧 Declarativo frente a imperativo con una máquina virtual, y qué pasa cuando algo falla
 
-!!! abstract
-    La página 1 mostró la diferencia entre un script y una declaración con dos
-    recursos. Esta práctica sube la escala a lo que tendrá el Moodle del curso:
-    una red, una subred, un grupo de seguridad, una interfaz y una máquina
-    virtual, cinco recursos con dependencias entre sí.
-
-    Con esa escala aparecen dos cosas que con dos recursos no se ven: el
-    **orden** —la interfaz necesita la subred, la máquina necesita la interfaz;
-    alguien tiene que saberlo— y el **fallo a medias** —si el tercer recurso
-    falla, ¿qué pasa con los dos primeros, y qué haces después?—.
-
-    El original quería probar "resiliencia" con herramientas que Topaz no tiene.
-    Aquí la prueba es real y más útil: se interrumpe la plataforma en mitad del
-    despliegue, con el script y con Terraform, y se observa cómo se recupera
-    cada uno. Es la resiliencia que importa en IaC: no la de la máquina, sino la
-    del proceso que la crea.
-
-!!! success "🎯 Objetivos de aprendizaje"
-    - Decir con precisión qué emula Topaz y qué no, y por qué eso basta para
-      este curso.
-    - Escribir la misma infraestructura de cinco recursos como script y como
-      declaración, y comparar dónde vive el conocimiento del orden.
-    - Observar un despliegue interrumpido en ambos enfoques: qué queda, qué
-      sabe cada herramienta y cómo se reanuda.
-    - Provocar deriva sobre un recurso intermedio y leer el plan que la
-      corrige.
-    - Usar `azurerm_linux_virtual_machine` con clave SSH, sin contraseñas en el
-      código.
-
-!!! info "🔷 Requisitos previos"
-    Páginas 1 y 3 —conceptos e instalación—: Topaz en marcha, `az` apuntando al
-    emulador y el `providers.tf` del curso en `~/tf-st`.
-
-    Comprueba antes de empezar qué proveedores emula tu versión: la parte de red
-    —`Microsoft.Network`— es la base del laboratorio; la máquina
-    —`Microsoft.Compute`— se acepta o no según la versión, y la página indica
-    qué hacer en cada caso.
-
 ## 1. Qué es Topaz y qué no es
 
 Azure Local Emulator —nombre en clave Topaz— es un contenedor que implementa la
