@@ -1,17 +1,13 @@
-Aquí tienes una versión estructurada y limpia en Markdown de tu práctica con el emulador Topaz. He mantenido intactos todos los comandos, explicaciones y advertencias, adaptando los bloques visuales del HTML para que la lectura sea fluida, directa y fácil de seguir paso a paso. 👇
+## 🚀 Práctica: Desplegar una VM en el emulador de Azure (Topaz) con Terraform
 
----
+En esta práctica desplegarás, **desde cero**, una infraestructura declarativa (grupo de recursos, red virtual, subred, interfaz de red y máquina virtual) sobre el emulador local de Azure **Topaz**, usando **Terraform** y el proveedor `azurerm 4.x`. Todo se ejecuta en tu máquina; no se toca ninguna cuenta real de Azure.
 
-## 🚀 Práctica: Desplegar una VM en el Azure Emulator (Topaz) con Terraform
-
-En esta práctica desplegarás, **desde cero**, una infraestructura declarativa (grupo de recursos, red virtual, subred, interfaz de red y máquina virtual) sobre el emulador local de Azure **Topaz**, usando **Terraform** y el provider `azurerm 4.x`. Todo se ejecuta en tu máquina; no se toca ninguna cuenta real de Azure.
-
-> **Requisitos previos** (ya instalados en `terraform01`): Ubuntu 24.04, Docker Engine, Azure CLI, Terraform ≥ 1.5, `jq`, `openssl`, `curl`. Compruébalo:
+> **Requisitos previos** (ya instalados en `terraform01`): Ubuntu 24.04, Docker Engine, Azure CLI, Terraform ≥ 1.5, `jq`, `openssl`, `curl`. Compruébalos:
 > ```bash
 > docker --version && az version --query '"azure-cli"' -o tsv && terraform version && jq --version
 > ```
 
-> 💡 **Convención:** todos los comandos se ejecutan como `root` (o con `sudo`) en el directorio `/home/curso`. Cada paso depende del anterior: **no saltes ninguno**.
+> 💡 **Convención:** todos los comandos se ejecutan como superusuario (o con `sudo`) en el directorio `/home/curso`. Cada paso depende del anterior: **no saltes ninguno**.
 
 ---
 
@@ -63,7 +59,7 @@ EOF
 source ~/.bashrc
 ```
 
-Verifica que el endpoint de metadatos responde con el certificado validado. Este endpoint es exactamente el que Terraform consultará después a través de `metadata_host`:
+Verifica que el punto de conexión de metadatos responde con el certificado validado. Este punto de conexión es exactamente el que Terraform consultará después a través de `metadata_host`:
 
 ```bash
 curl --noproxy '*' --connect-timeout 5 -s -o /dev/null -w 'HTTP %{http_code}\n' \
@@ -77,7 +73,7 @@ curl --noproxy '*' --connect-timeout 5 -s -o /dev/null -w 'HTTP %{http_code}\n' 
 
 ## 3️⃣ Conectar Azure CLI con el emulador
 
-Azure CLI apunta por defecto a la nube pública. Hay que registrar Topaz como nube personalizada, desactivar la comprobación de *instance discovery* de MSAL (que rechaza cualquier servidor de identidad que no sea de Microsoft) y autenticarse:
+Azure CLI apunta por defecto a la nube pública. Hay que registrar Topaz como nube personalizada, desactivar la comprobación del descubrimiento de instancias de MSAL (que rechaza cualquier servidor de identidad que no sea de Microsoft) y autenticarse:
 
 ```bash
 META="$(curl -s --noproxy '*' 'https://topaz.local.dev:8899/metadata/endpoints?api-version=2022-09-01')"
@@ -100,7 +96,7 @@ az login --use-device-code
 
 Abre la URL que muestra la terminal, introduce el código e inicia sesión con las credenciales del emulador.
 
-A continuación tienes los datos de acceso para autorizar la CLI:
+A continuación tienes las credenciales para autorizar la CLI:
 
 | **Campo** | **Valor** |
 |---|---|
@@ -109,7 +105,7 @@ A continuación tienes los datos de acceso para autorizar la CLI:
 
 *Asegúrate de introducir estas credenciales exactas para vincular correctamente tu sesión local.*
 
-Selecciona la suscripción y **anota el `tenant`**: lo necesitarás en `main.tf`.
+Selecciona la suscripción y **anota el identificador del inquilino (`tenant`)**: lo necesitarás en `main.tf`.
 
 ```bash
 az account set --subscription 00000000-0000-0000-0000-000000000001
@@ -125,7 +121,7 @@ az account show --query '{cloud:environmentName,id:id,tenant:tenantId}' -o json
 
 ## 4️⃣ Crear el proyecto y el archivo `main.tf`
 
-Crea un directorio de trabajo vacío y dentro de él el archivo `main.tf` con el contenido siguiente. Fíjate en el bloque `provider`: **Terraform no hereda la nube activa de Azure CLI**, así que hay que indicarle explícitamente el emulador con `metadata_host`, y desactivar el registro de *resource providers*, que Topaz no implementa.
+Crea un directorio de trabajo vacío y dentro de él el archivo `main.tf` con el contenido siguiente. Fíjate en el bloque `provider`: **Terraform no hereda la nube activa de Azure CLI**, así que hay que indicarle explícitamente el emulador con `metadata_host` y desactivar el registro de proveedores de recursos, que Topaz no implementa.
 
 ```bash
 mkdir -p /home/curso/nemo && cd /home/curso/nemo
@@ -158,16 +154,16 @@ provider "azurerm" {
   use_oidc = false
 
   subscription_id = "00000000-0000-0000-0000-000000000001"
-  tenant_id       = "50717675-3E5E-4A1E-8CB5-C62D8BE8CA48" # valor "tenant" de: az account show
+  tenant_id       = "50717675-3E5E-4A1E-8CB5-C62D8BE8CA48" # valor del inquilino de: az account show
 }
 
-# 1. Grup de recursos
+# 1. Grupo de recursos
 resource "azurerm_resource_group" "ejemplo" {
   name     = "rg-declarativo-topaz"
   location = "eastus"
 }
 
-# 2. Xarxa Virtual
+# 2. Red virtual
 resource "azurerm_virtual_network" "ejemplo" {
   name                = "vnet-topaz"
   address_space       = ["10.0.0.0/16"]
@@ -175,7 +171,7 @@ resource "azurerm_virtual_network" "ejemplo" {
   resource_group_name = azurerm_resource_group.ejemplo.name
 }
 
-# 3. Subxarxa
+# 3. Subred
 resource "azurerm_subnet" "ejemplo" {
   name                 = "subnet-topaz"
   resource_group_name  = azurerm_resource_group.ejemplo.name
@@ -183,7 +179,7 @@ resource "azurerm_subnet" "ejemplo" {
   address_prefixes     = ["10.0.1.0/24"]
 }
 
-# 4. Interfície de Xarxa
+# 4. Interfaz de red
 resource "azurerm_network_interface" "ejemplo" {
   name                = "nic-resiliente"
   location            = azurerm_resource_group.ejemplo.location
@@ -196,7 +192,7 @@ resource "azurerm_network_interface" "ejemplo" {
   }
 }
 
-# 5. Màquina Virtual
+# 5. Máquina virtual
 resource "azurerm_virtual_machine" "ejemplo" {
   name                  = "vm-resiliente"
   location              = azurerm_resource_group.ejemplo.location
@@ -244,7 +240,7 @@ sed -i "s/tenant_id       = \"[^\"]*\"/tenant_id       = \"$TENANT\"/" main.tf
 grep tenant_id main.tf
 ```
 
-> 💡 **¿Por qué no hay bloque `backend`?** El estado se guarda en local (`terraform.tfstate`, en el directorio del proyecto). Un backend remoto `azurerm` exigiría un storage account previo y publicar el puerto 8891 del emulador; para esta práctica no aporta nada y es la principal fuente de bloqueos.
+> 💡 **¿Por qué no hay bloque `backend`?** El estado se guarda en local (`terraform.tfstate`, en el directorio del proyecto). Un backend remoto `azurerm` exigiría una cuenta de almacenamiento previa y publicar el puerto 8891 del emulador; para esta práctica no aporta nada y es la principal fuente de bloqueos.
 
 ---
 
@@ -254,7 +250,7 @@ grep tenant_id main.tf
 cd /home/curso/nemo
 
 terraform fmt          # normaliza el formato; avisa si hay llaves descuadradas
-terraform init         # descarga el provider azurerm 4.x
+terraform init         # descarga el proveedor azurerm 4.x
 terraform validate     # "Success! The configuration is valid."
 terraform plan         # "Plan: 5 to add, 0 to change, 0 to destroy."
 ```
@@ -324,8 +320,8 @@ Aquí tienes un resumen estructurado para diagnosticar y resolver los errores m�
 | `Unsupported argument: skip_provider_registration` | Argumento eliminado en azurerm 4.x | Usar `resource_provider_registrations = "none"` |
 | `SubscriptionNotFound` en `init`/`plan` | Terraform habla con Azure público (falta `metadata_host`) | Revisar el bloque `provider` del paso 4 |
 | `x509: certificate signed by unknown authority` | Go no encuentra el certificado | `echo $SSL_CERT_FILE`; repetir paso 2 |
-| `plan` se queda colgado en `Refreshing state...` | Estado con recursos de otra práctica (p. ej. un storage account cuyo plano de datos no es alcanzable) | `terraform state list`; quitar los sobrantes con `terraform state rm`, o borrar `terraform.tfstate*` y el grupo con `az group delete` |
-| `apply` falla solo en la VM (HTTP 4xx/5xx del emulador) | Operación no implementada en esta *preview* de Topaz | `docker logs --tail 40 azure-environment`; desplegar el resto con `terraform apply -target=...` |
+| `plan` se queda colgado en `Refreshing state...` | Estado con recursos de otra práctica (p. ej. una cuenta de almacenamiento cuyo plano de datos no es alcanzable) | `terraform state list`; quitar los sobrantes con `terraform state rm`, o borrar `terraform.tfstate*` y el grupo con `az group delete` |
+| `apply` falla solo en la VM (HTTP 4xx/5xx del emulador) | Operación no implementada en esta *versión preliminar* de Topaz | `docker logs --tail 40 azure-environment`; desplegar el resto con `terraform apply -target=...` |
 
 *Utiliza esta tabla como tu primera línea de defensa si el despliegue se interrumpe.*
 
@@ -348,4 +344,4 @@ TF_LOG=DEBUG terraform plan -parallelism=1 2>&1 | grep -oE 'https://[a-zA-Z0-9.:
 6. Captura de `terraform destroy`.
 7. Respuesta breve (3–5 líneas): ¿por qué Terraform necesita `metadata_host` si Azure CLI ya está configurada con `az cloud set`?
 
-> 🚨 **⚠️ Entorno de prácticas.** Las credenciales `topazadmin@topaz.local.dev` / `admin`, la contraseña de la VM en claro y la desactivación de *instance discovery* solo son aceptables contra el emulador local. Nunca las uses contra Azure real.
+> 🚨 **⚠️ Entorno de prácticas.** Las credenciales `topazadmin@topaz.local.dev` / `admin`, la contraseña de la VM en claro y la desactivación del descubrimiento de instancias solo son aceptables contra el emulador local. Nunca las uses contra Azure real.
