@@ -9,7 +9,7 @@
 - Poner guardarraíles en dos tiempos: `plan` (`validation`, `check`, Trivy/Checkov) y `apply` (Azure Policy, locks).
 - Tratar el estado como el secreto que es.
 
-> **🔷 Requisitos previos.** Páginas 1 a 12 completadas y destruidas, `~/tf-st/providers.tf` disponible, Terraform `>= 1.11` (atributos *write-only*), provider `random >= 3.7` (recurso `ephemeral`), `jq`, opcionalmente `trivy` y `gitleaks`, `az account show --query environmentName -o tsv` → `Topaz`.
+> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 12 completadas y destruidas, `~/tf-st/providers.tf` disponible, Terraform `>= 1.11` (atributos *write-only*), provider `random >= 3.7` (recurso `ephemeral`), `jq`, opcionalmente `trivy` y `gitleaks`, `az account show --query environmentName -o tsv` → `Topaz`.
 
 ---
 
@@ -18,10 +18,10 @@
 | **Lugar** | **Cómo llega** | **Defensa** |
 |---|---|---|
 | Código y Git | Literal en `.tf` (el original), `terraform.tfvars` con contraseñas, `.tfstate` local commiteado | `.gitignore` (`*.tfstate*`, `*.tfvars`, `.terraform/`), gitleaks en pre-commit y CI; los secretos se generan (`random_password`) o se leen (Key Vault), nunca se escriben |
-| Plan y logs | `plan` muestra valores; `show -json` los muestra *todos*; el artefacto `tfplan` los contiene | `sensitive = true` oculta en consola; `ephemeral` ni siquiera lo incluye; artefactos con retención corta (página 12) |
+| Plan y logs | `plan` muestra valores; `show -json` los muestra *todos*; el artefacto `tfplan` los contiene | `sensitive = true` oculta en consola; `ephemeral` ni siquiera lo incluye; artefactos con retención corta ([página 12](index.md#pagina-12)) |
 | Estado | Todo atributo que el provider devuelve: contraseñas de `random_password`, claves de cuenta, cadenas de conexión. `sensitive` **no** lo cifra | Backend endurecido (13.5); valores `ephemeral` y atributos *write-only* (`value_wo`) que no se guardan; `shared_access_key_enabled = false` para que no haya claves que guardar |
 | Identidad de Terraform | `ARM_CLIENT_SECRET` en variables de CI, SP con *Owner* en la suscripción | OIDC / identidad gestionada (13.3): sin secreto; roles acotados al grupo y separados plan/apply |
-| Recursos desplegados | Cuenta con acceso público, Key Vault con *access policies* abiertas, TLS 1.0 | Guardarraíles en `plan` (13.4) y Azure Policy en `apply`; módulos con valores seguros por defecto (página 11) |
+| Recursos desplegados | Cuenta con acceso público, Key Vault con *access policies* abiertas, TLS 1.0 | Guardarraíles en `plan` (13.4) y Azure Policy en `apply`; módulos con valores seguros por defecto ([página 11](index.md#pagina-11)) |
 
 ---
 
@@ -127,7 +127,7 @@ provider "azurerm" { features {} }
 | Identidad de `plan` (PR, drift) | *Reader* en la suscripción + *Storage Blob Data Contributor* en el contenedor de estado | Refresca y planifica; el lock exige escribir el blob. No puede cambiar nada |
 | Identidad de `apply` | *Contributor* en **el grupo** del entorno + blob del estado + *Key Vault Secrets Officer* en el vault | Nunca *Owner*, nunca la suscripción entera. Si crea asignaciones de rol, *Role Based Access Control Administrator* con `condition` que limite qué roles puede dar |
 | Recursos desplegados (VM, App) | Identidad propia con *Key Vault Secrets User* sobre secretos concretos, *Storage Blob Data Reader* sobre su contenedor | La aplicación lee su secreto en arranque; Terraform no lo inyecta por `custom_data` |
-| Personas | *Reader* permanente; roles de escritura mediante PIM, con caducidad | Los cambios entran por el pipeline (página 12); el portal es para mirar |
+| Personas | *Reader* permanente; roles de escritura mediante PIM, con caducidad | Los cambios entran por el pipeline ([página 12](index.md#pagina-12)); el portal es para mirar |
 
 ---
 
@@ -207,12 +207,12 @@ resource "azurerm_policy_definition" "regiones_custom" {
 
 ## 5. El estado es un secreto; los recursos críticos no se borran
 
-El bloque `backend` del original no protege nada por sí solo. La cuenta de la página 7 ya lo hace; aquí está la lista completa de lo que la convierte en un almacén de secretos y de lo que evita un `destroy` accidental.
+El bloque `backend` del original no protege nada por sí solo. La cuenta de la [página 7](index.md#pagina-7) ya lo hace; aquí está la lista completa de lo que la convierte en un almacén de secretos y de lo que evita un `destroy` accidental.
 
 | **Medida** | **Cómo** |
 |---|---|
-| Sin claves de cuenta | `shared_access_key_enabled = false` en la cuenta; `use_azuread_auth = true` en el backend; RBAC por contenedor y, para PRs, ABAC por prefijo de blob (página 10) |
-| Recuperable | `versioning_enabled`, `delete_retention_policy` y `container_delete_retention_policy` (30 días); `state pull` a un archivo antes de cualquier cirugía (página 9) |
+| Sin claves de cuenta | `shared_access_key_enabled = false` en la cuenta; `use_azuread_auth = true` en el backend; RBAC por contenedor y, para PRs, ABAC por prefijo de blob ([página 10](index.md#pagina-10)) |
+| Recuperable | `versioning_enabled`, `delete_retention_policy` y `container_delete_retention_policy` (30 días); `state pull` a un archivo antes de cualquier cirugía ([página 9](index.md#pagina-9)) |
 | Inaccesible desde fuera | `public_network_access_enabled = false` + Private Endpoint desde la red del agente, o `network_rules { default_action = "Deny" }` con las IPs del runner; las personas leen el estado con *Storage Blob Data Reader*, nunca con la clave |
 | Auditado | `azurerm_monitor_diagnostic_setting` sobre el servicio blob (`StorageRead`, `StorageWrite`) hacia Log Analytics: quién descargó el estado y cuándo |
 | Con menos secretos dentro | `ephemeral` y `*_wo` (13.2); `features { storage { data_plane_available = false } }` para que el provider no liste claves que no vas a usar; identidades gestionadas en vez de contraseñas en los recursos |
@@ -427,4 +427,4 @@ terraform destroy -target=azurerm_storage_account.tfstate         # Error … Sc
 - [Locks de recursos](https://learn.microsoft.com/es-es/azure/azure-resource-manager/management/lock-resources) y [`azurerm_management_lock`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/management_lock)
 - [Trivy config](https://aquasecurity.github.io/trivy/latest/docs/scanner/misconfiguration/), [Checkov](https://www.checkov.io/), [gitleaks](https://github.com/gitleaks/gitleaks) y [Conftest (OPA)](https://www.conftest.dev/)
 - [Well-Architected Framework: pilar de seguridad](https://learn.microsoft.com/es-es/azure/well-architected/security/) y [Microsoft Cloud Security Benchmark](https://learn.microsoft.com/es-es/security/benchmark/azure/)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

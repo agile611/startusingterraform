@@ -464,4 +464,4 @@ az group list --query "[?starts_with(name,'rg-provider-lab')].name" -o tsv    # 
 - [Configuración de providers y `alias`](https://developer.hashicorp.com/terraform/language/providers/configuration) (documentación de Terraform)
 - [Restricciones de versión y `.terraform.lock.hcl`](https://developer.hashicorp.com/terraform/language/providers/requirements)
 - [Recurso `random_string`](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator): endpoints de metadatos y servicios soportados
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md): endpoints de metadatos y servicios soportados

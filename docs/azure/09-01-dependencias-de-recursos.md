@@ -10,7 +10,7 @@
 - Migrar de `count` a `for_each` con `moved` sin destruir recursos.
 - Reconocer el error de claves desconocidas hasta el apply y saber evitarlo.
 
-> **🔷 Requisitos previos.** Página 5 (sintaxis de HCL: variables, locals, tipos, expresiones `for`) y la práctica 1. Topaz con `Microsoft.Network` y `Microsoft.Storage`, que son la base del laboratorio.
+> **🔷 Requisitos previos.** [Página 5](index.md#pagina-5) (sintaxis de HCL: variables, locals, tipos, expresiones `for`) y la práctica 1. Topaz con `Microsoft.Network` y `Microsoft.Storage`, que son la base del laboratorio.
 
 ---
 
@@ -50,7 +50,7 @@ resource "azurerm_network_interface" "moodle" {
 | Módulo que necesita que otro módulo haya terminado | Mejor pasar un output | `depends_on` en módulos retrasa *todo* el módulo y convierte sus datos en "known after apply" |
 | Data source que debe leer después de un cambio | A veces | Con `depends_on` la lectura se posterga al apply: el plan pierde precisión. Es el coste |
 
-> ⚠️ **Sobre el provisioner del original.** `remote-exec` ejecuta comandos por SSH desde la máquina que aplica: necesita una IP alcanzable, una clave privada en disco y que la VM esté arrancada, y si falla deja el recurso *tainted*. Nada de eso es declarativo ni funciona en Topaz. Lo que va dentro de la máquina va en `custom_data` (cloud-init) o en Ansible (página 8).
+> ⚠️ **Sobre el provisioner del original.** `remote-exec` ejecuta comandos por SSH desde la máquina que aplica: necesita una IP alcanzable, una clave privada en disco y que la VM esté arrancada, y si falla deja el recurso *tainted*. Nada de eso es declarativo ni funciona en Topaz. Lo que va dentro de la máquina va en `custom_data` (cloud-init) o en Ansible ([página 8](index.md#pagina-8)).
 
 ---
 
@@ -329,13 +329,13 @@ terraform destroy -auto-approve
 > | **Mensaje o síntoma** | **Causa y solución** |
 > |---|---|
 > | `depends_on` en un recurso que ya referencia al otro (el original: DNS e IP) | Redundante: la referencia ya es la dependencia. Quítalo; `depends_on` solo cuando no hay dato que referenciar |
-> | `provisioner "remote-exec"` para instalar software (el original) | Imperativo, frágil, deja recursos *tainted*, no funciona en Topaz. `custom_data` con cloud-init o Ansible (página 8) |
+> | `provisioner "remote-exec"` para instalar software (el original) | Imperativo, frágil, deja recursos *tainted*, no funciona en Topaz. `custom_data` con cloud-init o Ansible ([página 8](index.md#pagina-8)) |
 > | `The given "for_each" argument value is unsuitable: … set of number` (el original: `toset([80, 443, 22])`) | `for_each` solo acepta `map` o `set(string)`. Construye el mapa con `for` y claves string (`"${nombre}-${puerto}"`), o `toset([for p in var.puertos : tostring(p)])` |
 > | `priority = 100 + each.value` con el puerto como valor (el original) | Puerto 8080 → prioridad 8180, fuera del rango 100–4096. Usa `index()` sobre la lista de puertos, o un contador en el `for` |
 > | `ip_configurations = [for nic in …]` en el backend pool (el original) | El argumento no existe. La relación NIC-pool es `azurerm_network_interface_backend_address_pool_association`, una por NIC con `for_each` (bloque C) |
 > | Quitar un elemento de una lista con `count` destruye más de uno | Renumeración (bloque 2). Migra a `for_each` con `moved` (6.5). Si has de mantener `count`, quita solo del final |
 > | `Invalid for_each argument … cannot be determined until apply` | Las claves derivan de un atributo desconocido (un `id`). Usa como claves algo que ya esté en el código: el propio mapa de entrada o el recurso completo (`for_each = azurerm_storage_account.each`), y el `id` en `each.value` (bloque 6) |
-> | "Funcionaba ayer y hoy en el entorno nuevo falla con ese error" | Mismo caso: en el entorno viejo las claves ya eran conocidas. Prueba siempre desde cero (`terraform test`, página 9) para que aparezca antes |
+> | "Funcionaba ayer y hoy en el entorno nuevo falla con ese error" | Mismo caso: en el entorno viejo las claves ya eran conocidas. Prueba siempre desde cero (`terraform test`, [página 9](index.md#pagina-9)) para que aparezca antes |
 > | `Error: Missing resource instance key` al referenciar `azurerm_subnet.s.id` | Con `for_each`/`count` el recurso es un mapa/lista: `azurerm_subnet.s["web"].id`, `[0].id`, o `values(…)[*].id` para todos |
 > | Splat `[*]` sobre un recurso con `for_each` devuelve error | El splat es solo para listas. `values(recurso)[*].id` o `{ for k, v in recurso : k => v.id }` |
 > | Cambiar de `count` a `for_each` planifica destruir y recrear todo | Faltan los bloques `moved` (6.5). Alternativa antigua: `terraform state mv`, imperativo y fuera del código |
@@ -386,4 +386,4 @@ terraform destroy -auto-approve
 - [`time_sleep`](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) (provider hashicorp/time)
 - [`azurerm_network_security_rule`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_security_rule), [`azurerm_subnet_network_security_group_association`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subnet_network_security_group_association) y [`azurerm_network_interface_backend_address_pool_association`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_interface_backend_address_pool_association)
 - [Key Vault con RBAC](https://learn.microsoft.com/es-es/azure/key-vault/general/rbac-guide) y [propagación de asignaciones de rol](https://learn.microsoft.com/es-es/azure/role-based-access-control/troubleshooting#symptom---role-assignment-changes-are-not-being-detected) (Microsoft Learn)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

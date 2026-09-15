@@ -620,6 +620,6 @@ La lógica vive en el script, no en el YAML: así la pruebas en tu terminal, la 
 - [Manual de jq](https://jqlang.github.io/jq/manual/)
 
 ### Emulador y automatización
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator): servicios soportados
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md): servicios soportados
 - [Self-hosted runners en GitHub Actions](https://docs.github.com/actions/hosting-your-own-runners)
 - [Agentes self-hosted en Azure DevOps](https://learn.microsoft.com/es-es/azure/devops/pipelines/agents/agents)

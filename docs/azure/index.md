@@ -205,6 +205,33 @@ Objetivo: automatizar planes y aplicaciones manteniendo revisiones, aprobaciones
 2. [Pipeline y `apply`](11-02-pipeline-y-apply.md)
 3. [Aprobaciones y puertas](11-03-aprobaciones-y-puertas.md)
 
+## Referencias de página
+
+Las referencias numeradas que aparecen en el texto conservan la numeración del
+itinerario original. Esta tabla las convierte en enlaces navegables y muestra
+el documento actual que desarrolla cada tema.
+
+| Página | Documento actual |
+|---|---|
+| <a id="pagina-1"></a>1 | [Fundamentos y primer entorno](01-01-introduccion-iac.md), [instalación y Topaz](01-04-Instalacion-de-herramientas-y-arranque-de-Topaz.md) |
+| <a id="pagina-2"></a>2 | [Despliegue de máquinas virtuales](06-01-despliegue-de-maquinas-virtuales.md) |
+| <a id="pagina-3"></a>3 | [Configuración del provider](03-03-Configuracion-del-provider-azurerm.md), [redes virtuales](06-02-redes-virtuales.md) |
+| <a id="pagina-4"></a>4 | [Estado remoto](07-01-estado-remoto-en-azure-storage.md), [bases de datos](06-03-bases-de-datos.md) |
+| <a id="pagina-5"></a>5 | [Almacenamiento](06-04-almacenamiento.md), [buenas prácticas](06-05-buenas-practicas.md) |
+| <a id="pagina-6"></a>6 | [Servicios de Azure](06-01-despliegue-de-maquinas-virtuales.md), [módulos personalizados](08-01-modulos-personalizados.md) |
+| <a id="pagina-7"></a>7 | [Estado remoto](07-01-estado-remoto-en-azure-storage.md) |
+| <a id="pagina-8"></a>8 | [Bloqueo del estado](07-02-bloqueo-de-estado.md), [CI/CD](08-02-ci-cd.md) |
+| <a id="pagina-9"></a>9 | [Workspaces](07-04-workspaces.md), [módulos personalizados](08-01-modulos-personalizados.md) |
+| <a id="pagina-10"></a>10 | [Valores sensibles](10-02-valores-sensibles.md), [Azure Key Vault](10-01-key-vault.md) |
+| <a id="pagina-11"></a>11 | [Identidades gestionadas](10-03-managed-identities.md), [seguridad avanzada](08-03-seguridad-avanzada.md) |
+| <a id="pagina-12"></a>12 | [CI/CD](08-02-ci-cd.md), [automatización y CI/CD con Terraform](11-01-automatizacion-y-ci-cd-terraform.md) |
+| <a id="pagina-13"></a>13 | [Validación](09-04-validacion.md), [automatización y CI/CD con Terraform](11-01-automatizacion-y-ci-cd-terraform.md) |
+| <a id="pagina-14"></a>14 | [Pipeline y apply](11-02-pipeline-y-apply.md) |
+| <a id="pagina-15"></a>15 | [Aprobaciones y puertas](11-03-aprobaciones-y-puertas.md) |
+| <a id="pagina-16"></a>16 | [CI/CD con controles](11-01-automatizacion-y-ci-cd-terraform.md) |
+| <a id="pagina-17"></a>17 | [Monitorización y logging](08-05-monitorizacion-y-logging.md) |
+| <a id="pagina-18"></a>18 | [Optimización](08-04-optimizacion.md) |
+
 ## Guía de trabajo recomendada
 
 Sigue este ciclo para cada práctica:

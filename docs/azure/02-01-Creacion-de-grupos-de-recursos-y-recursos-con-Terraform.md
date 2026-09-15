@@ -611,7 +611,7 @@ terraform plan                   # No changes.
 - [Importar recursos existentes al estado](https://developer.hashicorp.com/terraform/cli/import)
 
 ### Emulador y herramientas
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator): servicios soportados y limitaciones
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md): servicios soportados y limitaciones
 - [Extensión Terraform para VS Code](https://marketplace.visualstudio.com/items?itemName=HashiCorp.terraform)
 - [pre-commit-terraform](https://github.com/antonbabenko/pre-commit-terraform) (validación automática antes de cada commit)
 - [tfupdate](https://github.com/minamijoyo/tfupdate) (mantener actualizadas las versiones de providers)

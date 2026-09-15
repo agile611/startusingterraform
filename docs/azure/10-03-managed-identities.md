@@ -4,7 +4,7 @@ Aquí tienes la versión estructurada y limpia en Markdown de tu guía sobre ide
 
 # 🔑 Identidades gestionadas: acceso sin credenciales
 
-> En la página 11 la VM de Moodle leyó su contraseña de Key Vault sin que nadie le diera una credencial. Lo hizo con una **identidad gestionada**: una cuenta en Entra ID cuyo secreto nunca existe fuera de Azure, que la plataforma rota sola y que la VM usa pidiendo un token a una dirección local. Esta página explica ese mecanismo y lo lleva a todos los puntos de la arquitectura de Moodle donde hoy habría una clave: el VMSS que monta `moodledata`, el Application Gateway que lee el certificado, el servidor MySQL que autentica a su administrador, el propio Terraform cuando se ejecuta dentro de Azure y, mediante federación, el pipeline que se ejecuta fuera. El hilo conductor es la **asignación de roles**: qué rol, sobre qué ámbito, y cómo evitar que la identidad de una VM web pueda borrar la base de datos. En **Topaz** funcionan las identidades de usuario y las asignaciones de rol como recursos; lo que el emulador no hace es emitir tokens ni evaluar permisos, así que la prueba real de "esta identidad puede leer este contenedor y ningún otro" se hace en Azure.
+> En la [página 11](index.md#pagina-11) la VM de Moodle leyó su contraseña de Key Vault sin que nadie le diera una credencial. Lo hizo con una **identidad gestionada**: una cuenta en Entra ID cuyo secreto nunca existe fuera de Azure, que la plataforma rota sola y que la VM usa pidiendo un token a una dirección local. Esta página explica ese mecanismo y lo lleva a todos los puntos de la arquitectura de Moodle donde hoy habría una clave: el VMSS que monta `moodledata`, el Application Gateway que lee el certificado, el servidor MySQL que autentica a su administrador, el propio Terraform cuando se ejecuta dentro de Azure y, mediante federación, el pipeline que se ejecuta fuera. El hilo conductor es la **asignación de roles**: qué rol, sobre qué ámbito, y cómo evitar que la identidad de una VM web pueda borrar la base de datos. En **Topaz** funcionan las identidades de usuario y las asignaciones de rol como recursos; lo que el emulador no hace es emitir tokens ni evaluar permisos, así que la prueba real de "esta identidad puede leer este contenedor y ningún otro" se hace en Azure.
 
 **🎯 Objetivos de aprendizaje**
 - Explicar qué es una identidad gestionada, cómo obtiene tokens y qué significan `id`, `principal_id` y `client_id`.
@@ -14,7 +14,7 @@ Aquí tienes la versión estructurada y limpia en Markdown de tu guía sobre ide
 - Ejecutar Terraform bajo una identidad gestionada con permisos acotados, incluida la capacidad de asignar roles.
 - Federar una identidad gestionada con GitHub Actions o AKS sin ningún secreto de larga duración.
 
-> **🔷 Requisitos previos.** Páginas 1 a 11 completadas y destruidas, `~/tf-st/providers.tf`, Terraform `>= 1.11`, azurerm 4.x, `jq`, `az account show --query environmentName -o tsv` → `Topaz`.
+> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 11 completadas y destruidas, `~/tf-st/providers.tf`, Terraform `>= 1.11`, azurerm 4.x, `jq`, `az account show --query environmentName -o tsv` → `Topaz`.
 
 ---
 
@@ -103,7 +103,7 @@ resource "azurerm_role_assignment" "web_blob" {
   EOT
 }
 resource "azurerm_role_assignment" "web_kv" {
-  scope                = azurerm_key_vault_secret.mysql.resource_versionless_id   # el secreto, no el vault (página 11)
+  scope                = azurerm_key_vault_secret.mysql.resource_versionless_id   # el secreto, no el vault ([página 11](index.md#pagina-11))
   role_definition_name = "Key Vault Secrets User"
   principal_id         = azurerm_user_assigned_identity.web.principal_id
   principal_type       = "ServicePrincipal"
@@ -138,7 +138,7 @@ resource "azurerm_role_definition" "operador_moodle" {
 | **Identidad** | **Rol** | **Ámbito** | **Para** |
 |---|---|---|---|
 | `id-moodle-web` | Storage Blob Data Contributor | Cuenta `moodledata`, con condición al contenedor | blobfuse monta `/var/moodledata` |
-| `id-moodle-web` | Key Vault Secrets User | Secreto `mysql-moodle-password` | `config.php` (página 11) |
+| `id-moodle-web` | Key Vault Secrets User | Secreto `mysql-moodle-password` | `config.php` ([página 11](index.md#pagina-11)) |
 | `id-moodle-agw` | Key Vault Secrets User | Vault | PFX del certificado TLS |
 | `id-moodle-mysql` | Permisos Graph *User.Read.All*, *GroupMember.Read.All*, *Application.Read.All* | Entra ID | El servidor valida logins de Entra (12.4) |
 | `id-moodle-tf` | Contributor + RBAC Administrator (condicionado) + Secrets Officer + Blob Data Contributor | Grupo de recursos; vault; contenedor `tfstate` | Terraform (12.5) |
@@ -276,13 +276,13 @@ resource "azurerm_role_assignment" "tf_rbac_admin" {                 # puede asi
     )
   EOT
 }
-resource "azurerm_role_assignment" "tf_kv" {                         # plano de datos del vault (escribe secretos, página 11)
+resource "azurerm_role_assignment" "tf_kv" {                         # plano de datos del vault (escribe secretos, [página 11](index.md#pagina-11))
   scope                = azurerm_key_vault.moodle.id
   role_definition_name = "Key Vault Secrets Officer"
   principal_id         = azurerm_user_assigned_identity.tf.principal_id
   principal_type       = "ServicePrincipal"
 }
-resource "azurerm_role_assignment" "tf_estado" {                     # el estado, por Entra ID (página 10)
+resource "azurerm_role_assignment" "tf_estado" {                     # el estado, por Entra ID ([página 10](index.md#pagina-10))
   scope                = "${azurerm_storage_account.tfstate.id}/blobServices/default/containers/tfstate"
   role_definition_name = "Storage Blob Data Contributor"
   principal_id         = azurerm_user_assigned_identity.tf.principal_id
@@ -471,7 +471,7 @@ az role assignment list --assignee $(az account show --query user.name -o tsv) -
 #    3) ¿Alcanza al recurso concreto? La condición ABAC deja moodledata y niega backups:
 az storage blob list --account-name $ST -c moodledata --auth-mode login -o table            # OK
 az storage blob list --account-name $ST -c backups    --auth-mode login                     # AuthorizationPermissionMismatch: la condición funciona
-az storage blob list --account-name $ST -c moodledata --account-key x                       # KeyBasedAuthenticationNotPermitted: sin claves (página 10)
+az storage blob list --account-name $ST -c moodledata --account-key x                       # KeyBasedAuthenticationNotPermitted: sin claves ([página 10](index.md#pagina-10))
 #    4) blobfuse2 con la misma identidad:
 sudo blobfuse2 mount /var/moodledata --config-file=/etc/blobfuse2/moodledata.yaml && touch /var/moodledata/prueba && ls -la /var/moodledata
 
@@ -512,7 +512,7 @@ az monitor activity-log list --caller $TF_CLIENT_ID --offset 1d --query "[].{cua
 > | *identity_ids is required when type is UserAssigned* | El bloque `identity` con tipo de usuario necesita la lista de `id` (rutas ARM), no de `principal_id` ni `client_id` |
 > | *The client … does not have authorization to perform action Microsoft.Authorization/roleDefinitions/write* | Crear roles personalizados exige *User Access Administrator* u *Owner*; *Contributor* + *RBAC Administrator* no bastan. Los roles personalizados los crea la plataforma; el código de Moodle los asigna |
 > | *The given role assignment condition is invalid* | Sintaxis ABAC: `condition_version = "2.0"`, comillas simples dentro de `ActionMatches{}`, atributos entre `@Resource[…]` / `@Request[…]`. Las condiciones solo existen para roles con acciones de datos de Storage y para asignar roles (`roleAssignments/write`) |
-> | La identidad tiene *Key Vault Secrets User* y el vault devuelve *Forbidden* | El vault está en modo *access policy*, que ignora RBAC. `rbac_authorization_enabled = true` (página 11). O al revés: política de acceso en un vault RBAC, que no hace nada |
+> | La identidad tiene *Key Vault Secrets User* y el vault devuelve *Forbidden* | El vault está en modo *access policy*, que ignora RBAC. `rbac_authorization_enabled = true` ([página 11](index.md#pagina-11)). O al revés: política de acceso en un vault RBAC, que no hace nada |
 > | Function App: `storage_uses_managed_identity` y sigue fallando al arrancar con `shared_access_key_enabled = false` | Los planes Consumption (`Y1`) y Elastic Premium guardan el contenido en Azure Files, que exige clave (`WEBSITE_CONTENTAZUREFILECONNECTIONSTRING`). Para una Function sin claves: plan Flex Consumption (`azurerm_function_app_flex_consumption`) o Dedicated con `WEBSITE_RUN_FROM_PACKAGE` por URL. El `Y1` del laboratorio sirve para el `plan`, no para producción sin claves |
 > | Function App con `storage_account_access_key` *e* `identity` (el original) | La clave gana: la identidad no se usa para el storage y la clave está en el estado. Quita la clave y añade `storage_uses_managed_identity` más los tres roles de datos (Blob Owner, Queue Contributor, Table Contributor) |
 > | MySQL: *The identity doesn't have permission to read directory* al crear el administrador Entra | La identidad del servidor necesita permisos Graph (*User.Read.All*, *GroupMember.Read.All*, *Application.Read.All*) concedidos por un administrador de Entra. Con azurerm no se puede; con el provider azuread, `azuread_app_role_assignment` |
@@ -566,4 +566,4 @@ az monitor activity-log list --caller $TF_CLIENT_ID --offset 1d --query "[].{cua
 - [Federación de una identidad de usuario con GitHub y otros emisores](https://learn.microsoft.com/es-es/entra/workload-id/workload-identity-federation-create-trust-user-assigned-managed-identity) y [OIDC en GitHub Actions](https://docs.github.com/es/actions/security-for-github-actions/security-hardening-your-deployments/about-security-hardening-with-openid-connect) (formato del `sub`)
 - [Provider azurerm con identidad gestionada](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/managed_service_identity) y [con OIDC](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/service_principal_oidc)
 - [`DefaultAzureCredential`: orden de la cadena](https://learn.microsoft.com/es-es/python/api/overview/azure/identity-readme#defaultazurecredential)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

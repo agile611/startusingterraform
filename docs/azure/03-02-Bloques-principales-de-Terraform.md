@@ -578,4 +578,4 @@ En el emulador no hay coste, pero el hábito de destruir lo que no se usa es de 
 - [Autenticación con Azure CLI](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/azure_cli)
 - [Recurso `random_string`](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string)
 - [Recurso `azurerm_virtual_network`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_network)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

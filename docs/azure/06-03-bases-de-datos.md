@@ -9,7 +9,7 @@
 - Añadir un administrador de Microsoft Entra ID de forma opcional con un bloque `dynamic`.
 - Conectarte con `sqlcmd` y desde Python sin incrustar credenciales.
 
-> **🔷 Requisitos previos.** Páginas 1 a 3 completadas y destruidas, `~/tf-intro/providers.tf` disponible, `az account show --query environmentName -o tsv` → `Topaz`. Para la sección de conexión en Azure real necesitarás `sqlcmd` (`az extension add -n sqlcmd` o el paquete `mssql-tools18`).
+> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 3 completadas y destruidas, `~/tf-intro/providers.tf` disponible, `az account show --query environmentName -o tsv` → `Topaz`. Para la sección de conexión en Azure real necesitarás `sqlcmd` (`az extension add -n sqlcmd` o el paquete `mssql-tools18`).
 
 ---
 
@@ -253,7 +253,7 @@ resource "azurerm_mssql_firewall_rule" "servicios_azure" {
 }
 ```
 
-> ⚠️ **El original abría `0.0.0.0`–`255.255.255.255`.** Eso es todo Internet: bots de fuerza bruta contra el puerto 1433 en minutos, y Microsoft Defender for SQL lo marca como alerta de severidad alta. Y llamarlo "AllowAzureServices" es doblemente engañoso, porque esa regla real es `0.0.0.0–0.0.0.0`. Incluso esta última conviene evitarla: permite conexiones desde cualquier VM o App Service de cualquier suscripción de Azure. Para que tu aplicación llegue al servidor usa reglas de red virtual (`azurerm_mssql_virtual_network_rule`) o, mejor, un **private endpoint** en la subred `snet-backend` de la página 3 y `public_network_access_enabled = false`.
+> ⚠️ **El original abría `0.0.0.0`–`255.255.255.255`.** Eso es todo Internet: bots de fuerza bruta contra el puerto 1433 en minutos, y Microsoft Defender for SQL lo marca como alerta de severidad alta. Y llamarlo "AllowAzureServices" es doblemente engañoso, porque esa regla real es `0.0.0.0–0.0.0.0`. Incluso esta última conviene evitarla: permite conexiones desde cualquier VM o App Service de cualquier suscripción de Azure. Para que tu aplicación llegue al servidor usa reglas de red virtual (`azurerm_mssql_virtual_network_rule`) o, mejor, un **private endpoint** en la subred `snet-backend` de la [página 3](index.md#pagina-3) y `public_network_access_enabled = false`.
 
 ---
 
@@ -411,7 +411,7 @@ with engine.connect() as conn:
 | `pool_pre_ping=True` | Comprueba la conexión antes de usarla; imprescindible con serverless, que cierra sesiones al pausarse |
 | Variables de entorno | El código no cambia entre laboratorio, CI y producción; solo cambia de dónde salen las variables |
 
-> **🔷 Un paso más allá.** Si la aplicación corre en Azure (App Service, Container Apps, la VM de la página 2), activa su identidad gestionada, créala como usuario en la base de datos (`CREATE USER [nombre-app] FROM EXTERNAL PROVIDER`) y conecta con `Authentication=ActiveDirectoryMsi` en la cadena. No hay contraseña que rotar ni filtrar.
+> **🔷 Un paso más allá.** Si la aplicación corre en Azure (App Service, Container Apps, la VM de la [página 2](index.md#pagina-2)), activa su identidad gestionada, créala como usuario en la base de datos (`CREATE USER [nombre-app] FROM EXTERNAL PROVIDER`) y conecta con `Authentication=ActiveDirectoryMsi` en la cadena. No hay contraseña que rotar ni filtrar.
 
 ---
 
@@ -471,4 +471,4 @@ with engine.connect() as conn:
 - [Reglas de firewall de Azure SQL](https://learn.microsoft.com/es-es/azure/azure-sql/database/firewall-configure) y [private endpoints](https://learn.microsoft.com/es-es/azure/azure-sql/database/private-endpoint-overview)
 - [Autenticación con Microsoft Entra ID](https://learn.microsoft.com/es-es/azure/azure-sql/database/authentication-aad-configure) e [identidades gestionadas para conectarse a SQL](https://learn.microsoft.com/es-es/azure/app-service/tutorial-connect-msi-sql-database)
 - [ODBC Driver 18](https://learn.microsoft.com/es-es/sql/connect/odbc/download-odbc-driver-for-sql-server) y [`sqlcmd`](https://learn.microsoft.com/es-es/sql/tools/sqlcmd/sqlcmd-utility)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

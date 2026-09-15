@@ -42,7 +42,7 @@ problemas aparecen cuando hay que hacer algo con él.
 | "¿Quién abrió el puerto 3306 a Internet y cuándo?" | El Activity Log dice quién, si no ha caducado; el porqué no lo sabe nadie. | `git log -p` sobre la regla: autor, fecha, la PR con la discusión, y quién la aprobó. |
 | "El storage tiene TLS 1.0 activado, pero juraría que lo pusimos en 1.2". | Alguien lo cambió en el portal durante una urgencia. Se descubre en una auditoría. | `terraform plan` lo muestra como diferencia entre código y realidad, y el siguiente apply lo revierte. |
 | "La persona que montó esto se ha ido". | La documentación está en su cabeza y en una wiki de hace dos años. | El código describe lo que existe; `terraform show` describe lo que existe de verdad. |
-| "Hay que replicarlo para otro centro". | Vuelta a empezar. | Un módulo con otros parámetros —página 9—. |
+| "Hay que replicarlo para otro centro". | Vuelta a empezar. | Un módulo con otros parámetros —[página 9](index.md#pagina-9)—. |
 
 Lo que estos cinco casos tienen en común no es la velocidad, aunque también:
 es que **la configuración real y la descripción de la configuración son la
@@ -89,7 +89,7 @@ resource "azurerm_storage_account" "datos" {
 
 !!! info "🔷 Lo imperativo no es el enemigo"
     En este curso hay scripts `bash` en casi todas las páginas: las
-    comprobaciones del pipeline —página 13—, las puertas —página 15—, el
+    comprobaciones del pipeline —[página 13](index.md#pagina-13)—, las puertas —[página 15](index.md#pagina-15)—, el
     cloud-init que instala Moodle dentro de la máquina. Son imperativos y están
     bien así, porque describen *procesos*, no *estados*.
 
@@ -102,10 +102,10 @@ resource "azurerm_storage_account" "datos" {
 | Término | Definición precisa | Dónde lo verás |
 |---|---|---|
 | **Idempotencia** | Aplicar la misma descripción N veces deja el sistema igual que aplicarla una. No significa "no hace nada": significa que lo que hace depende de la diferencia, no de cuántas veces se ejecuta. | Laboratorio, paso 3: *No changes*. |
-| **Estado** | El registro que Terraform guarda de qué recursos reales corresponden a cada bloque del código, con sus atributos. Sin él, no sabría que `stmoodledata01` es "suyo". Es un fichero, y contiene todo lo que Azure devolvió, incluidas contraseñas. | Página 4 —dónde guardarlo y cómo bloquearlo—, página 10 —qué secretos contiene—. |
-| **Plan** | La diferencia calculada entre el código, el estado y la realidad, expresada como acciones: crear, cambiar, reemplazar, destruir. Se puede leer, guardar, comparar y evaluar antes de ejecutar. | Todo el curso; a fondo, página 14. |
-| **Provider** | El plugin que traduce cada tipo de recurso a llamadas de API: `azurerm` para Azure Resource Manager. Terraform no sabe qué es una cuenta de almacenamiento; el provider sí. | Página 3 —configuración y versiones—. |
-| **Deriva** | Cualquier diferencia entre la realidad y el estado que no viene del código: alguien tocó el portal, un servicio cambió algo solo. IaC no la impide; la hace visible en el siguiente plan. | Laboratorio, paso 5; página 13 —detección diaria—. |
+| **Estado** | El registro que Terraform guarda de qué recursos reales corresponden a cada bloque del código, con sus atributos. Sin él, no sabría que `stmoodledata01` es "suyo". Es un fichero, y contiene todo lo que Azure devolvió, incluidas contraseñas. | [Página 4](index.md#pagina-4) —dónde guardarlo y cómo bloquearlo—, [página 10](index.md#pagina-10) —qué secretos contiene—. |
+| **Plan** | La diferencia calculada entre el código, el estado y la realidad, expresada como acciones: crear, cambiar, reemplazar, destruir. Se puede leer, guardar, comparar y evaluar antes de ejecutar. | Todo el curso; a fondo, [página 14](index.md#pagina-14). |
+| **Provider** | El plugin que traduce cada tipo de recurso a llamadas de API: `azurerm` para Azure Resource Manager. Terraform no sabe qué es una cuenta de almacenamiento; el provider sí. | [Página 3](index.md#pagina-3) —configuración y versiones—. |
+| **Deriva** | Cualquier diferencia entre la realidad y el estado que no viene del código: alguien tocó el portal, un servicio cambió algo solo. IaC no la impide; la hace visible en el siguiente plan. | Laboratorio, paso 5; [página 13](index.md#pagina-13) —detección diaria—. |
 
 ## 5. Lo que IaC no resuelve, y lo que cuesta
 
@@ -114,14 +114,14 @@ también lo son estas cuatro cosas, y conviene saberlas antes de empezar.
 
 - **El estado es un activo nuevo.** Antes había que proteger la
   infraestructura; ahora también el fichero que la describe, que contiene
-  secretos y cuya pérdida deja los recursos huérfanos. Las páginas 4, 10 y 15
+  secretos y cuya pérdida deja los recursos huérfanos. Las [páginas 4](index.md#pagina-4), 10 y 15
   existen por esto.
 - **La deriva no desaparece.** El portal sigue ahí y la gente sigue teniendo
   urgencias. IaC convierte la deriva de invisible en visible; impedirla es cosa
-  de permisos —página 12— y puertas —página 15—.
+  de permisos —[página 12](index.md#pagina-12)— y puertas —[página 15](index.md#pagina-15)—.
 - **Un error se replica con la misma eficacia que un acierto.** Un `destroy`
   mal dirigido borra en segundos lo que costó meses. Por eso se revisa el plan
-  antes de aplicar —página 13— y se protegen los recursos con datos —páginas
+  antes de aplicar —[página 13](index.md#pagina-13)— y se protegen los recursos con datos —páginas
   14 y 15—.
 - **Describe recursos, no arquitectura.** Una red mal diseñada en HCL sigue
   siendo una red mal diseñada, ahora reproducible. IaC no sustituye saber qué
@@ -132,7 +132,7 @@ también lo son estas cuatro cosas, y conviene saberlas antes de empezar.
 | **ARM / Bicep** | Declarativo, nativo de Azure, sin estado propio —Azure es el estado—. | Excelente si solo hay Azure. Sin estado local no hay `plan` tan detallado ni `destroy` completo; y las ideas que enseña este curso —estado, plan, deriva, módulos— son las que Bicep no obliga a aprender. |
 | **Terraform / OpenTofu** | Declarativo, multi-proveedor, con estado explícito y plan como artefacto. | El elegido: el mismo modelo sirve para Azure, GitHub, Entra ID, Kubernetes y DNS en un solo grafo. OpenTofu es compatible con casi todo lo que verás. |
 | **Pulumi** | Declarativo en el modelo, imperativo en la sintaxis —Python, TypeScript…—. | Mismos conceptos —estado, plan, providers—; lenguaje general en lugar de HCL. Lo que aprendas aquí se traslada. |
-| **Ansible** | Gestión de configuración: qué hay dentro de la máquina. | Complementario, no alternativo. Terraform crea la VM; dentro, el curso usa cloud-init —página 7—. |
+| **Ansible** | Gestión de configuración: qué hay dentro de la máquina. | Complementario, no alternativo. Terraform crea la VM; dentro, el curso usa cloud-init —[página 7](index.md#pagina-7)—. |
 
 !!! info "🔷 Por qué Topaz"
     Azure Local Emulator —nombre en clave Topaz— implementa el plano de control
@@ -160,7 +160,7 @@ también lo son estas cuatro cosas, y conviene saberlas antes de empezar.
 Diez minutos para sentir la diferencia de 3. Primero un script, dos veces.
 Después una declaración, dos veces; luego un cambio, una deriva provocada,
 una reversión con Git y un borrado quitando código. No hace falta entender
-la sintaxis de HCL todavía: eso empieza en la página 3. Fíjate en lo que
+la sintaxis de HCL todavía: eso empieza en la [página 3](index.md#pagina-3). Fíjate en lo que
 dice cada `plan`.
 
 !!! danger "⚠️ Antes de nada"
@@ -345,13 +345,13 @@ cd ~ && rm -rf ~/tf-iac
     |---|---|
     | "Tengo los scripts en Git, ya hago IaC". | Texto y versionado, sí; repetible, no: el script del paso 1 crea duplicados y no sabe borrar. Falta la tercera propiedad de 1.1. |
     | "Idempotente significa que no hace nada la segunda vez". | Significa que hace *lo que falta*: nada si no falta nada, un cambio si hay diferencia, un borrado si sobra algo. Paso 3 frente a pasos 4 y 8. |
-    | "El orden de los bloques en el fichero importa". | El orden lo dan las referencias —`azurerm_resource_group.moodle.name`—, no la posición. Puedes poner el storage antes que el grupo y el plan es el mismo —página 14—. |
-    | "Con IaC nadie puede cambiar nada en el portal". | Sí pueden —paso 5—. IaC lo detecta y lo revierte; impedirlo es cosa de permisos —página 12— y puertas —página 15—. |
-    | "El estado es un detalle interno de Terraform". | Es el fichero que sabe qué recursos son tuyos y contiene todo lo que Azure devolvió, contraseñas incluidas. Perderlo o filtrarlo son los dos incidentes más graves del curso —páginas 4 y 10—. |
+    | "El orden de los bloques en el fichero importa". | El orden lo dan las referencias —`azurerm_resource_group.moodle.name`—, no la posición. Puedes poner el storage antes que el grupo y el plan es el mismo —[página 14](index.md#pagina-14)—. |
+    | "Con IaC nadie puede cambiar nada en el portal". | Sí pueden —paso 5—. IaC lo detecta y lo revierte; impedirlo es cosa de permisos —[página 12](index.md#pagina-12)— y puertas —[página 15](index.md#pagina-15)—. |
+    | "El estado es un detalle interno de Terraform". | Es el fichero que sabe qué recursos son tuyos y contiene todo lo que Azure devolvió, contraseñas incluidas. Perderlo o filtrarlo son los dos incidentes más graves del curso —[páginas 4](index.md#pagina-4) y 10—. |
     | "Cambiar el nombre de un recurso es un cambio pequeño". | Para muchos recursos es borrar y crear otro —paso 4: `-/+`—. Con datos dentro, es perderlos. El plan lo dice; por eso se lee siempre. |
-    | "Terraform gestiona todo lo que hay en la suscripción". | Solo lo que está en su estado. Lo que creó el script del paso 1 le es invisible; `destroy` no lo toca. Lo existente se incorpora con `import` —página 8—. |
+    | "Terraform gestiona todo lo que hay en la suscripción". | Solo lo que está en su estado. Lo que creó el script del paso 1 le es invisible; `destroy` no lo toca. Lo existente se incorpora con `import` —[página 8](index.md#pagina-8)—. |
     | "Declarativo es mejor que imperativo". | Declarativo es mejor para *estado*; imperativo para *procesos*. El curso usa los dos: HCL para lo que debe existir, bash para lo que debe ocurrir. |
-    | "`-auto-approve` es normal". | En este laboratorio sí, porque acabas de leer el plan. En el curso, el apply va detrás de un plan revisado en una PR —página 13—; desde el portátil, sin `-auto-approve`. |
+    | "`-auto-approve` es normal". | En este laboratorio sí, porque acabas de leer el plan. En el curso, el apply va detrás de un plan revisado en una PR —[página 13](index.md#pagina-13)—; desde el portátil, sin `-auto-approve`. |
     | "Topaz es un Azure de juguete: lo que funciona ahí no vale". | Implementa el mismo plano de control con los mismos tipos y el mismo provider: plan, estado, deriva y módulos se comportan igual. Lo que no emula —RBAC, políticas, federación, límites— cada página lo marca y lo lleva a Azure real. |
 
 ## 9. Autoevaluación
@@ -442,4 +442,4 @@ cd ~ && rm -rf ~/tf-iac
   —bifurcación de código abierto compatible—.
 - [Azure Resource Manager](https://learn.microsoft.com/es-es/azure/azure-resource-manager/management/overview)
   —el plano de control con el que hablan Terraform y Topaz—.
-- [Azure Local Emulator —Topaz—](https://github.com/Azure/azure-local-emulator).
+- [Azure Local Emulator —Topaz—](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md).

@@ -11,7 +11,7 @@
 - Conectar Application Insights (workspace-based) y entender cómo llega la telemetría desde PHP.
 - Definir alertas de métrica, de logs y de activity log con severidad, ventana y grupo de acción, y silenciarlas en mantenimientos.
 
-> **🔷 Requisitos previos.** Páginas 1 a 13 completadas y destruidas, `~/tf-st/providers.tf`, Terraform `>= 1.10`, azurerm `~> 4.0`, Docker (para el emulador de Kusto, ≈ 4 GB de RAM), `jq`, `az account show --query environmentName -o tsv` → `Topaz`.
+> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 13 completadas y destruidas, `~/tf-st/providers.tf`, Terraform `>= 1.10`, azurerm `~> 4.0`, Docker (para el emulador de Kusto, ≈ 4 GB de RAM), `jq`, `az account show --query environmentName -o tsv` → `Topaz`.
 
 ---
 
@@ -30,7 +30,7 @@
 
 ## 2. El destino: Log Analytics workspace
 
-Todo lo demás apunta aquí, así que se crea primero y se dimensiona con cabeza: la retención y la cuota diaria son las dos palancas de coste (página 15), y el *plan* de cada tabla decide si esos logs se consultan a menudo (*Analytics*) o solo se guardan por si acaso (*Basic*, mucho más barato de ingerir, con consultas limitadas).
+Todo lo demás apunta aquí, así que se crea primero y se dimensiona con cabeza: la retención y la cuota diaria son las dos palancas de coste ([página 15](index.md#pagina-15)), y el *plan* de cada tabla decide si esos logs se consultan a menudo (*Analytics*) o solo se guardan por si acaso (*Basic*, mucho más barato de ingerir, con consultas limitadas).
 
 ```hcl
 resource "azurerm_log_analytics_workspace" "moodle" {
@@ -399,7 +399,7 @@ resource "azurerm_application_insights_standard_web_test" "moodle" {
 }
 ```
 
-> **🔷 ¿Y cómo envía Moodle la telemetría?** No hay SDK oficial de Application Insights para PHP. El camino soportado es **OpenTelemetry**: la extensión `opentelemetry` de PHP con instrumentación automática de PDO/MySQL y HTTP, exportando por OTLP a un *OpenTelemetry Collector* que corre como servicio en la misma VM (o como sidecar) y que usa el exporter `azuremonitor` del repositorio *contrib* con la connection string leída de Key Vault. Es exactamente el patrón de la página 13: la aplicación nunca ve el secreto; lo ve un proceso local con identidad gestionada. El `cloud-init` de la página 15 instala el collector y su configuración.
+> **🔷 ¿Y cómo envía Moodle la telemetría?** No hay SDK oficial de Application Insights para PHP. El camino soportado es **OpenTelemetry**: la extensión `opentelemetry` de PHP con instrumentación automática de PDO/MySQL y HTTP, exportando por OTLP a un *OpenTelemetry Collector* que corre como servicio en la misma VM (o como sidecar) y que usa el exporter `azuremonitor` del repositorio *contrib* con la connection string leída de Key Vault. Es exactamente el patrón de la [página 13](index.md#pagina-13): la aplicación nunca ve el secreto; lo ve un proceso local con identidad gestionada. El `cloud-init` de la [página 15](index.md#pagina-15) instala el collector y su configuración.
 
 ---
 
@@ -899,10 +899,10 @@ az rest --method get --url "https://management.azure.com$(az group show -n rg-mo
 - [`azurerm_log_analytics_workspace`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/log_analytics_workspace), [`azurerm_log_analytics_workspace_table`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/log_analytics_workspace_table) y [planes de tabla Analytics, Basic y Auxiliary](https://learn.microsoft.com/es-es/azure/azure-monitor/logs/basic-logs-configure)
 - [`azurerm_monitor_diagnostic_setting`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_diagnostic_setting), [`data "azurerm_monitor_diagnostic_categories"`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/monitor_diagnostic_categories) y [índice de tablas y categorías por recurso](https://learn.microsoft.com/es-es/azure/azure-monitor/reference/logs-index)
 - [Azure Monitor Agent](https://learn.microsoft.com/es-es/azure/azure-monitor/agents/azure-monitor-agent-overview), [`azurerm_monitor_data_collection_rule`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_data_collection_rule), [logs de texto con DCR](https://learn.microsoft.com/es-es/azure/azure-monitor/agents/data-collection-log-text) y [transformaciones en la ingesta](https://learn.microsoft.com/es-es/azure/azure-monitor/essentials/data-collection-transformations)
-- [Referencia de KQL](https://learn.microsoft.com/es-es/kusto/query/), [esquema de `StorageBlobLogs`](https://learn.microsoft.com/es-es/azure/azure-monitor/reference/tables/storage%D0%B1loblogs), [primeras consultas en Log Analytics](https://learn.microsoft.com/es-es/azure/azure-monitor/logs/get-started-queries) y [API REST de Kusto](https://learn.microsoft.com/es-es/kusto/api/rest/index) (la que usan `kql` y `kmgmt` en 14.8)
+- [Referencia de KQL](https://learn.microsoft.com/es-es/kusto/query/), [esquema de `StorageBlobLogs`](https://learn.microsoft.com/es-es/azure/azure-monitor/reference/tables/storagebloblogs), [primeras consultas en Log Analytics](https://learn.microsoft.com/es-es/azure/azure-monitor/logs/get-started-queries) y [API REST de Kusto](https://learn.microsoft.com/es-es/kusto/api/rest/index) (la que usan `kql` y `kmgmt` en 14.8)
 - [Emulador de Kusto](https://learn.microsoft.com/es-es/kusto/emulator/kusto-emulator-overview) (`kustainer-linux`): instalación, límites y licencia
 - [`azurerm_application_insights`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/application_insights), [`azurerm_application_insights_standard_web_test`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/application_insights_standard_web_test), [OpenTelemetry con Azure Monitor](https://learn.microsoft.com/es-es/azure/azure-monitor/app/opentelemetry-enable) y [exporter `azuremonitor` del Collector](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter/azuremonitorexporter)
 - [`azurerm_monitor_metric_alert`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_metric_alert), [`azurerm_monitor_scheduled_query_rules_alert_v2`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_scheduled_query_rules_alert_v2), [`azurerm_monitor_activity_log_alert`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_activity_log_alert) y [`azurerm_monitor_alert_processing_rule_suppression`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_alert_processing_rule_suppression)
 - [Alertas en Azure Monitor](https://learn.microsoft.com/es-es/azure/azure-monitor/alerts/alerts-overview), [esquema común de alertas](https://learn.microsoft.com/es-es/azure/azure-monitor/alerts/alerts-common-schema) y [Well-Architected Framework: observabilidad](https://learn.microsoft.com/es-es/azure/well-architected/operational-excellence/observability)
 - [Coste y uso de Azure Monitor](https://learn.microsoft.com/es-es/azure/azure-monitor/cost-usage) (qué se factura en logs, métricas y alertas)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

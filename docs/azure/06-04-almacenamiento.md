@@ -9,7 +9,7 @@
 - Endurecer la cuenta: TLS 1.2, solo HTTPS, sin blobs públicos, soft delete y versionado.
 - Escribir una política de ciclo de vida real y acceder a los datos con identidad (RBAC) en lugar de claves.
 
-> **🔷 Requisitos previos.** Páginas 1 a 4 completadas y destruidas, `~/tf-intro/providers.tf` disponible, `az account show --query environmentName -o tsv` → `Topaz`.
+> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 4 completadas y destruidas, `~/tf-intro/providers.tf` disponible, `az account show --query environmentName -o tsv` → `Topaz`.
 
 ---
 
@@ -31,7 +31,7 @@ rg-st-001
 |---|---|---|---|
 | Blob Storage | Objetos: archivos, imágenes, copias de seguridad, estado de Terraform | `azurerm_storage_container` (ARM), `azurerm_storage_blob` (datos) | ✅ contenedor / ❌ blob |
 | Azure Files | Carpeta compartida SMB/NFS montable desde VMs y contenedores | `azurerm_storage_share` (ARM con `storage_account_id`) | ✅ |
-| Disk Storage | Discos de VM. Es el `os_disk` de la página 2; no vive en una cuenta de almacenamiento | `azurerm_managed_disk` | ❌ (Microsoft.Compute) |
+| Disk Storage | Discos de VM. Es el `os_disk` de la [página 2](index.md#pagina-2); no vive en una cuenta de almacenamiento | `azurerm_managed_disk` | ❌ (Microsoft.Compute) |
 
 ### Redundancia y nivel de acceso
 
@@ -133,7 +133,7 @@ asignar_rbac = false
 ```hcl
 # storage.tf
 locals {
-  tags = { entorno = "lab", gestion = "terraform" }   # fuente única (página 4)
+  tags = { entorno = "lab", gestion = "terraform" }   # fuente única ([página 4](index.md#pagina-4))
 }
 
 resource "azurerm_resource_group" "st" {
@@ -496,4 +496,4 @@ for blob in contenedor.list_blobs():
 - [Montar Azure Files en Linux](https://learn.microsoft.com/es-es/azure/storage/files/storage-how-to-use-files-linux)
 - [`DefaultAzureCredential` (azure-identity)](https://learn.microsoft.com/es-es/python/api/overview/azure/identity-readme) y [SDK azure-storage-blob](https://learn.microsoft.com/es-es/python/api/overview/azure/storage-blob-readme)
 - [Backend `azurerm` para el estado remoto](https://developer.hashicorp.com/terraform/language/backend/azurerm) (siguiente página)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

@@ -19,10 +19,10 @@
 | **Terraform** | `1.11.x`, fijada con `tenv` | Todo el curso. La versión fijada garantiza que tu plan y el del pipeline coinciden |
 | **Azure CLI** | `2.7x` o superior | Autenticación (el provider la reutiliza), comprobaciones fuera de Terraform, provocar derivas en los laboratorios |
 | **Docker** | Engine o Desktop | Ejecutar Topaz |
-| **Git** | 2.4x | Versionado desde la página 1; pipelines desde la 13 |
+| **Git** | 2.4x | Versionado desde la [página 1](index.md#pagina-1); pipelines desde la 13 |
 | **jq** | 1.7 | Leer `terraform show -json` y salidas de `az`: aparece en casi todos los laboratorios |
 | **Editor** | VS Code + extensión HashiCorp Terraform | Formato, validación y autocompletado del provider. Opcional pero muy recomendable |
-| **tflint, trivy, gitleaks** | Se instalan en la página 13 | Comprobaciones del pipeline; no hacen falta todavía |
+| **tflint, trivy, gitleaks** | Se instalan en la [página 13](index.md#pagina-13) | Comprobaciones del pipeline; no hacen falta todavía |
 | **Azure PowerShell** | No se usa | El original lo lista como opcional. El curso es `bash` + `az`; dos CLIs para lo mismo es una fuente de confusión |
 
 ## 2. Instalación por sistema
@@ -70,7 +70,7 @@ Terraform cambia el formato del estado y el comportamiento del plan entre versio
 - **`.terraform-version`** en la raíz del repositorio: `tenv` (y su antecesor `tfenv`) lo leen y cambian de binario al entrar en el directorio. Es para las personas.
 - **`required_version`** en el bloque `terraform {}`: si el binario no cumple, `init` falla. Es para el pipeline y para quien no usa gestor.
 
-Lo mismo aplica al provider: `version = "~> 4.20"` acepta parches y menores de la 4, no la 5. Y `.terraform.lock.hcl`, que `init` genera, fija el parche exacto y sus sumas; va al repositorio (página 4).
+Lo mismo aplica al provider: `version = "~> 4.20"` acepta parches y menores de la 4, no la 5. Y `.terraform.lock.hcl`, que `init` genera, fija el parche exacto y sus sumas; va al repositorio ([página 4](index.md#pagina-4)).
 
 ## 4. Topaz: arrancar, registrar, autenticarse
 
@@ -239,7 +239,7 @@ export TF_VAR_subscription_id=$(az account show --query id -o tsv) TF_VAR_tenant
 
 ## 9. Referencias
 
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator): README con imagen, puerto, certificado y proveedores emulados por versión
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md): README con imagen, puerto, certificado y proveedores emulados por versión
 - [Instalar Azure CLI en Linux (apt)](https://learn.microsoft.com/es-es/cli/azure/install-azure-cli-linux?pivots=apt) y [nubes en Azure CLI](https://learn.microsoft.com/es-es/cli/azure/manage-clouds-azure-cli) (`az cloud register`)
 - [Configuración de Azure CLI](https://learn.microsoft.com/es-es/cli/azure/azure-cli-configuration) (`AZURE_CONFIG_DIR`, `REQUESTS_CA_BUNDLE`)
 - [Instalar Terraform](https://developer.hashicorp.com/terraform/install) (repositorio apt, Homebrew, binarios con sumas) y [tenv](https://github.com/tofuutils/tenv)

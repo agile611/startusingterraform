@@ -10,7 +10,7 @@
 - Autenticar Terraform y su backend sin credenciales en el código.
 - Montar un escáner de secretos en *pre-commit* y ejecutar un plan de respuesta a una fuga.
 
-> **🔷 Requisitos previos.** Páginas 1 a 9 completadas y destruidas, `~/tf-st/providers.tf`, Terraform `>= 1.11`, `jq`, `git`, `gitleaks` y `trivy` instalados (o Docker para ejecutarlos), `az account show --query environmentName -o tsv` → `Topaz`.
+> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 9 completadas y destruidas, `~/tf-st/providers.tf`, Terraform `>= 1.11`, `jq`, `git`, `gitleaks` y `trivy` instalados (o Docker para ejecutarlos), `az account show --query environmentName -o tsv` → `Topaz`.
 
 ---
 
@@ -24,12 +24,12 @@ Antes de elegir herramienta conviene saber contra qué se defiende uno. Sigue la
 | `*.tfvars` | Valor en claro en disco | Quien tenga el portátil o el repo si falla el `.gitignore` | Solo no-secretos en tfvars; secretos por variable efímera (10.4) |
 | Entorno (`TF_VAR_*`, `ARM_*`) | `export`, CI | `~/.bash_history`, `/proc/<pid>/environ`, procesos hijos | Leerlo del gestor justo antes; no en el historial (10.4) |
 | Plan guardado (`-out`) | Toda variable no efímera y todo atributo | Quien descargue el artefacto del pipeline | Tratarlo como secreto; `ephemeral` no entra en él (10.5) |
-| Estado | Todo atributo de todo recurso y `data` | Quien lea el backend; `tfstate.backup` local | Backend cifrado y con RBAC (página 4); argumentos `_wo`; identidades en lugar de claves (10.5) |
+| Estado | Todo atributo de todo recurso y `data` | Quien lea el backend; `tfstate.backup` local | Backend cifrado y con RBAC ([página 4](index.md#pagina-4)); argumentos `_wo`; identidades en lugar de claves (10.5) |
 | Outputs | `output` con el valor | `terraform output -raw/-json`, estados remotos que los leen, logs del CI | No exportar secretos; si es inevitable, `sensitive` (10.2) |
 | Logs | `TF_LOG=DEBUG`, `crash.log` | Cuerpos HTTP completos con el secreto dentro | Nunca DEBUG en CI; borrar tras depurar (10.7) |
-| `custom_data`, provisioners | Plantilla con el secreto | Estado, disco de la VM, IMDS de la VM | La VM lo pide con identidad gestionada (página 11) |
+| `custom_data`, provisioners | Plantilla con el secreto | Estado, disco de la VM, IMDS de la VM | La VM lo pide con identidad gestionada ([página 11](index.md#pagina-11)) |
 
-> **🔷 El almacén es intercambiable; el problema no.** El original dedica la mitad de la página a comparar Azure Key Vault, AWS Secrets Manager, HashiCorp Vault, GitHub Secrets y Docker Secrets. Son respuestas a la pregunta fácil (dónde guardar). Todas las filas de la tabla anterior siguen existiendo con cualquiera de ellos, porque las copias las hace Terraform, no el almacén. Este curso usa Key Vault (página 11); lo que aprendes aquí vale igual con los otros cuatro.
+> **🔷 El almacén es intercambiable; el problema no.** El original dedica la mitad de la página a comparar Azure Key Vault, AWS Secrets Manager, HashiCorp Vault, GitHub Secrets y Docker Secrets. Son respuestas a la pregunta fácil (dónde guardar). Todas las filas de la tabla anterior siguen existiendo con cualquiera de ellos, porque las copias las hace Terraform, no el almacén. Este curso usa Key Vault ([página 11](index.md#pagina-11)); lo que aprendes aquí vale igual con los otros cuatro.
 
 ---
 
@@ -105,7 +105,7 @@ output "clave" { value = var.api_key_sms, ephemeral = true }
 
 ## 4. Cómo entra un valor y qué va al repositorio
 
-La mayoría de los secretos de Moodle no debería teclearlos nadie: la contraseña de MySQL la genera `ephemeral "random_password"` y nunca la ve un humano (página 11). Quedan los que vienen de fuera, como la clave del proveedor de SMS. Para esos hay cuatro vías de entrada, y el orden importa.
+La mayoría de los secretos de Moodle no debería teclearlos nadie: la contraseña de MySQL la genera `ephemeral "random_password"` y nunca la ve un humano ([página 11](index.md#pagina-11)). Quedan los que vienen de fuera, como la clave del proveedor de SMS. Para esos hay cuatro vías de entrada, y el orden importa.
 
 ```bash
 # 1. Recomendado: del gestor al entorno, en el mismo comando, sin tocar el historial de la shell
@@ -183,7 +183,7 @@ resource "azurerm_storage_account" "moodledata" {
   default_to_oauth_authentication = true
   allow_nested_items_to_be_public = false
 }
-resource "azurerm_role_assignment" "web_blob" {                 # la VM accede con su identidad (página 11)
+resource "azurerm_role_assignment" "web_blob" {                 # la VM accede con su identidad ([página 11](index.md#pagina-11))
   scope                = azurerm_storage_account.moodledata.id
   role_definition_name = "Storage Blob Data Contributor"
   principal_id         = azurerm_user_assigned_identity.web.principal_id
@@ -212,7 +212,7 @@ El secreto más peligroso de un proyecto Terraform no es la contraseña de MySQL
 | **Dónde corre** | **Método** | **Configuración** | **Secreto de larga duración** |
 |---|---|---|---|
 | Tu portátil | Azure CLI | `az login`; el provider reutiliza el token. `ARM_SUBSCRIPTION_ID` obligatorio en 4.x | Ninguno (tokens de horas, MFA) |
-| GitHub Actions / GitLab / Azure DevOps | OIDC (*workload identity federation*) | `ARM_USE_OIDC=true`, `ARM_CLIENT_ID`, `ARM_TENANT_ID`; credencial federada en la app registration que confía en el repo y la rama (página 12) | Ninguno (token por job, 1 h) |
+| GitHub Actions / GitLab / Azure DevOps | OIDC (*workload identity federation*) | `ARM_USE_OIDC=true`, `ARM_CLIENT_ID`, `ARM_TENANT_ID`; credencial federada en la app registration que confía en el repo y la rama ([página 12](index.md#pagina-12)) | Ninguno (token por job, 1 h) |
 | Runner autoalojado en Azure | Identidad gestionada | `ARM_USE_MSI=true` (+ `ARM_CLIENT_ID` si es user-assigned) | Ninguno |
 | Legado | Service principal + secreto | `ARM_CLIENT_SECRET` (nunca `client_secret =` en el bloque provider) | Sí: rótalo cada 90 días y planifica su eliminación |
 | Topaz | Emulador | Lo que fija `~/tf-st/providers.tf` (endpoints del emulador); acepta cualquier identidad | Ninguno real: por eso no valida RBAC |
@@ -357,10 +357,10 @@ az role assignment list --scope $(az storage account show -n <sttfstate> --query
 > |---|---|
 > | *Unsupported argument: sensitive* dentro de un `resource` (ejercicio del original) | `sensitive` solo existe en `variable` y `output`. Los atributos de recurso heredan la marca del valor que reciben; si quieres que no persistan, usa el argumento `_wo` |
 > | *Output refers to sensitive values* | El valor deriva de algo sensible. O añades `sensitive = true` al output, o te preguntas por qué exportas un secreto. Si de verdad no lo es (un FQDN que heredó la marca por una plantilla), `nonsensitive()` con comentario |
-> | "He puesto `sensitive = true` y sigue en el estado" | Correcto: `sensitive` solo oculta la pantalla. Para no persistir: `ephemeral` en el origen y `_wo` en el destino (10.3, página 11). Para lo que no admite `_wo`: backend cifrado y rotación |
+> | "He puesto `sensitive = true` y sigue en el estado" | Correcto: `sensitive` solo oculta la pantalla. Para no persistir: `ephemeral` en el origen y `_wo` en el destino (10.3, [página 11](index.md#pagina-11)). Para lo que no admite `_wo`: backend cifrado y rotación |
 > | *Output value is not ephemeral* / *Invalid use of ephemeral value* | Intentas persistir un efímero (output raíz, atributo normal, `data`). Destinos válidos: `_wo`, providers, provisioners, otros efímeros, locals, outputs `ephemeral` de módulos hijos |
 > | `terraform apply plan.tfplan` exige una variable que ya pasé en el `plan` | Es efímera: no está en el fichero de plan. Vuelve a pasarla por `TF_VAR_` en el `apply`. En CI, el paso de apply lee del gestor igual que el de plan |
-> | El secreto aparece en el log del pipeline con asteriscos… y una línea más abajo en claro | El *masking* solo cubre el valor exacto: `terraform output -json`, `-raw`, un `base64` o un JSON lo destapan. La solución no es enmascarar mejor sino que el pipeline nunca tenga el secreto (página 12) |
+> | El secreto aparece en el log del pipeline con asteriscos… y una línea más abajo en claro | El *masking* solo cubre el valor exacto: `terraform output -json`, `-raw`, un `base64` o un JSON lo destapan. La solución no es enmascarar mejor sino que el pipeline nunca tenga el secreto ([página 12](index.md#pagina-12)) |
 > | El `.gitignore` del original no ignora nada | Dos patrones fusionados en una línea (`.terraform/credentials.tfstate`). Usa la plantilla oficial `Terraform.gitignore` y añade `*.tfplan`; permite explícitamente los tfvars sin secretos con `!dev.tfvars` |
 > | "Está en `.gitignore`, así que es seguro" | `.gitignore` no protege ficheros ya versionados (`git rm --cached`) ni copias de seguridad ni el plan. Un `tfvars` con secretos sigue en claro en disco: saca los secretos, no el fichero |
 > | He borrado el commit con la contraseña y ya no aparece en GitHub | Sigue en los clones, forks, cachés y en el *reflog* del servidor durante semanas. Primero rotar, después revisar el uso, y solo entonces `git filter-repo` (10.7) |
@@ -416,4 +416,4 @@ az role assignment list --scope $(az storage account show -n <sttfstate> --query
 - [gitleaks](https://github.com/gitleaks/gitleaks), [pre-commit-terraform](https://github.com/antonbabenko/pre-commit-terraform) y [Trivy para configuración IaC](https://trivy.dev/latest/docs/scanner/misconfiguration/)
 - [Plantilla oficial `Terraform.gitignore`](https://github.com/github/gitignore/blob/main/Terraform.gitignore) y [git-filter-repo](https://github.com/newren/git-filter-repo)
 - [OWASP Secrets Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

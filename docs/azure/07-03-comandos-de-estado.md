@@ -9,7 +9,7 @@
 - Recrear un recurso concreto con `apply -replace` y saber por qué `taint` ya no se usa.
 - Sacar un recurso del estado sin borrarlo (`removed`) y dividir un proyecto en dos con `state mv -state-out`.
 
-> **🔷 Requisitos previos.** Páginas 1 a 8 completadas y destruidas, `~/tf-st/providers.tf` disponible, Terraform `>= 1.7` (bloque `removed`; `import` y `-generate-config-out` desde 1.5), `jq`, `az account show --query environmentName -o tsv` → `Topaz`.
+> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 8 completadas y destruidas, `~/tf-st/providers.tf` disponible, Terraform `>= 1.7` (bloque `removed`; `import` y `-generate-config-out` desde 1.5), `jq`, `az account show --query environmentName -o tsv` → `Topaz`.
 
 ---
 
@@ -76,7 +76,7 @@ import {
 | Asignación de rol | `<scope>/providers/Microsoft.Authorization/roleAssignments/<guid>` | `az role assignment list --scope … --query "[].id"` (solo Azure real) |
 | `random_password`, `tls_private_key`… | No se pueden importar: no existen fuera del estado | Se regeneran (y se rota el secreto) o se leen de Key Vault con un `data` |
 
-> ⚠️ **El código generado no es el código final.** `-generate-config-out` vuelca todos los atributos que el provider devuelve, incluidos los calculados y los que no deberías fijar. Aplicarlo tal cual funciona, pero deja un bloque de 60 líneas ilegible que además referencia el grupo por su nombre literal. La regla es la misma que en la página 6: gobierna lo que decides, referencia lo demás, y `plan` hasta ver *0 to change*.
+> ⚠️ **El código generado no es el código final.** `-generate-config-out` vuelca todos los atributos que el provider devuelve, incluidos los calculados y los que no deberías fijar. Aplicarlo tal cual funciona, pero deja un bloque de 60 líneas ilegible que además referencia el grupo por su nombre literal. La regla es la misma que en la [página 6](index.md#pagina-6): gobierna lo que decides, referencia lo demás, y `plan` hasta ver *0 to change*.
 
 ---
 
@@ -136,7 +136,7 @@ resource "azurerm_virtual_machine_extension" "bootstrap" {
 | `state mv -state-out=../b/terraform.tfstate A A` | Dividir un proyecto: mueve el recurso al estado de otro directorio. Después, el código se mueve a `b/` y en `a/` se referencia con `data` | Con backend remoto: `state pull` en ambos, `mv` entre archivos locales, `state push` en ambos. Copia antes |
 | `state replace-provider hashicorp/azurerm registry.terraform.io/hashicorp/azurerm` | Cambiar la dirección del provider en el estado (migraciones antiguas, forks, registries privados) | Solo la dirección; no cambia versiones ni esquemas |
 | `apply -target=A` | Aplicar solo un recurso y sus dependencias. Para salir de un atolladero, no para el día a día | Deja el resto sin aplicar y Terraform lo recuerda: el plan siguiente lo avisa. Nunca en CI |
-| `apply -refresh-only` | Aceptar en el estado cambios hechos fuera (drift) sin tocar Azure | Si alguien borró algo, lo olvida; si quieres recrearlo, `apply` normal (página 7) |
+| `apply -refresh-only` | Aceptar en el estado cambios hechos fuera (drift) sin tocar Azure | Si alguien borró algo, lo olvida; si quieres recrearlo, `apply` normal ([página 7](index.md#pagina-7)) |
 
 ---
 
@@ -414,4 +414,4 @@ cd ~/tf-cmd && terraform destroy -auto-approve            # grupo, VNet, subrede
 - [Resource targeting (`-target`)](https://developer.hashicorp.com/terraform/cli/commands/plan#resource-targeting) y [modo `-refresh-only`](https://developer.hashicorp.com/terraform/cli/commands/plan#planning-modes)
 - [Sección *Import* de cada recurso azurerm](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_security_group#import) (formato exacto del id) y [reglas de nombres e ids de ARM](https://learn.microsoft.com/es-es/azure/azure-resource-manager/management/resource-name-rules)
 - [Azure Export for Terraform (aztfexport)](https://learn.microsoft.com/es-es/azure/developer/terraform/azure-export-for-terraform/export-terraform-overview): importación masiva de un grupo de recursos existente
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

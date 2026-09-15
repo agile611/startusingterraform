@@ -1,6 +1,6 @@
 # 🔒 Bloqueo del estado
 
-> Dos `terraform apply` a la vez sobre el mismo estado es la forma más rápida de corromperlo: el segundo lee un estado que el primero está a punto de cambiar, y al escribir pisa lo que el otro hizo. El bloqueo del estado lo impide, y en Azure Storage viene incluido: el backend `azurerm` toma un lease del blob al empezar y lo suelta al terminar, sin scripts ni pasos previos. Esta página explica esa mecánica, qué hacer cuando un bloqueo se queda huérfano, cómo se integra en CI/CD y qué problemas no resuelve. En **Topaz** el backend `azurerm` no funciona (plano de datos, página 7), pero el backend `local` bloquea con la misma interfaz y el mismo mensaje: el laboratorio se hace ahí.
+> Dos `terraform apply` a la vez sobre el mismo estado es la forma más rápida de corromperlo: el segundo lee un estado que el primero está a punto de cambiar, y al escribir pisa lo que el otro hizo. El bloqueo del estado lo impide, y en Azure Storage viene incluido: el backend `azurerm` toma un lease del blob al empezar y lo suelta al terminar, sin scripts ni pasos previos. Esta página explica esa mecánica, qué hacer cuando un bloqueo se queda huérfano, cómo se integra en CI/CD y qué problemas no resuelve. En **Topaz** el backend `azurerm` no funciona (plano de datos, [página 7](index.md#pagina-7)), pero el backend `local` bloquea con la misma interfaz y el mismo mensaje: el laboratorio se hace ahí.
 
 **🎯 Objetivos de aprendizaje**
 - Explicar cómo bloquea el backend `azurerm` (lease + metadato) y qué comandos toman el bloqueo.
@@ -9,7 +9,7 @@
 - Distinguir el bloqueo del estado de los bloqueos de Azure Resource Manager y del serial.
 - Serializar ejecuciones en GitHub Actions y Azure DevOps sin scripts de lease.
 
-> **🔷 Requisitos previos.** Página 7 completada (directorio `~/tf-estado/app` con `providers.tf`), dos terminales abiertas, `jq`, `az account show --query environmentName -o tsv` → `Topaz`.
+> **🔷 Requisitos previos.** [Página 7](index.md#pagina-7) completada (directorio `~/tf-estado/app` con `providers.tf`), dos terminales abiertas, `jq`, `az account show --query environmentName -o tsv` → `Topaz`.
 
 ---
 
@@ -76,14 +76,14 @@ Cuando Terraform no puede adquirir el bloqueo, devuelve un mensaje detallado. Le
 
 ## 3. Laboratorio en Topaz: el backend local también bloquea
 
-El backend local bloquea con un `flock` del sistema operativo y escribe el mismo Lock Info en un archivo `.<nombre>.lock.info` junto al estado. Misma interfaz, mismo mensaje, mismo `force-unlock`. Retoma el proyecto de la página 7:
+El backend local bloquea con un `flock` del sistema operativo y escribe el mismo Lock Info en un archivo `.<nombre>.lock.info` junto al estado. Misma interfaz, mismo mensaje, mismo `force-unlock`. Retoma el proyecto de la [página 7](index.md#pagina-7):
 
 ```bash
 cd ~/tf-estado/app && mkdir -p estados
 cat > backend.tf <<'EOF'
 terraform { backend "local" { path = "estados/app-lab.tfstate" } }
 EOF
-terraform init -reconfigure && terraform apply -auto-approve      # 4 to add (grupo, vnet, 2 subredes; main.tf de la página 7)
+terraform init -reconfigure && terraform apply -auto-approve      # 4 to add (grupo, vnet, 2 subredes; main.tf de la [página 7](index.md#pagina-7))
 
 # ─── 1. Provocar el bloqueo ─────────────────────────────────────────────────────
 # Terminal A:
@@ -175,7 +175,7 @@ A continuación, una comparativa para entender qué protege cada mecanismo:
 | `serial` del estado | Escribir una versión más antigua (`state push`) o aplicar un tfplan guardado sobre un estado que cambió (*Saved plan is stale*) | Nada en tiempo real: se comprueba al escribir |
 | Versionado + soft delete | Recuperar tras cualquiera de los fallos anteriores | Que ocurran |
 
-> **🔷 El lock de ARM del original no es state locking.** Crear un `CanNotDelete` sobre el contenedor `tfstate` es buena idea (la página 7 lo hace sobre el grupo), pero por otro motivo: impide que alguien borre el contenedor con todos los estados dentro. No tiene ningún efecto sobre dos `apply` concurrentes; de eso se ocupa el lease. Son capas complementarias, no alternativas.
+> **🔷 El lock de ARM del original no es state locking.** Crear un `CanNotDelete` sobre el contenedor `tfstate` es buena idea (la [página 7](index.md#pagina-7) lo hace sobre el grupo), pero por otro motivo: impide que alguien borre el contenedor con todos los estados dentro. No tiene ningún efecto sobre dos `apply` concurrentes; de eso se ocupa el lease. Son capas complementarias, no alternativas.
 
 ---
 
@@ -235,7 +235,7 @@ stages:
 | `-lock-timeout=10m` en `apply` | Una persona aplicando desde su portátil no debe hacer fallar el pipeline: que espere |
 | `-lock=false` solo en el `plan` de PR | No escribe estado; un plan sobre un estado que está cambiando solo produce un plan que habrá que repetir |
 | Job `force-unlock` con aprobación | Romper un lock es una acción auditable: queda quién lo pidió, quién lo aprobó y qué ID se liberó. Mejor que un `az storage blob lease break` desde un portátil |
-| Sin `secrets.AZURE_CREDENTIALS` ni claves de cuenta | OIDC (página 6) y `use_azuread_auth`. Los scripts del original necesitaban la clave para el lease: con `shared_access_key_enabled = false` ni siquiera funcionarían |
+| Sin `secrets.AZURE_CREDENTIALS` ni claves de cuenta | OIDC ([página 6](index.md#pagina-6)) y `use_azuread_auth`. Los scripts del original necesitaban la clave para el lease: con `shared_access_key_enabled = false` ni siquiera funcionarían |
 
 ---
 
@@ -248,7 +248,7 @@ El bloqueo del estado es fundamental, pero no es una solución mágica para todo
 | Dos personas aplican en secuencia con código distinto: la segunda deshace lo de la primera | No hay concurrencia; cada `apply` es correcto respecto a su código | Un solo origen de verdad (rama `main`) y aplicar solo desde el pipeline |
 | Aplicar un `tfplan` de hace una hora | El lock se toma al aplicar, no al planificar | El serial: *Saved plan is stale*. Volver a planificar |
 | Dos proyectos (dos estados) gestionan el mismo recurso | Cada estado tiene su propio lease; se pisan en Azure, no en el blob | Un recurso, un estado. Compartir por `data` sources, no duplicando `resource` |
-| Cambios a mano en el portal mientras nadie aplica | No pasan por Terraform | `plan -refresh-only` programado (página 6), RBAC que no dé Contributor a personas en producción |
+| Cambios a mano en el portal mientras nadie aplica | No pasan por Terraform | `plan -refresh-only` programado ([página 6](index.md#pagina-6)), RBAC que no dé Contributor a personas en producción |
 | Un `apply` interrumpido deja recursos creados y no registrados | El lock protege el archivo, no la transacción con Azure | Terraform escribe el estado tras cada recurso; lo que falte se adopta con `import` o se borra a mano |
 
 ---

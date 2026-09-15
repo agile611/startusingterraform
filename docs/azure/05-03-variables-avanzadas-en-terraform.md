@@ -386,4 +386,4 @@ az group list -o table                      # vacío
 - [Workspaces](https://developer.hashicorp.com/terraform/cli/workspaces)
 - [Datos sensibles en el estado](https://developer.hashicorp.com/terraform/language/state/sensitive-data)
 - [`azurerm_subnet`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subnet) y [`azurerm_storage_account`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_account)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

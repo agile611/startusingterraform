@@ -9,7 +9,7 @@
 - Conectar dos redes virtuales con peering bidireccional y saber qué requisitos tiene.
 - Verificar la topología con Azure CLI y exponerla con outputs derivados de `for_each`.
 
-> **🔷 Requisitos previos.** Páginas 1 y 2 completadas, `~/tf-intro/providers.tf` configurado para Topaz y `az account show --query environmentName -o tsv` → `Topaz`. Si dejaste recursos de la página 2, ejecuta allí `terraform destroy`: este laboratorio usa otro grupo de recursos, pero conviene empezar limpio.
+> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) y 2 completadas, `~/tf-intro/providers.tf` configurado para Topaz y `az account show --query environmentName -o tsv` → `Topaz`. Si dejaste recursos de la [página 2](index.md#pagina-2), ejecuta allí `terraform destroy`: este laboratorio usa otro grupo de recursos, pero conviene empezar limpio.
 
 ---
 
@@ -113,13 +113,13 @@ resource "azurerm_subnet" "app" {
 |---|---|---|
 | Dirección de la instancia | `azurerm_subnet.app[0]`, `[1]`… | `azurerm_subnet.app["web"]`, `["backend"]` |
 | Si borras el primer elemento | Todos los demás cambian de índice: Terraform los **destruye y recrea** | Solo desaparece esa clave; el resto no se toca |
-| Cuándo usarlo | Interruptor 0/1 (como la VM de la página 2) o N copias idénticas | Colecciones con identidad propia: subredes, reglas, usuarios… |
+| Cuándo usarlo | Interruptor 0/1 (como la VM de la [página 2](index.md#pagina-2)) o N copias idénticas | Colecciones con identidad propia: subredes, reglas, usuarios… |
 
 ---
 
 ## 3.4. Grupos de seguridad a nivel de subred
 
-En la página 2 el NSG se asoció a la NIC: filtra una máquina. Asociado a la subred filtra **todo lo que haya dentro**, presente y futuro, y es la forma habitual de expresar "el nivel web acepta 80/443 de Internet; el nivel backend solo acepta 8080 desde el nivel web". Si hay NSG en ambos sitios, el tráfico entrante debe pasar los dos.
+En la [página 2](index.md#pagina-2) el NSG se asoció a la NIC: filtra una máquina. Asociado a la subred filtra **todo lo que haya dentro**, presente y futuro, y es la forma habitual de expresar "el nivel web acepta 80/443 de Internet; el nivel backend solo acepta 8080 desde el nivel web". Si hay NSG en ambos sitios, el tráfico entrante debe pasar los dos.
 
 ```hcl
 # nsg.tf
@@ -191,7 +191,7 @@ resource "azurerm_subnet_network_security_group_association" "backend" {
 | `AzureLoadBalancer` | Sondas de estado del balanceador (168.63.129.16). No lo bloquees |
 | `Storage`, `Sql`, `AzureCloud`… | Rangos públicos de servicios de Azure, mantenidos por Microsoft. Lista completa: `az network list-service-tags -l eastus` |
 
-> **🔷 En Topaz.** Las reglas van inline porque el emulador no implementa `azurerm_network_security_rule` (página 2). La asociación subred-NSG es un `PUT` sobre la propia subred, el mismo endpoint que la crea, así que funciona. El emulador guarda las reglas y las devuelve con `az network nsg show`, pero **no evalúa tráfico**: la comprobación de que el backend está aislado solo puede hacerse en Azure real.
+> **🔷 En Topaz.** Las reglas van inline porque el emulador no implementa `azurerm_network_security_rule` ([página 2](index.md#pagina-2)). La asociación subred-NSG es un `PUT` sobre la propia subred, el mismo endpoint que la crea, así que funciona. El emulador guarda las reglas y las devuelve con `az network nsg show`, pero **no evalúa tráfico**: la comprobación de que el backend está aislado solo puede hacerse en Azure real.
 
 ---
 
@@ -423,4 +423,4 @@ terraform destroy -auto-approve                    # las vnets no cuestan; el tr
 - [Redes virtuales de Azure](https://learn.microsoft.com/es-es/azure/virtual-network/virtual-networks-overview) y [preguntas frecuentes (direcciones reservadas, límites)](https://learn.microsoft.com/es-es/azure/virtual-network/virtual-networks-faq)
 - [Grupos de seguridad de red: reglas por defecto y evaluación](https://learn.microsoft.com/es-es/azure/virtual-network/network-security-groups-overview) y [service tags](https://learn.microsoft.com/es-es/azure/virtual-network/service-tags-overview)
 - [Peering de redes virtuales](https://learn.microsoft.com/es-es/azure/virtual-network/virtual-network-peering-overview) y [topología hub-and-spoke](https://learn.microsoft.com/es-es/azure/architecture/networking/architecture/hub-spoke)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

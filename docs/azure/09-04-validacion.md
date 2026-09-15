@@ -10,7 +10,7 @@
 - Escribir pruebas con `terraform test`: unitarias con `mock_provider` e integración contra Topaz.
 - Montar el pipeline (GitHub Actions y GitLab CI) para que falle en el peldaño correcto, y el gancho local que evita llegar a él.
 
-> **🔷 Requisitos previos.** Páginas 5 a 7 (sintaxis, `validation`, `precondition`). Herramientas: `tflint`, `trivy` y `pre-commit` (`brew install tflint trivy pre-commit` o los binarios de sus releases; la página 3 tiene la lista). Terraform ≥ 1.7 para `mock_provider`.
+> **🔷 Requisitos previos.** [Páginas 5](index.md#pagina-5) a 7 (sintaxis, `validation`, `precondition`). Herramientas: `tflint`, `trivy` y `pre-commit` (`brew install tflint trivy pre-commit` o los binarios de sus releases; la [página 3](index.md#pagina-3) tiene la lista). Terraform ≥ 1.7 para `mock_provider`.
 
 ---
 
@@ -109,7 +109,7 @@ run "crea_y_comprueba" {
 
 ## 6. El pipeline: cada peldaño en su sitio
 
-Dos trabajos. El primero corre sin credenciales ni nube en menos de un minuto y bloquea el PR. El segundo levanta Topaz con el script de la página 3 y hace plan y test de integración; sigue sin tocar Azure. El plan contra Azure real con OIDC es la página 12.
+Dos trabajos. El primero corre sin credenciales ni nube en menos de un minuto y bloquea el PR. El segundo levanta Topaz con el script de la [página 3](index.md#pagina-3) y hace plan y test de integración; sigue sin tocar Azure. El plan contra Azure real con OIDC es la [página 12](index.md#pagina-12).
 
 ```yaml
 # .github/workflows/validar.yml
@@ -147,7 +147,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
         with: { terraform_version: "${{ env.TF_VERSION }}" }
-      - run: ./scripts/topaz-start.sh                 # el mismo script de la página 3: contenedor, certificado, topaz.env
+      - run: ./scripts/topaz-start.sh                 # el mismo script de la [página 3](index.md#pagina-3): contenedor, certificado, topaz.env
       - run: |
           source ~/.topaz/topaz.env
           terraform init -backend=false
@@ -257,7 +257,7 @@ tflint --init && tflint; echo "exit $?"
 #   Warning: Interpolation-only expressions are deprecated (terraform_deprecated_interpolation)
 #   exit 2
 sed -i '/variable "sin_uso"/d; s/{ owner = "\${var.sin_uso}" }/{ owner = "curso" }/' main.tf && tflint && echo "limpio"
-sed -i 's/size *= "Standard_B2s"/size = "Standard_B2xs"/' vm.tf 2>/dev/null   # si tienes la VM de la página 9: azurerm_linux_virtual_machine_invalid_size
+sed -i 's/size *= "Standard_B2s"/size = "Standard_B2xs"/' vm.tf 2>/dev/null   # si tienes la VM de la [página 9](index.md#pagina-9): azurerm_linux_virtual_machine_invalid_size
 
 # ─── Peldaño 4: trivy ───────────────────────────────────────────────────────────
 trivy config --severity HIGH,CRITICAL .
@@ -348,7 +348,7 @@ git checkout main.tf && az policy assignment delete -n tls-minimo
 > | Aserción sobre un `id` falla con `mock_provider` | Los mocks devuelven valores ficticios para lo computado. Afirma sobre lo que *tú* configuras (TLS, tags) en la unitaria; los ids, en la de integración contra Topaz |
 > | La prueba de integración deja recursos en Topaz | Falló a mitad y la destrucción no pudo completarse; Terraform lo avisa al final. `az group delete` del grupo de la prueba, o dar a cada run un nombre único para que no colisionen |
 > | `expect_failures` no hace pasar la prueba | Debe apuntar exactamente a lo que falla: `var.nombre` para una `validation`, la dirección del recurso para una `precondition`. Y solo vale para condiciones tuyas, no para errores del provider |
-> | El pipeline pasa y el apply destruye la base de datos | Ningún peldaño estático lo ve. Inspecciona el plan (`terraform show -json` y buscar `"delete"`) y exige aprobación humana para destrucciones (página 12). `prevent_destroy` como red (página 7) |
+> | El pipeline pasa y el apply destruye la base de datos | Ningún peldaño estático lo ve. Inspecciona el plan (`terraform show -json` y buscar `"delete"`) y exige aprobación humana para destrucciones ([página 12](index.md#pagina-12)). `prevent_destroy` como red ([página 7](index.md#pagina-7)) |
 > | pre-commit tarda demasiado en cada commit | El hook de `validate` hace `init` por directorio. Deja en pre-commit fmt, tflint y trivy; validate y test en el pipeline. O `pre-commit run --all-files` solo antes del push |
 > | `RequestDisallowedByPolicy` en el apply tras un pipeline verde | Azure Policy es una capa distinta y no se evalúa en el plan. Añade la regla equivalente en tflint/trivy o en una `validation` para que aparezca antes (bloque C) |
 
@@ -397,4 +397,4 @@ git checkout main.tf && az policy assignment delete -n tls-minimo
 - [setup-terraform](https://github.com/hashicorp/setup-terraform) y [subir SARIF a GitHub](https://docs.github.com/es/code-security/code-scanning/integrating-with-code-scanning/uploading-a-sarif-file-to-github)
 - [GitLab CI: `image.entrypoint`](https://docs.gitlab.com/ee/ci/yaml/#imageentrypoint) y [IaC con Terraform en GitLab](https://docs.gitlab.com/ee/user/infrastructure/iac/)
 - [Azure Policy](https://learn.microsoft.com/es-es/azure/governance/policy/overview) y [políticas integradas de Storage](https://learn.microsoft.com/es-es/azure/governance/policy/samples/built-in-policies#storage) (Microsoft Learn)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

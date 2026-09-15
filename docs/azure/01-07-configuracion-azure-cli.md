@@ -10,7 +10,7 @@
 > - Decidir qué valores por defecto son seguros en un flujo con Terraform y cuáles no.
 > - En Azure real: elegir el método de autenticación adecuado a cada contexto, gestionar tenants y suscripciones, comprobar permisos y proveedores registrados.
 
-> **🔷 Requisitos previos.** Página 3: Topaz en marcha, `topaz.env` creado y el `providers.tf` en `~/tf-st`. El bloque de Azure real necesita una suscripción con al menos el rol Colaborador en un grupo de recursos; puede hacerse más adelante.
+> **🔷 Requisitos previos.** [Página 3](index.md#pagina-3): Topaz en marcha, `topaz.env` creado y el `providers.tf` en `~/tf-st`. El bloque de Azure real necesita una suscripción con al menos el rol Colaborador en un grupo de recursos; puede hacerse más adelante.
 
 ## 1. Para qué sirve `az` cuando Terraform gestiona la infraestructura
 
@@ -18,9 +18,9 @@
 |---|---|---|
 | **Prestar la sesión** | `use_cli = true` en `providers.tf`: el provider pide el token a `az` | La nube y la suscripción de `az` son las de Terraform. Comprobarlas antes de cada apply |
 | **Comprobar desde fuera** | `az storage account show … --query minimumTlsVersion` después de un apply | Lectura siempre permitida; es la segunda opinión sobre el estado |
-| **Provocar deriva** | `az network nic delete` en la práctica 1; `az storage account update` en la página 5 | Solo en laboratorios y sabiendo que el siguiente plan lo va a corregir |
+| **Provocar deriva** | `az network nic delete` en la práctica 1; `az storage account update` en la [página 5](index.md#pagina-5) | Solo en laboratorios y sabiendo que el siguiente plan lo va a corregir |
 | **Lo que Terraform no debe gestionar** | Registrar proveedores, ver roles, obtener ids de objetos de Entra ID para pasarlos como variables | Operaciones de plataforma o de lectura, no recursos del grafo |
-| **Crear recursos** | El storage del estado remoto, una sola vez (página 5), y después `terraform import` | La excepción del huevo y la gallina. Cualquier otro recurso creado con `az` es deriva o es algo que Terraform no sabe que existe |
+| **Crear recursos** | El storage del estado remoto, una sola vez ([página 5](index.md#pagina-5)), y después `terraform import` | La excepción del huevo y la gallina. Cualquier otro recurso creado con `az` es deriva o es algo que Terraform no sabe que existe |
 
 ## 2. Dónde vive la configuración: el perfil
 
@@ -45,7 +45,7 @@ El original presenta tres métodos como equivalentes. No lo son: cada uno respon
 | Tu portátil, con navegador | Interactivo | `az login` | MFA incluido. Desde CLI 2.61 muestra un selector de suscripción; en Windows usa WAM (la sesión del sistema) |
 | WSL sin navegador, SSH a un servidor, Cloud Shell ajeno | Código de dispositivo | `az login --use-device-code` | El navegador va en otro dispositivo. Algunas políticas de acceso condicional lo bloquean |
 | Varios directorios | Interactivo con tenant | `az login --tenant <id o dominio>` | Una cuenta invitada en otro tenant solo ve sus suscripciones si se autentica contra ese tenant |
-| Pipeline (GitHub Actions, Azure DevOps) | **Federación OIDC** | `az login --service-principal -u <app> --tenant <t> --federated-token "$TOKEN"` | Sin secreto que guardar ni rotar: el pipeline demuestra quién es con un token del propio GitHub. Es el método del curso (página 12) |
+| Pipeline (GitHub Actions, Azure DevOps) | **Federación OIDC** | `az login --service-principal -u <app> --tenant <t> --federated-token "$TOKEN"` | Sin secreto que guardar ni rotar: el pipeline demuestra quién es con un token del propio GitHub. Es el método del curso ([página 12](index.md#pagina-12)) |
 | Dentro de una VM, App Service, contenedor en Azure | Identidad administrada | `az login --identity` (`--client-id` si hay varias) | La plataforma da el token; no hay credencial en ningún sitio. Es lo que usa la VM de Moodle para leer Key Vault |
 | Automatización fuera de Azure sin OIDC posible | Service principal con certificado | `az login --service-principal -u <app> --tenant <t> -p cert.pem` | El certificado no viaja en la línea de comandos ni en logs como lo haría un secreto |
 | *El original* | Service principal con secreto | `-p <PASSWORD>` | El secreto queda en el historial de la shell, en logs del pipeline y en el fichero de donde se copió. Caduca (máximo 2 años) y alguien tiene que rotarlo. Solo si no hay alternativa, y entonces desde un gestor de secretos, nunca como argumento |
@@ -103,7 +103,7 @@ Desde CLI 2.61, `az login` muestra un selector si hay más de una. `az account s
 
 ### ¿Qué permisos tengo?
 
-RBAC de Azure: roles asignados a una identidad en un ámbito (grupo de administración, suscripción, grupo de recursos, recurso). Para el curso hace falta **Colaborador** en el grupo de recursos o la suscripción para crear recursos, y además **Administrador de acceso de usuario** (o *Role Based Access Control Administrator*) si Terraform va a crear asignaciones de rol, como la de la identidad administrada de la VM sobre Key Vault (página 10). Colaborador *no* puede asignar roles: es el error de permisos más habitual del curso y el original no lo menciona.
+RBAC de Azure: roles asignados a una identidad en un ámbito (grupo de administración, suscripción, grupo de recursos, recurso). Para el curso hace falta **Colaborador** en el grupo de recursos o la suscripción para crear recursos, y además **Administrador de acceso de usuario** (o *Role Based Access Control Administrator*) si Terraform va a crear asignaciones de rol, como la de la identidad administrada de la VM sobre Key Vault ([página 10](index.md#pagina-10)). Colaborador *no* puede asignar roles: es el error de permisos más habitual del curso y el original no lo menciona.
 
 ### ¿Qué proveedores están registrados?
 
@@ -187,7 +187,7 @@ az account show --query "{nube:environmentName, sub:name, id:id, tenant:tenantId
 export TF_VAR_subscription_id=$(az account show --query id -o tsv) TF_VAR_tenant_id=$(az account show --query tenantId -o tsv)
 
 # B. Quién soy y qué puedo hacer (RBAC)
-YO=$(az ad signed-in-user show --query id -o tsv)                   # object id: lo que Key Vault y las asignaciones de rol necesitan (página 10)
+YO=$(az ad signed-in-user show --query id -o tsv)                   # object id: lo que Key Vault y las asignaciones de rol necesitan ([página 10](index.md#pagina-10))
 az role assignment list --assignee "$YO" --all --query "[].{rol:roleDefinitionName, ambito:scope}" -o table
 #   Necesario para el curso: Contributor en el grupo o la suscripción. Para que Terraform asigne roles: además User Access Administrator
 #   o "Role Based Access Control Administrator" en ese ámbito. Contributor solo NO puede asignar roles.
@@ -284,4 +284,4 @@ az account clear                                                    # borra toda
 - [Proveedores de recursos y registro](https://learn.microsoft.com/es-es/azure/azure-resource-manager/management/resource-providers-and-types)
 - [Provider azurerm: autenticación con Azure CLI](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/azure_cli), [con OIDC](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/service_principal_oidc) y [variables `ARM_*`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs#argument-reference)
 - [Depuración de Terraform (`TF_LOG`)](https://developer.hashicorp.com/terraform/internals/debugging)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

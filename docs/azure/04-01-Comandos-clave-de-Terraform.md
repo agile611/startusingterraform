@@ -434,4 +434,4 @@ Orden inverso al de creación: primero la red, luego el grupo.
 - [Meta-argumento `lifecycle` (`prevent_destroy`, `ignore_changes`)](https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle)
 - [El archivo `.terraform.lock.hcl`](https://developer.hashicorp.com/terraform/language/files/dependency-lock)
 - [Backend `azurerm`](https://developer.hashicorp.com/terraform/language/backend/azurerm)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

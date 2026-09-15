@@ -536,4 +536,4 @@ az group list -o table           # rg-outputs-001 ya no aparece
 - [Datos sensibles en el estado](https://developer.hashicorp.com/terraform/language/state/sensitive-data)
 - [`terraform console`](https://developer.hashicorp.com/terraform/cli/commands/console)
 - [Atributos de `azurerm_storage_account`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_account#attributes-reference)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

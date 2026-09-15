@@ -1,6 +1,6 @@
 # 🚧 Aprobaciones y puertas: seis capas entre el commit y Azure
 
-> Las páginas 13 y 14 dejaron un pipeline con una aprobación delante de producción y políticas sobre el plan. Esta página se pregunta qué pasa cuando alguien no usa el pipeline. Un revisor cansado aprueba sin mirar; un `workflow_dispatch` mal condicionado aplica desde una rama equivocada; un compañero con permisos ejecuta `terraform destroy` desde su portátil un viernes. Ninguna puerta del pipeline detiene eso. Por eso las puertas se organizan en **capas**: la rama (quién puede fusionar y con qué comprobaciones), el código (análisis estático), el plan (políticas), el humano (revisores, ventanas horarias), Azure (políticas con *deny*, bloqueos de borrado, roles acotados) y la verificación posterior (pruebas de humo, plan a cero). Cada capa para algo que la anterior no ve, y cada una se abre de una forma explícita que deja rastro. El laboratorio ejecuta en **Topaz** todas las puertas que son scripts (destrucción, etiquetas, horario, humo) y crea los recursos de protección (bloqueos, asignaciones de política); su *efecto*, que lo evalúa ARM, se comprueba en el bloque de Azure real.
+> Las [páginas 13](index.md#pagina-13) y 14 dejaron un pipeline con una aprobación delante de producción y políticas sobre el plan. Esta página se pregunta qué pasa cuando alguien no usa el pipeline. Un revisor cansado aprueba sin mirar; un `workflow_dispatch` mal condicionado aplica desde una rama equivocada; un compañero con permisos ejecuta `terraform destroy` desde su portátil un viernes. Ninguna puerta del pipeline detiene eso. Por eso las puertas se organizan en **capas**: la rama (quién puede fusionar y con qué comprobaciones), el código (análisis estático), el plan (políticas), el humano (revisores, ventanas horarias), Azure (políticas con *deny*, bloqueos de borrado, roles acotados) y la verificación posterior (pruebas de humo, plan a cero). Cada capa para algo que la anterior no ve, y cada una se abre de una forma explícita que deja rastro. El laboratorio ejecuta en **Topaz** todas las puertas que son scripts (destrucción, etiquetas, horario, humo) y crea los recursos de protección (bloqueos, asignaciones de política); su *efecto*, que lo evalúa ARM, se comprueba en el bloque de Azure real.
 
 **🎯 Objetivos de aprendizaje**
 - Situar cada control en una de las seis capas y explicar qué detiene y a quién.
@@ -9,7 +9,7 @@
 - Desplegar con Terraform las puertas que viven en Azure (bloqueos, Azure Policy) y aplicar el patrón de dos PRs para cambios destructivos.
 - Añadir puertas posteriores al apply (pruebas de humo, plan a cero) entre dev y pro, y auditar quién aprobó qué.
 
-> **🔷 Requisitos previos.** Páginas 1 a 14 completadas y destruidas, backend de la página 4 en Topaz, `~/tf-st/providers.tf`, Terraform `1.11.x`, `jq`, `az account show --query environmentName -o tsv` → `Topaz`. Para el bloque de Azure real: `gh` autenticado con permisos de administración del repositorio.
+> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 14 completadas y destruidas, backend de la [página 4](index.md#pagina-4) en Topaz, `~/tf-st/providers.tf`, Terraform `1.11.x`, `jq`, `az account show --query environmentName -o tsv` → `Topaz`. Para el bloque de Azure real: `gh` autenticado con permisos de administración del repositorio.
 
 ---
 
@@ -20,10 +20,10 @@ El original clasifica las puertas por tipo (automática, manual, temporal, de se
 | **Capa** | **Qué detiene** | **A quién no detiene** | **Herramienta** |
 |---|---|---|---|
 | **1. Rama** | Fusionar sin revisión, sin que las comprobaciones pasen, con la rama desactualizada, sin el dueño del directorio | A quien tenga permiso de *bypass*; a quien no pase por Git | *Rulesets*, CODEOWNERS, *required status checks*; en DevOps, *branch policies* |
-| **2. Código** | Formato, sintaxis, configuraciones inseguras, secretos en el repositorio | A lo que solo se ve con el estado delante (qué se destruye) | `fmt`, `validate`, tflint, trivy, gitleaks (página 13) |
-| **3. Plan** | Destrucción de recursos con datos, reemplazos, ausencia de etiquetas, valores prohibidos | A quien ejecute Terraform fuera del pipeline | `jq`, conftest, `terraform test` (página 14) |
+| **2. Código** | Formato, sintaxis, configuraciones inseguras, secretos en el repositorio | A lo que solo se ve con el estado delante (qué se destruye) | `fmt`, `validate`, tflint, trivy, gitleaks ([página 13](index.md#pagina-13)) |
+| **3. Plan** | Destrucción de recursos con datos, reemplazos, ausencia de etiquetas, valores prohibidos | A quien ejecute Terraform fuera del pipeline | `jq`, conftest, `terraform test` ([página 14](index.md#pagina-14)) |
 | **4. Humano** | Lo que ninguna regla formula: "¿es este el momento?", "¿es esto lo que acordamos?" | A sí mismo, si aprueba sin leer; por eso necesita el resumen delante | *Environments*: revisores, *wait timer*, ramas; DevOps: *Approvals*, *Business hours* |
-| **5. Azure** | Borrar un recurso bloqueado, crear fuera de las regiones permitidas, sin etiqueta obligatoria, con una identidad sin rol | A un *Owner* que quite el bloqueo o la política primero (y eso queda en el Activity Log) | Bloqueos `CanNotDelete`, Azure Policy con *deny*, RBAC acotado (página 12) |
+| **5. Azure** | Borrar un recurso bloqueado, crear fuera de las regiones permitidas, sin etiqueta obligatoria, con una identidad sin rol | A un *Owner* que quite el bloqueo o la política primero (y eso queda en el Activity Log) | Bloqueos `CanNotDelete`, Azure Policy con *deny*, RBAC acotado ([página 12](index.md#pagina-12)) |
 | **6. Verificación** | Que pro reciba un cambio que en dev no funciona; que el apply deje deriva | Nada que ya haya pasado: es la última, mira hacia atrás | Pruebas de humo con `az` y `curl`, `plan -detailed-exitcode` = 0, escaneo de política |
 
 > **⚠️ Toda puerta tiene que poder abrirse.** Una puerta que nadie puede abrir se rodea (se desactiva el check, se aplica desde el portátil). El diseño correcto es que cada puerta se abra con un acto *explícito y auditado*: una etiqueta en la PR puesta por un dueño, un `workflow_dispatch` con campo `motivo` obligatorio, un commit propio que quita un bloqueo. Lo que se prohíbe no es pasar: es pasar sin dejar rastro.
@@ -32,7 +32,7 @@ El original clasifica las puertas por tipo (automática, manual, temporal, de se
 
 ## 2. Capa 1: la fusión es la primera puerta
 
-El original no protege la rama: cualquier push a `main` dispara el apply. Con una regla de rama, `main` solo recibe fusiones de PRs que hayan pasado las comprobaciones exactas del workflow de la página 13 y que haya aprobado alguien distinto del autor; si el directorio `infra/` tiene dueños, uno de ellos.
+El original no protege la rama: cualquier push a `main` dispara el apply. Con una regla de rama, `main` solo recibe fusiones de PRs que hayan pasado las comprobaciones exactas del workflow de la [página 13](index.md#pagina-13) y que haya aprobado alguien distinto del autor; si el directorio `infra/` tiene dueños, uno de ellos.
 
 ```bash
 # .github/CODEOWNERS: quien debe aprobar cambios en infraestructura (equipo, no persona)
@@ -72,7 +72,7 @@ az repos policy required-reviewer create --branch main --repository-id <id> --re
 
 ## 3. Capa 4: la puerta humana, bien colocada
 
-El original crea un job `Approve_Prod` con `environment: 'Producción'` cuyo único paso es un `echo`, y después un `Deploy_Prod` sin *environment*. La aprobación protege el `echo`; el apply corre libre. La regla es simple: **el *environment* va en el job que ejecuta el apply**, y ese job debe mostrar al revisor lo que va a aprobar antes de pedir la aprobación. Como la aprobación detiene el job *antes* de que empiece, el resumen tiene que venir de otro sitio: el comentario de la PR y la huella (página 14), enlazados desde el *summary* del job de plan.
+El original crea un job `Approve_Prod` con `environment: 'Producción'` cuyo único paso es un `echo`, y después un `Deploy_Prod` sin *environment*. La aprobación protege el `echo`; el apply corre libre. La regla es simple: **el *environment* va en el job que ejecuta el apply**, y ese job debe mostrar al revisor lo que va a aprobar antes de pedir la aprobación. Como la aprobación detiene el job *antes* de que empiece, el resumen tiene que venir de otro sitio: el comentario de la PR y la huella ([página 14](index.md#pagina-14)), enlazados desde el *summary* del job de plan.
 
 ```bash
 # Environment moodle-pro: revisores, ramas, espera mínima y sin auto-aprobación
@@ -150,7 +150,7 @@ resource "azurerm_resource_group_policy_assignment" "tag_entorno" {
 # Dos aprobaciones, dos entradas en el Activity Log, ninguna sorpresa en un plan mezclado con otros cambios.
 ```
 
-> **🔷 El bloqueo del estado también.** El grupo de recursos `rg-tfstate` de la página 4 merece su propio `CanNotDelete`: perder el estado es peor que perder cualquier recurso, porque se pierde la capacidad de gestionarlos todos. Se crea desde la configuración de plataforma, no desde la de Moodle, para que un `destroy` de Moodle no pueda ni intentarlo.
+> **🔷 El bloqueo del estado también.** El grupo de recursos `rg-tfstate` de la [página 4](index.md#pagina-4) merece su propio `CanNotDelete`: perder el estado es peor que perder cualquier recurso, porque se pierde la capacidad de gestionarlos todos. Se crea desde la configuración de plataforma, no desde la de Moodle, para que un `destroy` de Moodle no pueda ni intentarlo.
 
 ---
 
@@ -342,14 +342,14 @@ az devops security permission list … | grep -i "bypass"                      #
 >
 > | **Mensaje o síntoma** | **Causa y solución** |
 > |---|---|
-> | `grep -q "destroy" tfplan` nunca bloquea nada (el original) | El fichero de plan es un ZIP binario. La destrucción se detecta en el JSON de `terraform show -json`, en `resource_changes[].change.actions` (página 14); el script `destruccion` del laboratorio |
+> | `grep -q "destroy" tfplan` nunca bloquea nada (el original) | El fichero de plan es un ZIP binario. La destrucción se detecta en el JSON de `terraform show -json`, en `resource_changes[].change.actions` ([página 14](index.md#pagina-14)); el script `destruccion` del laboratorio |
 > | El job de aprobación tiene el *environment* y el de apply no (el original) | La aprobación protege un `echo`; el apply corre libre. El *environment* va en el job que ejecuta `terraform apply` |
 > | `if [ $? -ne 0 ]` en un paso nuevo tras CodeQL o las pruebas (el original) | Cada paso empieza con `$?` a 0: la condición nunca se cumple. Un paso que falla ya detiene el job; no hace falta comprobarlo después. Y CodeQL no analiza HCL: la puerta de código es tflint/trivy/gitleaks |
 > | `trstringer/manual-approval` con `APPROVAL_SECRET` e `issue-number` vacío | Acción de terceros que abre un issue y espera comentarios; en un evento `push` no hay número de PR. La aprobación nativa son los *environments* con revisores, *wait timer* y *prevent self-review* |
 > | `az policy state list` como puerta previa al apply (el original) | Mide el cumplimiento de lo que ya existe, con horas de retraso; no evalúa el cambio. La política con *deny* la aplica ARM en el propio apply; lo que quieres saber antes lo dice la capa 3 sobre el plan |
 > | *RequestDisallowedByPolicy* en el apply, con el plan aprobado | Una política de Azure que la capa 3 no replica. Añade la regla equivalente a conftest para que el mensaje llegue en la PR, no en el apply; y comprueba con `az policy assignment list --disable-scope-strict-match` qué políticas heredan del grupo o la suscripción |
 > | *ScopeLocked* (409) en un destroy que sí querías hacer | La puerta funciona. Patrón de dos PRs: primero `proteger = false`, aprobado y aplicado; después el recurso. Nunca `az lock delete` a mano antes de un apply: es exactamente lo que el Activity Log mostraría como sospechoso |
-> | El bloqueo `CanNotDelete` no aparece en el plan de destroy como error | Terraform no sabe de bloqueos hasta que Azure rechaza la petición: el plan de destroy siempre parece viable. La capa que avisa antes es `prevent_destroy` (página 14); las dos juntas cubren plan y apply |
+> | El bloqueo `CanNotDelete` no aparece en el plan de destroy como error | Terraform no sabe de bloqueos hasta que Azure rechaza la petición: el plan de destroy siempre parece viable. La capa que avisa antes es `prevent_destroy` ([página 14](index.md#pagina-14)); las dos juntas cubren plan y apply |
 > | Un plan de destroy sobre el bloqueo y el recurso a la vez | Terraform borra primero el bloqueo (depende del recurso) y después el recurso: el bloqueo no protege de un destroy que también lo elimina a él. Por eso `azurerm_management_lock` está en la lista de protegidos del script, y por eso el bloqueo del estado se crea desde otra configuración |
 > | "El job de pro no se dispara nunca" con *required reviewers* | Está esperando aprobación en la pestaña del run, sin avisar a nadie si no hay notificaciones configuradas. Revisores como equipo (no persona), notificaciones del equipo activas, y el *summary* del job de plan con el enlace |
 > | El autor del cambio aprueba su propio despliegue | `prevent_self_review: true` en el environment; en la rama, `require_last_push_approval` para que quien empujó el último commit no cuente como aprobador. En DevOps, "el solicitante no puede aprobar" en el check |
@@ -357,7 +357,7 @@ az devops security permission list … | grep -i "bypass"                      #
 > | Un *Owner* del repositorio fusiona sin cumplir la regla | Tiene *bypass*. Revisa `bypass_actors` del ruleset: debería estar vacío o limitarse a una app de emergencia. El que puede saltarse la puerta es parte del modelo de amenaza |
 > | `wait_timer` usado como ventana horaria | Es una espera relativa (minutos desde que el job queda listo), no un horario. La ventana es el paso `horario` con apertura por `MOTIVO`, o el check *Business hours* en DevOps |
 > | La etiqueta `destruccion-aprobada` la puede poner cualquiera | Poner etiquetas requiere permiso *triage*; si el equipo es amplio, el script debe comprobar quién la puso (`gh api …/issues/N/events`, evento `labeled`) contra la lista de CODEOWNERS |
-> | "Rollback automático" y "canary" para infraestructura (el original) | Un recurso no se despliega al 10 %. La progresión es dev → verificación (humo, plan a cero) → pro; el retroceso es `git revert` por el mismo flujo (página 14) |
+> | "Rollback automático" y "canary" para infraestructura (el original) | Un recurso no se despliega al 10 %. La progresión es dev → verificación (humo, plan a cero) → pro; el retroceso es `git revert` por el mismo flujo ([página 14](index.md#pagina-14)) |
 > | Demasiadas puertas: el equipo aplica desde el portátil para "ir rápido" | Señal de que una puerta no tiene apertura razonable. Cada puerta debe abrirse con un acto auditado y proporcionado; y la capa 5 (RBAC: nadie tiene rol de escritura en pro salvo la identidad del pipeline) hace que el portátil no sea una opción |
 > | En Topaz: el bloqueo se crea pero un `az storage account delete` lo ignora; la asignación de política no se puede crear o no rechaza nada | Esperado: el emulador acepta los tipos `Microsoft.Authorization/*` en distinto grado según la versión, y no evalúa políticas ni bloqueos en las peticiones. Por eso el laboratorio no intenta borrar con el bloqueo puesto, y `politicas` va a `false`. Ambas cosas se ven en el bloque de Azure real |
 
@@ -401,4 +401,4 @@ az devops security permission list … | grep -i "bypass"                      #
 - [Azure Policy: efecto *deny*](https://learn.microsoft.com/es-es/azure/governance/policy/concepts/effect-deny), [definiciones integradas](https://learn.microsoft.com/es-es/azure/governance/policy/samples/built-in-policies) y [`azurerm_resource_group_policy_assignment`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group_policy_assignment)
 - [`workflow_dispatch` con inputs](https://docs.github.com/es/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#workflow_dispatch) y [resumen del job (`GITHUB_STEP_SUMMARY`)](https://docs.github.com/es/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#adding-a-job-summary)
 - [Activity Log de Azure](https://learn.microsoft.com/es-es/azure/azure-monitor/essentials/activity-log) (quién intentó qué, incluidos los rechazos)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

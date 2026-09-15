@@ -9,7 +9,7 @@
 - Aplicar mínimos privilegios, bloqueos de borrado y alertas con los recursos correctos.
 - Automatizar `fmt`, `validate`, `test`, análisis estático y `plan` en un pipeline sin secretos.
 
-> **🔷 Requisitos previos.** Páginas 1 a 5 completadas y destruidas, `~/tf-sql/providers.tf` disponible, Terraform `>= 1.6` (para `terraform test`; `terraform version`), `az account show --query environmentName -o tsv` → `Topaz`.
+> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 5 completadas y destruidas, `~/tf-sql/providers.tf` disponible, Terraform `>= 1.6` (para `terraform test`; `terraform version`), `az account show --query environmentName -o tsv` → `Topaz`.
 
 ---
 
@@ -208,7 +208,7 @@ terraform apply -replace=module.red.azurerm_subnet.this[\"frontend\"]   # forzar
 terraform plan -refresh-only                           # ver drift sin proponer cambios
 ```
 
-Mientras el estado sea un archivo local, solo una persona puede trabajar y un `rm` accidental lo destruye. El backend `azurerm` lo guarda en el contenedor de blobs de la página 5, con bloqueo (lease) para que dos `apply` no colisionen:
+Mientras el estado sea un archivo local, solo una persona puede trabajar y un `rm` accidental lo destruye. El backend `azurerm` lo guarda en el contenedor de blobs de la [página 5](index.md#pagina-5), con bloqueo (lease) para que dos `apply` no colisionen:
 
 ```hcl
 # providers.tf — bloque backend, SOLO en Azure real (ver cuadro)
@@ -220,7 +220,7 @@ terraform {
   }
   backend "azurerm" {
     resource_group_name  = "rg-st-001"
-    storage_account_name = "stlabXXXXXXXX"          # la cuenta de la página 5
+    storage_account_name = "stlabXXXXXXXX"          # la cuenta de la [página 5](index.md#pagina-5)
     container_name       = "tfstate"                 # un contenedor dedicado, privado, con versionado
     key                  = "bp/lab.tfstate"          # una ruta por proyecto y entorno
     use_azuread_auth     = true                      # Entra ID: sin clave de cuenta; requiere Storage Blob Data Contributor
@@ -233,7 +233,7 @@ terraform {
 #   comentar el bloque backend y  terraform init -migrate-state
 ```
 
-> ⚠️ **En Topaz el backend `azurerm` no funciona.** El backend lee y escribe el blob del estado por el plano de datos (`blob.core.windows.net`), que el emulador no tiene (página 5). En el laboratorio el estado sigue siendo local y protegido por el `.gitignore`; el bloque `backend` se añade al pasar a Azure real. Nunca pongas la clave de cuenta en `access_key`: `use_azuread_auth` con tu identidad, o en CI con la identidad federada de la sección 6.7.
+> ⚠️ **En Topaz el backend `azurerm` no funciona.** El backend lee y escribe el blob del estado por el plano de datos (`blob.core.windows.net`), que el emulador no tiene ([página 5](index.md#pagina-5)). En el laboratorio el estado sigue siendo local y protegido por el `.gitignore`; el bloque `backend` se añade al pasar a Azure real. Nunca pongas la clave de cuenta en `access_key`: `use_azuread_auth` con tu identidad, o en CI con la identidad federada de la sección 6.7.
 
 ---
 
@@ -284,7 +284,7 @@ resource "azurerm_key_vault" "bp" {
 |---|---|
 | `enabled_for_disk_encryption = true` "activa el cifrado en reposo" | Solo permite que Azure Disk Encryption lea claves de ese vault. El cifrado en reposo (SSE) está **siempre activo** en discos, Storage y SQL; lo que se decide es quién gestiona la clave (Microsoft o tú, *customer-managed key*) |
 | "Cifrado en tránsito" | Se configura por servicio: `min_tls_version` y `https_traffic_only_enabled` (Storage), `minimum_tls_version` (SQL), `Encrypt=yes` en el cliente |
-| `variable "admin_password" { sensitive = true }` protege la contraseña | Solo la oculta en la consola. Sigue en el estado y en el plan. Mejor: generarla con `random_password` (página 4), guardarla en Key Vault, o declararla `ephemeral = true` (Terraform ≥ 1.10) para que no se persista |
+| `variable "admin_password" { sensitive = true }` protege la contraseña | Solo la oculta en la consola. Sigue en el estado y en el plan. Mejor: generarla con `random_password` ([página 4](index.md#pagina-4)), guardarla en Key Vault, o declararla `ephemeral = true` (Terraform ≥ 1.10) para que no se persista |
 | Pasar secretos por variables de entorno | Correcto para CI: `TF_VAR_nombre` o `ARM_*`. Pero la mejor credencial es la que no existe: identidad gestionada u OIDC (6.7) |
 
 ---
@@ -322,7 +322,7 @@ resource "azurerm_monitor_metric_alert" "cpu" {
 
   name                = "alerta-cpu-alta"
   resource_group_name = azurerm_resource_group.bp.name
-  scopes              = [var.vm_id]         # la VM de la página 2, si existe
+  scopes              = [var.vm_id]         # la VM de la [página 2](index.md#pagina-2), si existe
   description         = "CPU media > 80 % durante 5 minutos"
   severity            = 2                   # 0 crítico … 4 informativo
   frequency           = "PT1M"
@@ -345,10 +345,10 @@ resource "azurerm_monitor_metric_alert" "cpu" {
 | `metric_name` | `""` | `"Percentage CPU"`; lista completa con `az monitor metrics list-definitions --resource <id>` |
 | `time_aggregation` | no existe | `aggregation` |
 | `action_group_id` | `azurerm_management_group` (jerarquía de suscripciones) | `azurerm_monitor_action_group`: quién recibe el aviso (correo, SMS, webhook, función) |
-| `scopes` | `azurerm_virtual_machine` (recurso obsoleto) | Id de una `azurerm_linux_virtual_machine` (página 2), pasado por variable |
+| `scopes` | `azurerm_virtual_machine` (recurso obsoleto) | Id de una `azurerm_linux_virtual_machine` ([página 2](index.md#pagina-2)), pasado por variable |
 
 > **🔷 Coste: las cuatro medidas que más ahorran.**
-> - **Destruir lo que no se usa.** Cada página del curso termina con `terraform destroy`: la VM de la página 2 cuesta lo mismo parada que encendida si no está *deallocated*.
+> - **Destruir lo que no se usa.** Cada página del curso termina con `terraform destroy`: la VM de la [página 2](index.md#pagina-2) cuesta lo mismo parada que encendida si no está *deallocated*.
 > - **Apagado automático.** `azurerm_dev_test_global_vm_shutdown_schedule` apaga (y desasigna) una VM a una hora fija; ideal para entornos lab y dev.
 > - **Presupuesto con aviso.** `azurerm_consumption_budget_resource_group` envía al action group cuando el gasto supera el 80 % de lo previsto.
 > - **Tag de centro de coste.** La tag `coste` de `local.tags` permite agrupar la factura por proyecto en Cost Management. Sin tags, la factura es un solo número.
@@ -609,7 +609,7 @@ terraform plan                                      # No changes
 terraform destroy -auto-approve
 ```
 
-> **🔷 Al pasar a Azure real.** Añade el bloque `backend` de 6.3 apuntando a la cuenta de la página 5 (con un contenedor `tfstate` nuevo), `terraform init -migrate-state`, y activa los interruptores de uno en uno: `asignar_rbac` con tu Object ID, `bloquear`, `desplegar_alertas` (y `vm_id` si tienes la VM de la página 2), `desplegar_kv`. Recuerda que el bloqueo protege también contra ti: antes de `destroy`, `bloquear = false` y `apply`.
+> **🔷 Al pasar a Azure real.** Añade el bloque `backend` de 6.3 apuntando a la cuenta de la [página 5](index.md#pagina-5) (con un contenedor `tfstate` nuevo), `terraform init -migrate-state`, y activa los interruptores de uno en uno: `asignar_rbac` con tu Object ID, `bloquear`, `desplegar_alertas` (y `vm_id` si tienes la VM de la [página 2](index.md#pagina-2)), `desplegar_kv`. Recuerda que el bloqueo protege también contra ti: antes de `destroy`, `bloquear = false` y `apply`.
 
 ---
 
@@ -677,4 +677,4 @@ terraform destroy -auto-approve
 - [`azurerm_monitor_metric_alert`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_metric_alert), [`azurerm_monitor_action_group`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_action_group) y [métricas de `Microsoft.Compute/virtualMachines`](https://learn.microsoft.com/es-es/azure/azure-monitor/reference/supported-metrics/microsoft-compute-virtualmachines-metrics)
 - [`terraform test`](https://developer.hashicorp.com/terraform/language/tests), [variables `ephemeral`](https://developer.hashicorp.com/terraform/language/values/variables#ephemeral-variables), [tflint-ruleset-azurerm](https://github.com/terraform-linters/tflint-ruleset-azurerm) y [Trivy (misconfiguration)](https://trivy.dev/latest/docs/scanner/misconfiguration/)
 - [OIDC entre GitHub Actions y Azure](https://learn.microsoft.com/es-es/azure/developer/github/connect-from-azure-openid-connect), [autenticación OIDC del provider azurerm](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/service_principal_oidc) y [environments con revisores en GitHub](https://docs.github.com/actions/deployment/targeting-different-environments/using-environments-for-deployment)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

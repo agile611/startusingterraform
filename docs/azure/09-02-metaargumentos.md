@@ -1,6 +1,6 @@
 # 🎛️ Meta-argumentos: `lifecycle`, `provider`, y lo que no lo es (`dynamic`, provisioners)
 
-> Un meta-argumento es un argumento que acepta *cualquier* recurso, sea del provider que sea, porque no lo interpreta el provider sino Terraform. Hay cinco: `depends_on`, `count` y `for_each` (página 6), `provider` y `lifecycle`. Esta página cubre los dos que faltan, y dentro de `lifecycle` los seis ajustes que cambian cómo Terraform planifica: cuándo ignorar una diferencia, cuándo negarse a destruir, en qué orden reemplazar, qué obliga a reemplazar y qué condiciones deben cumplirse antes y después. Después trata dos cosas que el original llamaba meta-argumentos y no lo son: los bloques `dynamic`, que son una expresión para generar bloques anidados, y los *provisioners*, que son una puerta de escape del modelo declarativo con un coste que conviene ver antes de decidir usarlos. Cada ajuste tiene su experimento en el emulador: se provoca la situación y se lee el plan. Lo que Topaz no puede enseñar (bloqueos de Azure, dos suscripciones) va al bloque de Azure real.
+> Un meta-argumento es un argumento que acepta *cualquier* recurso, sea del provider que sea, porque no lo interpreta el provider sino Terraform. Hay cinco: `depends_on`, `count` y `for_each` ([página 6](index.md#pagina-6)), `provider` y `lifecycle`. Esta página cubre los dos que faltan, y dentro de `lifecycle` los seis ajustes que cambian cómo Terraform planifica: cuándo ignorar una diferencia, cuándo negarse a destruir, en qué orden reemplazar, qué obliga a reemplazar y qué condiciones deben cumplirse antes y después. Después trata dos cosas que el original llamaba meta-argumentos y no lo son: los bloques `dynamic`, que son una expresión para generar bloques anidados, y los *provisioners*, que son una puerta de escape del modelo declarativo con un coste que conviene ver antes de decidir usarlos. Cada ajuste tiene su experimento en el emulador: se provoca la situación y se lee el plan. Lo que Topaz no puede enseñar (bloqueos de Azure, dos suscripciones) va al bloque de Azure real.
 
 **🎯 Objetivos de aprendizaje**
 - Distinguir un meta-argumento de un argumento del provider y de una expresión del lenguaje.
@@ -11,7 +11,7 @@
 - Generar bloques anidados con `dynamic` y decidir cuándo no hacerlo.
 - Observar por qué un provisioner rompe el modelo, y qué lo sustituye.
 
-> **🔷 Requisitos previos.** Páginas 5 y 6: sintaxis, estado, `for_each` y bloques `moved`. Topaz con `Microsoft.Storage` y `Microsoft.Network`.
+> **🔷 Requisitos previos.** [Páginas 5](index.md#pagina-5) y 6: sintaxis, estado, `for_each` y bloques `moved`. Topaz con `Microsoft.Storage` y `Microsoft.Network`.
 
 ---
 
@@ -181,9 +181,9 @@ Un provisioner ejecuta un comando (en local o por SSH) cuando el recurso se crea
 
 | **Lo que el original quería** | **Con provisioner** | **Sin provisioner** |
 |---|---|---|
-| Instalar nginx en la VM | `remote-exec`: SSH, clave en disco, IP alcanzable, VM arrancada | `custom_data` con cloud-init: la plataforma lo ejecuta al arrancar, sin conexión desde fuera (página 9) |
+| Instalar nginx en la VM | `remote-exec`: SSH, clave en disco, IP alcanzable, VM arrancada | `custom_data` con cloud-init: la plataforma lo ejecuta al arrancar, sin conexión desde fuera ([página 9](index.md#pagina-9)) |
 | Copiar un fichero a la VM | `file` | `write_files` en cloud-init, o el fichero en un blob que la VM lee con su identidad administrada |
-| Registrar la creación en un log | `local-exec` con `echo >> log` | El estado y el historial de Git ya lo registran; el pipeline guarda el plan (página 14). Un log local no es fuente de verdad |
+| Registrar la creación en un log | `local-exec` con `echo >> log` | El estado y el historial de Git ya lo registran; el pipeline guarda el plan ([página 14](index.md#pagina-14)). Un log local no es fuente de verdad |
 | Ejecutar algo que no tiene recurso | `terraform_data` + `local-exec` | Buscar el recurso (`azapi_resource_action` cubre casi toda la API de Azure). Si de verdad no existe, provisioner con `triggers_replace` y asumir el coste |
 
 ---
@@ -322,12 +322,12 @@ terraform plan                                                       # el peerin
 > | `dynamic` sobre un bloque que solo admite una instancia (`identity`, `features`) | Funciona solo si `for_each` produce 0 o 1 elementos: es el truco para bloques opcionales (`for_each = var.identidad ? [1] : []`). Con más de uno, el provider lo rechaza |
 > | Un NSG con `dynamic "security_rule"` y, además, `azurerm_network_security_rule` apuntando al mismo NSG | Dos gestores de las mismas reglas: cada apply borra las del otro. Elige uno por NSG (7.4). Si has heredado la mezcla, migra las inline a recursos con `import` |
 > | `provider = "azurerm.hub"` entre comillas | Es una referencia, no un string: `provider = azurerm.hub`. Y el alias debe existir en un bloque `provider` del mismo módulo raíz (o venir por `configuration_aliases`) |
-> | Módulo que usa `azurerm.hub` falla con `Provider configuration not present` | El módulo debe declararlo en `required_providers { azurerm = { configuration_aliases = [azurerm.hub] } }` y quien lo llama pasar `providers = { azurerm.hub = azurerm.hub }` (página 8) |
+> | Módulo que usa `azurerm.hub` falla con `Provider configuration not present` | El módulo debe declararlo en `required_providers { azurerm = { configuration_aliases = [azurerm.hub] } }` y quien lo llama pasar `providers = { azurerm.hub = azurerm.hub }` ([página 8](index.md#pagina-8)) |
 > | Recurso *tainted* tras un apply | Un provisioner falló: el recurso existe pero se reemplazará en el siguiente apply. Arregla el comando (o quítalo) y aplica; `terraform untaint` solo si el recurso está bien y el fallo era del script |
 > | Provisioner `when = destroy` que no se ejecuta | Solo corre si el bloque sigue en el código al destruir. Si quitaste el recurso entero, ya no existe (bloque 7). Y no puede referenciar nada fuera de `self`, `count.index` y `each.key` |
 > | `null_resource` con `triggers` (el original) | Funciona, pero necesita el provider `null`. `terraform_data` con `triggers_replace` viene con Terraform 1.4+ y hace lo mismo |
 > | `${self.tags.Name}`, `self.public_ip` (el original, AWS) | Atributos de `aws_instance`. En azurerm la IP pública es otro recurso y no se conoce hasta después: motivo adicional para no configurar la VM desde fuera |
-> | `remote-exec` contra Topaz | No hay VM real a la que conectarse: el provisioner falla y deja el recurso tainted. En Topaz la configuración interna de la VM no se puede probar; en Azure real, cloud-init (página 9) |
+> | `remote-exec` contra Topaz | No hay VM real a la que conectarse: el provisioner falla y deja el recurso tainted. En Topaz la configuración interna de la VM no se puede probar; en Azure real, cloud-init ([página 9](index.md#pagina-9)) |
 
 ---
 
@@ -368,7 +368,7 @@ terraform plan                                                       # el peerin
 
 - [Meta-argumento `lifecycle`](https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle): `create_before_destroy`, `prevent_destroy`, `ignore_changes`, `replace_triggered_by`, condiciones (HashiCorp)
 - [Condiciones personalizadas](https://developer.hashicorp.com/terraform/language/expressions/custom-conditions): `precondition`, `postcondition` y `validation`
-- [Meta-argumento `provider`](https://developer.hashicorp.com/terraform/language/meta-arguments/resource-provider) y [configuraciones con alias](https://developer.hashicorp.com/terraform/language/providers/configuration#alias-multiple-provider-configurations)
+- [Meta-argumento `provider`](https://developer.hashicorp.com/terraform/language/meta-arguments/provider) y [configuraciones con alias](https://developer.hashicorp.com/terraform/language/providers/configuration#alias-multiple-provider-configurations)
 - [Bloques `dynamic`](https://developer.hashicorp.com/terraform/language/expressions/dynamic-blocks), con el aviso de la propia documentación sobre su abuso
 - [Provisioners: un último recurso](https://developer.hashicorp.com/terraform/language/resources/provisioners/syntax) y [el recurso `terraform_data`](https://developer.hashicorp.com/terraform/language/resources/terraform-data)
 - [Recursos tainted: `taint`, `untaint` y `-replace`](https://developer.hashicorp.com/terraform/cli/commands/taint)
@@ -377,4 +377,4 @@ terraform plan                                                       # el peerin
 - [`azurerm_network_security_group`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_security_group): el bloque `security_rule` y la advertencia sobre mezclarlo con reglas separadas
 - [cloud-init en VMs de Azure](https://learn.microsoft.com/es-es/azure/virtual-machines/linux/using-cloud-init): la alternativa a `remote-exec`
 - [`azapi_resource_action`](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource_action): acciones de la API sin provisioner
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

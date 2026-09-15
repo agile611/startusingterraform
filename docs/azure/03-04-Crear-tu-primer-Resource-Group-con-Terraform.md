@@ -479,4 +479,4 @@ backend "azurerm" {
 - [Meta-argumento `for_each`](https://developer.hashicorp.com/terraform/language/meta-arguments/for_each)
 - [El estado de Terraform](https://developer.hashicorp.com/terraform/language/state) y [backend `azurerm`](https://developer.hashicorp.com/terraform/language/backend/azurerm)
 - [Recurso `random_string`](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

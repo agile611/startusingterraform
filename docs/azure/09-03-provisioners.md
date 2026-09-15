@@ -10,7 +10,7 @@
 - Comprobar el interior de una VM sin SSH ni IP pública con `az vm run-command`.
 - Reconocer los problemas reales de los provisioners y descartar los que el original inventa.
 
-> **🔷 Requisitos previos.** Páginas 6 y 7 (la red del Moodle desde el mapa, `lifecycle`, `terraform_data`). Topaz con `Microsoft.Compute` y `Microsoft.Network`. Para validar cloud-init en local: `sudo apt install cloud-init` (WSL/Ubuntu) o `pipx install cloud-init`.
+> **🔷 Requisitos previos.** [Páginas 6](index.md#pagina-6) y 7 (la red del Moodle desde el mapa, `lifecycle`, `terraform_data`). Topaz con `Microsoft.Compute` y `Microsoft.Network`. Para validar cloud-init en local: `sudo apt install cloud-init` (WSL/Ubuntu) o `pipx install cloud-init`.
 
 ---
 
@@ -76,7 +76,7 @@ resource "azurerm_linux_virtual_machine" "moodle" {
   custom_data = base64encode(templatefile("${path.module}/cloud-init.yaml", {
     titulo = var.titulo, entorno = terraform.workspace
   }))                                                                # cambiarlo FUERZA REEMPLAZO: cloud-init es solo del primer arranque
-  identity { type = "SystemAssigned" }                               # para leer Key Vault sin credenciales (página 10)
+  identity { type = "SystemAssigned" }                               # para leer Key Vault sin credenciales ([página 10](index.md#pagina-10))
   tags = { Role = "web" }
 }
 output "vm_ip_privada" { value = azurerm_linux_virtual_machine.moodle.private_ip_address }
@@ -108,7 +108,7 @@ resource "azurerm_virtual_machine_extension" "comprobar" {
 
 ## 4. Ansible: después de Terraform, no dentro
 
-El original envuelve `ansible-playbook` en un `null_resource` con `local-exec`. Eso sigue siendo un provisioner: corre una vez, fuera del plan, y si el playbook cambia nadie lo nota. La integración correcta es secuencial: Terraform aplica y publica outputs; el pipeline (página 14) construye el inventario a partir de ellos y ejecuta Ansible como paso propio. Cada herramienta con su estado y su idempotencia.
+El original envuelve `ansible-playbook` en un `null_resource` con `local-exec`. Eso sigue siendo un provisioner: corre una vez, fuera del plan, y si el playbook cambia nadie lo nota. La integración correcta es secuencial: Terraform aplica y publica outputs; el pipeline ([página 14](index.md#pagina-14)) construye el inventario a partir de ellos y ejecuta Ansible como paso propio. Cada herramienta con su estado y su idempotencia.
 
 ```bash
 # Paso del pipeline, después de terraform apply
@@ -134,7 +134,7 @@ ansible-playbook -i inventario.ini moodle.yml \
 
 ## 6. Laboratorio en Topaz
 
-Seis bloques. Reutiliza la red de la página 6 (`red.tf`) y añade `vm.tf`, `cloud-init.yaml`, `comprobar.sh` y la extensión de 9.3 en `ext.tf`.
+Seis bloques. Reutiliza la red de la [página 6](index.md#pagina-6) (`red.tf`) y añade `vm.tf`, `cloud-init.yaml`, `comprobar.sh` y la extensión de 9.3 en `ext.tf`.
 
 ```bash
 source ~/.topaz/topaz.env && az account show --query environmentName -o tsv   # Topaz
@@ -250,7 +250,7 @@ terraform destroy -auto-approve
 > | `Additional properties are not allowed` en `cloud-init schema` | Clave mal escrita (`package` por `packages`, `run_cmd` por `runcmd`). El validador local lo dice en un segundo; la VM lo callaría |
 > | "Cambié el cloud-init y Terraform quiere destruir la VM" | Es lo esperado: `custom_data` fuerza reemplazo (bloque 3). Si la VM no guarda datos, acéptalo y añade `create_before_destroy`; si los guarda, el cambio posterior va en la extensión o en Ansible, no en cloud-init |
 > | Datos perdidos al reemplazar la VM | Algo vivía en el disco del SO. Los datos de Moodle van en MySQL flexible y `moodledata` en Azure Files o un disco de datos con `azurerm_virtual_machine_data_disk_attachment`: sobreviven al reemplazo |
-> | Secreto en `custom_data` o en `settings` de la extensión | Queda en el estado y (en la extensión) visible en el portal. Secretos en Key Vault, leídos desde la VM con su identidad administrada (página 10); si hay que pasar algo a la extensión, `protected_settings` |
+> | Secreto en `custom_data` o en `settings` de la extensión | Queda en el estado y (en la extensión) visible en el portal. Secretos en Key Vault, leídos desde la VM con su identidad administrada ([página 10](index.md#pagina-10)); si hay que pasar algo a la extensión, `protected_settings` |
 > | `sudo echo "…" > /var/www/html/index.html` (el original) | El `sudo` aplica al `echo`; la redirección la hace la shell sin privilegios y falla. En cloud-init, `write_files`; en un script, `echo … | sudo tee fichero` |
 > | `UbuntuServer / 18.04-LTS` (el original) | Fin de soporte en 2023: la imagen puede no existir y no recibe parches. `ubuntu-24_04-lts / server`. `az vm image list -p Canonical --all` para ver las vigentes |
 > | `type_handler_version = "1.10"` (el original) | Versión antigua de CustomScript para Linux. `2.1` con `Microsoft.Azure.Extensions` |
@@ -261,7 +261,7 @@ terraform destroy -auto-approve
 > | `null_resource` + `local-exec` con `ansible-playbook` (el original) | Provisioner disfrazado: corre una vez, fuera del plan. Ansible como paso del pipeline después del apply, con inventario de `terraform output` (9.4) |
 > | Ansible no llega a la VM | Sin IP pública hace falta salto: `--ssh-common-args="-o ProxyJump=azureuser@<bastion>"`, o el plugin de inventario `azure_rm` con Azure Bastion y túnel |
 > | `az vm run-command invoke` tarda o devuelve vacío | Va por el agente: puede tardar un minuto y se cola detrás de la extensión. Si la VM acaba de arrancar, `cloud-init status --wait` al principio del script |
-> | `terraform-aws-modules/terraform-aws-nginx` (el original) | No existe, y sería de AWS. Los módulos empaquetan recursos (página 8), no instalan software: eso lo hace lo que el módulo ponga en `custom_data` |
+> | `terraform-aws-modules/terraform-aws-nginx` (el original) | No existe, y sería de AWS. Los módulos empaquetan recursos ([página 8](index.md#pagina-8)), no instalan software: eso lo hace lo que el módulo ponga en `custom_data` |
 > | "Run commands de Terraform Cloud" como alternativa (el original) | No existen como tal. HCP Terraform ejecuta plan/apply; el interior de la VM lo hacen cloud-init, extensiones, Ansible o Packer, igual que en local |
 > | Intentar ver el resultado de cloud-init en Topaz | El emulador crea el recurso VM pero no arranca un SO: nada se ejecuta. Lo que sí se comprueba en Topaz es la plantilla renderizada, el esquema y qué cambio fuerza reemplazo (bloques 1–4); el resto en Azure real |
 
@@ -308,4 +308,4 @@ terraform destroy -auto-approve
 - [Plugin de inventario `azure_rm`](https://docs.ansible.com/ansible/latest/collections/azure/azcollection/azure_rm_inventory.html) y [conexión SSH y `ProxyJump`](https://docs.ansible.com/ansible/latest/inventory_guide/connection_details.html) (Ansible)
 - [Packer: builder de Azure](https://developer.hashicorp.com/packer/integrations/hashicorp/azure) y [Azure Compute Gallery](https://learn.microsoft.com/es-es/azure/virtual-machines/azure-compute-gallery)
 - [Buscar imágenes de VM (`az vm image list`)](https://learn.microsoft.com/es-es/azure/virtual-machines/linux/cli-ps-findimage)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

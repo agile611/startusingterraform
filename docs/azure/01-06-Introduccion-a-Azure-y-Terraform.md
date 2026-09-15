@@ -346,4 +346,4 @@ Acabas de recorrer el ciclo completo: describir, planificar, aplicar, cambiar, d
 - [Provider `azurerm`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs) y [autenticación con Azure CLI](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/azure_cli)
 - [`azurerm_resource_group`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) y [`azurerm_virtual_network`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_network)
 - [Referencia de Azure CLI](https://learn.microsoft.com/es-es/cli/azure/)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

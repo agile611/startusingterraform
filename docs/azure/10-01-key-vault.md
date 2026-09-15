@@ -10,7 +10,7 @@
 - Dar a la VM de Moodle acceso a su contraseña con identidad gestionada y ámbito por secreto.
 - Rotar una contraseña de MySQL en un solo `apply` y configurar rotación automática de claves.
 
-> **🔷 Requisitos previos.** Páginas 1 a 10 completadas y destruidas, `~/tf-st/providers.tf`, Terraform `>= 1.11` (argumentos *write-only*), azurerm 4.x reciente, providers `random >= 3.7` y `time`, `jq`, `az account show --query environmentName -o tsv` → `Topaz`.
+> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 10 completadas y destruidas, `~/tf-st/providers.tf`, Terraform `>= 1.11` (argumentos *write-only*), azurerm 4.x reciente, providers `random >= 3.7` y `time`, `jq`, `az account show --query environmentName -o tsv` → `Topaz`.
 
 ---
 
@@ -24,7 +24,7 @@ Key Vault gestiona tres tipos de objeto con tres APIs y tres juegos de roles dis
 | **Clave** | Par RSA/EC que nunca sale del vault: cifra, firma, envuelve otras claves | Clave gestionada por el cliente (CMK) para cifrar `moodledata` y los discos | *Crypto Officer*, *Crypto Service Encryption User* (para el servicio que cifra) | plan ✅ / apply según versión |
 | **Certificado** | X.509 + clave privada + política de renovación; expone también un secreto (PFX) y una clave | TLS del Application Gateway; en pro, emitido por CA integrada | *Certificates Officer*; el gateway lee con *Secrets User* | plan ✅ / apply ❌ |
 
-> **🔷 Lo que no va a Key Vault.** Configuración que no es secreta (nombre del servidor, puerto, URL de Moodle): eso son variables o *outputs*, y meterlo en el vault solo añade latencia y llamadas facturables. Ficheros grandes (un `.pfx` de 25 KB es el límite). Y estados de Terraform: van al backend con cifrado y RBAC propio (página 4). Regla práctica: Key Vault guarda lo que, si se filtra, hay que rotar.
+> **🔷 Lo que no va a Key Vault.** Configuración que no es secreta (nombre del servidor, puerto, URL de Moodle): eso son variables o *outputs*, y meterlo en el vault solo añade latencia y llamadas facturables. Ficheros grandes (un `.pfx` de 25 KB es el límite). Y estados de Terraform: van al backend con cifrado y RBAC propio ([página 4](index.md#pagina-4)). Regla práctica: Key Vault guarda lo que, si se filtra, hay que rotar.
 
 ---
 
@@ -56,7 +56,7 @@ resource "azurerm_key_vault" "moodle" {
   soft_delete_retention_days = var.entorno == "pro" ? 90 : 7   # siempre activo; el mínimo es 7
   purge_protection_enabled   = var.entorno == "pro"            # pro: nadie puede purgar antes del plazo, ni tú. Irreversible una vez activado.
 
-  public_network_access_enabled = var.entorno != "pro"         # pro: solo private endpoint (página 13)
+  public_network_access_enabled = var.entorno != "pro"         # pro: solo private endpoint ([página 13](index.md#pagina-13))
   network_acls {
     default_action = var.entorno == "pro" ? "Deny" : "Allow"
     bypass         = "AzureServices"                           # el Application Gateway y el cifrado de discos entran por aquí
@@ -159,7 +159,7 @@ resource "azurerm_mysql_flexible_server" "moodle" {
   resource_group_name    = azurerm_resource_group.moodle.name
   location               = azurerm_resource_group.moodle.location
   version                = "8.0.21"
-  sku_name               = local.t.mysql                      # tallas por entorno (página 15)
+  sku_name               = local.t.mysql                      # tallas por entorno ([página 15](index.md#pagina-15))
   administrator_login    = "moodleadmin"
   administrator_password_wo         = ephemeral.azurerm_key_vault_secret.mysql.value   # write-only: se envía, no se guarda
   administrator_password_wo_version = var.mysql_password_version                       # la misma versión que el secreto: cambian juntos
@@ -174,7 +174,7 @@ resource "azurerm_mysql_flexible_server" "moodle" {
 #   "Invalid use of ephemeral value" — y eso es exactamente lo que quieres.
 ```
 
-> **🔷 Y si el recurso destino no tiene argumento `_wo`.** Aún hay recursos sin variante *write-only*. Entonces el valor se guarda en el estado, hagas lo que hagas en el origen. Las defensas pasan a ser el backend (cifrado, RBAC mínimo, sin copias locales, página 4) y la rotación frecuente: un secreto que cambia cada 90 días en el estado de hace 6 meses ya no sirve a nadie. Y comprueba el *changelog* del provider antes de asumir que no existe: cada versión añade argumentos `_wo`.
+> **🔷 Y si el recurso destino no tiene argumento `_wo`.** Aún hay recursos sin variante *write-only*. Entonces el valor se guarda en el estado, hagas lo que hagas en el origen. Las defensas pasan a ser el backend (cifrado, RBAC mínimo, sin copias locales, [página 4](index.md#pagina-4)) y la rotación frecuente: un secreto que cambia cada 90 días en el estado de hace 6 meses ya no sirve a nadie. Y comprueba el *changelog* del provider antes de asumir que no existe: cada versión añade argumentos `_wo`.
 
 ---
 
@@ -505,7 +505,7 @@ az keyvault certificate show --vault-name $KV -n tls-lab --query "{caduca:attrib
 > | Cambié la contraseña efímera y el `plan` dice *No changes* | Esperado: Terraform no guarda el valor, así que no puede compararlo. Solo `value_wo_version` dispara la reescritura. Súbela |
 > | *Invalid use of ephemeral value* | Intentas poner un efímero en un output, un atributo normal o un `data`. Solo argumentos `_wo`, providers, provisioners, otros efímeros y locals. Si el destino no tiene `_wo`, lee la nota de 11.4 |
 > | "Uso `data` para no exponer el secreto" (original) | Falso: el `data` se guarda íntegro en el estado en cada refresh. `ephemeral "azurerm_key_vault_secret"` hacia un argumento `_wo` |
-> | Con `network_acls default_action = "Deny"`, Terraform ya no puede escribir secretos | Te has cerrado la puerta a ti mismo. El runner necesita estar en `ip_rules`, en una subred con service endpoint, o (pro) llegar por private endpoint desde un runner autoalojado (página 12) |
+> | Con `network_acls default_action = "Deny"`, Terraform ya no puede escribir secretos | Te has cerrado la puerta a ti mismo. El runner necesita estar en `ip_rules`, en una subred con service endpoint, o (pro) llegar por private endpoint desde un runner autoalojado ([página 12](index.md#pagina-12)) |
 > | IMDS devuelve 400 *Multiple user assigned identities exist* | La VM tiene más de una identidad y no indicas cuál. Añade `client_id=` a la petición del token (el script de 11.5 ya lo hace) |
 > | La VM lee el secreto del vault pero MySQL rechaza la contraseña | Versiones desalineadas: el secreto se rotó y MySQL no (o al revés). Ambos `_wo_version` deben apuntar a la misma variable/local. Comprueba con `az keyvault secret list-versions` |
 > | El Application Gateway no arranca: *KeyVaultSecretNotFound* o *SecretAccessForbidden* | Tres causas: la identidad del gateway no tiene *Secrets User* (lee el PFX como secreto, no como certificado); `network_acls` en *Deny* sin `bypass = "AzureServices"`; o usas `secret_id` con versión y el certificado se ha renovado. Usa `versionless_secret_id` |
@@ -549,7 +549,7 @@ az keyvault certificate show --vault-name $KV -n tls-lab --query "{caduca:attrib
 14. **¿Qué de esta página se prueba en Topaz y qué no?**
     Sí: vault, secretos (crear, versionar, leer con CLI), estado con y sin `_wo`, rotación por versión. No: evaluación de RBAC, IMDS, MySQL, emisión de certificados y renovación. Eso se valida con `plan` y se prueba en Azure real.
 15. **¿Qué pasa si `network_acls` está en *Deny* y el runner de CI/CD no está en `ip_rules`?**
-    Terraform gestiona el vault (plano de gestión, por ARM) pero no puede escribir secretos (plano de datos, bloqueado). En pro, runner autoalojado en la VNet con private endpoint (páginas 12 y 13).
+    Terraform gestiona el vault (plano de gestión, por ARM) pero no puede escribir secretos (plano de datos, bloqueado). En pro, runner autoalojado en la VNet con private endpoint ([páginas 12](index.md#pagina-12) y 13).
 
 ---
 
@@ -564,5 +564,5 @@ az keyvault certificate show --vault-name $KV -n tls-lab --query "{caduca:attrib
 - [Obtener un token con identidad gestionada desde una VM (IMDS)](https://learn.microsoft.com/es-es/entra/identity/managed-identities-azure-resources/how-to-use-vm-token) y [referencias a Key Vault en App Service](https://learn.microsoft.com/es-es/azure/app-service/app-service-key-vault-references)
 - [Rotación automática de claves](https://learn.microsoft.com/es-es/azure/key-vault/keys/how-to-configure-key-rotation) y [renovación de certificados](https://learn.microsoft.com/es-es/azure/key-vault/certificates/tutorial-rotate-certificates)
 - [Application Gateway con certificados de Key Vault](https://learn.microsoft.com/es-es/azure/application-gateway/key-vault-certs)
-- [Registro de auditoría de Key Vault](https://learn.microsoft.com/es-es/azure/key-vault/general/logging) (la tabla `AZKVAuditLogs` de la página 14)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Registro de auditoría de Key Vault](https://learn.microsoft.com/es-es/azure/key-vault/general/logging) (la tabla `AZKVAuditLogs` de la [página 14](index.md#pagina-14))
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

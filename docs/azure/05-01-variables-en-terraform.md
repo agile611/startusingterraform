@@ -541,4 +541,4 @@ Un `destroy` necesita los mismos valores que el `apply`: sin `-var-file`, Terraf
 - [Workspaces de la CLI](https://developer.hashicorp.com/terraform/cli/workspaces)
 - [`merge()`](https://developer.hashicorp.com/terraform/language/functions/merge), [`contains()`](https://developer.hashicorp.com/terraform/language/functions/contains), [`can()`](https://developer.hashicorp.com/terraform/language/functions/can)
 - [Recurso `azurerm_storage_account`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_account) y [`azurerm_subnet`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subnet)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

@@ -10,7 +10,7 @@ bifurcación compatible con distinta licencia.
 |---|---|---|---|---|
 | **¿Dónde vive el estado?** | Fichero explícito —local o backend remoto—. Sabe qué recurso es suyo y guarda todo lo que la API devolvió. | En Azure: los recursos mismos y el historial de despliegues. No hay fichero que proteger… ni que consultar. | Fichero explícito, en Pulumi Cloud o en un backend propio —Azure Blob, fichero—. | No hay. Cada ejecución consulta la realidad tarea por tarea. |
 | **¿Quién calcula la diferencia?** | `plan`: código frente a estado frente a realidad, con acciones por recurso. Se guarda como fichero y se aplica ese mismo fichero. | `what-if`: ARM evalúa la plantilla contra lo existente. Informativo; el despliegue posterior recalcula, y hay "ruido" documentado. | `preview`: mismo modelo que Terraform. | `--check --diff`: cada módulo dice si cambiaría algo. Sin grafo, sin visión de conjunto. |
-| **¿Qué pasa al quitar un recurso del código?** | El plan dice `destroy`. Quitar código es una orden de borrado —página 1, paso 8—. | Modo *Incremental* —por defecto—: nada, el recurso sigue. *Complete*: borra todo lo del grupo que no esté en la plantilla, tuyo o no. *Deployment stacks*: borra lo que el stack gestionaba —`actionOnUnmanage`—. | Como Terraform. | Nada. Hay que escribir una tarea con `state: absent` y ejecutarla. |
+| **¿Qué pasa al quitar un recurso del código?** | El plan dice `destroy`. Quitar código es una orden de borrado —[página 1](index.md#pagina-1), paso 8—. | Modo *Incremental* —por defecto—: nada, el recurso sigue. *Complete*: borra todo lo del grupo que no esté en la plantilla, tuyo o no. *Deployment stacks*: borra lo que el stack gestionaba —`actionOnUnmanage`—. | Como Terraform. | Nada. Hay que escribir una tarea con `state: absent` y ejecutarla. |
 | **Alcance** | Cualquier API con provider, en el mismo grafo: Azure, Entra ID, GitHub, DNS, Kubernetes, contraseñas aleatorias, claves TLS. Recursos de día 0 con `azapi`. | Azure Resource Manager, con soporte de día 0 de cada API. Extensiones —Microsoft Graph— en expansión. | Como Terraform: providers nativos más los de Terraform vía puente. | Colecciones cloud —`azure.azcollection`—, y su fuerte: lo que hay dentro de la máquina. |
 | **Lenguaje y pruebas** | HCL. `terraform test` nativo —1.6+—, tflint, trivy, conftest; Terratest en Go. | Bicep —DSL— o JSON. Linter de Bicep, ARM-TTK, PSRule, what-if. | TypeScript, Python, Go, C#, Java, YAML. Pruebas con el framework del lenguaje; CrossGuard para políticas. | YAML. ansible-lint, Molecule. |
 | **Licencia y coste** | Terraform: BSL 1.1 desde 1.6 —gratis salvo para productos que compitan con HashiCorp—. OpenTofu: MPL 2.0, Linux Foundation. HCP Terraform: freemium. | Incluido en Azure; Bicep es MIT. | CLI y providers Apache 2.0; Pulumi Cloud freemium; backend propio gratis. | GPL 3.0; Ansible Automation Platform de pago. |
@@ -170,11 +170,11 @@ const datos = new storage.StorageAccount("datos", {
 
 | Escenario | Herramienta | Razón real |
 |---|---|---|
-| Azure y algo más en el mismo despliegue: GitHub —repos, environments—, Entra ID —grupos, aplicaciones—, DNS externo, Kubernetes, contraseñas generadas. | Terraform / OpenTofu | Un solo grafo y un solo plan para todo. Es el caso de este curso: el pipeline de la página 13 crea la identidad federada, el repositorio y los recursos en la misma configuración. |
+| Azure y algo más en el mismo despliegue: GitHub —repos, environments—, Entra ID —grupos, aplicaciones—, DNS externo, Kubernetes, contraseñas generadas. | Terraform / OpenTofu | Un solo grafo y un solo plan para todo. Es el caso de este curso: el pipeline de la [página 13](index.md#pagina-13) crea la identidad federada, el repositorio y los recursos en la misma configuración. |
 | 100 % Azure, equipo de plataforma que quiere cada API el día que sale. | Bicep | Soporte de día 0, sin fichero de estado que proteger, integración con *deployment stacks*, Policy y Template Specs. Aquí Bicep es mejor que Terraform, y hay que decirlo. |
 | Plantillas exportadas del portal, Marketplace, Azure Quickstart. | ARM JSON —leer—, Bicep —escribir— | `az bicep decompile` convierte JSON en Bicep. Nadie debería escribir JSON a mano en 2026. |
 | Equipo de desarrollo que quiere pruebas unitarias, tipos y abstracciones de su lenguaje. | Pulumi | Mismo modelo que Terraform con TypeScript, Python, Go o C#. El riesgo es la tentación de meter lógica imperativa en lo que debería ser una declaración. |
-| Lo que hay dentro de la máquina: paquetes, ficheros, servicios, Moodle instalado y configurado. | Ansible —o cloud-init— | Complemento, no alternativa: Terraform crea la VM; Ansible o cloud-init la configuran. El curso usa cloud-init por no añadir otra herramienta —página 8—. |
+| Lo que hay dentro de la máquina: paquetes, ficheros, servicios, Moodle instalado y configurado. | Ansible —o cloud-init— | Complemento, no alternativa: Terraform crea la VM; Ansible o cloud-init la configuran. El curso usa cloud-init por no añadir otra herramienta —[página 8](index.md#pagina-8)—. |
 | Organización con normas de licencia estrictas sobre código abierto. | OpenTofu o Bicep | Terraform es BSL desde 1.6; OpenTofu —MPL 2.0— y Bicep —MIT— son código abierto sin restricciones de uso. |
 | Ya hay un equipo experto en una de ellas. | Esa | La diferencia entre Terraform y Bicep bien usados es menor que la diferencia entre cualquiera de las dos bien usada y mal usada. |
 
@@ -186,11 +186,11 @@ curso no despliega en dos nubes ni usa Vault o Consul. Las razones son estas
 cuatro.
 
 - **El estado explícito enseña más.** Tener que decidir dónde vive, cómo se
-  bloquea y quién lo lee —página 4— obliga a entender qué es y qué contiene.
+  bloquea y quién lo lee —[página 4](index.md#pagina-4)— obliga a entender qué es y qué contiene.
   Con Bicep, ese conocimiento se puede posponer, y suele posponerse hasta el
   primer incidente.
 - **El plan es un artefacto.** Se guarda, se comenta en la PR, se evalúa con
-  políticas y se aplica exactamente ese fichero —páginas 13 a 15—. `what-if`
+  políticas y se aplica exactamente ese fichero —[páginas 13](index.md#pagina-13) a 15—. `what-if`
   es un informe; el despliegue recalcula.
 - **Un grafo para todo.** La identidad federada en Entra ID, el *environment*
   en GitHub y el Key Vault en Azure se crean y se destruyen juntos, con
@@ -199,7 +199,7 @@ cuatro.
   sin modo *Complete* que arrastre lo que no era tuyo —2.5, paso 3—.
 
 Lo que se pierde, y conviene saberlo: soporte de día 0 de cada API —`azapi` lo
-mitiga, página 8—, un fichero de estado que proteger —página 4—, y una licencia
+mitiga, [página 8](index.md#pagina-8)—, un fichero de estado que proteger —[página 4](index.md#pagina-4)—, y una licencia
 que no es código abierto —OpenTofu si importa—. Todo lo que el curso enseña
 vale para Pulumi sin cambios de concepto, y para Bicep con un cambio: donde aquí
 se dice "estado", allí se dice "Azure".
@@ -473,13 +473,13 @@ sed -i '/name: Storage de moodledata/,$d' storage.yml &&
     |---|---|
     | "Bicep no tiene estado" —el original—. | Azure es el estado: los recursos y el historial de despliegues. No hay fichero que proteger, pero tampoco una vista completa que consultar sin preguntar recurso a recurso —paso 4—. |
     | "Terraform es código abierto" —el original—. | BSL 1.1 desde agosto de 2023 —versión 1.6—. Gratis para casi todos los usos; no cumple la definición de código abierto. OpenTofu sí —MPL 2.0—. |
-    | "Terraform solo se prueba con Terratest" —el original—. | `terraform test` es nativo desde 1.6 y escribe las pruebas en HCL —página 9—. Terratest sigue existiendo para pruebas de integración en Go. |
+    | "Terraform solo se prueba con Terratest" —el original—. | `terraform test` es nativo desde 1.6 y escribe las pruebas en HCL —[página 9](index.md#pagina-9)—. Terratest sigue existiendo para pruebas de integración en Go. |
     | "Ansible no tiene planificación" —el original—. | `--check --diff` muestra qué cambiaría cada tarea. Lo que no hay es grafo ni borrados implícitos: no puede decir "esto sobra". |
     | Recomendar ARM JSON a "equipos con experiencia en ARM" —el original—. | Bicep compila a ARM JSON: la experiencia se conserva y la sintaxis mejora. `az bicep decompile` convierte lo existente. |
     | "Pulumi es de pago" —el original: freemium—. | CLI y providers Apache 2.0. Lo freemium es Pulumi Cloud, el backend gestionado; el estado puede ir a un Blob propio —bloque B—. |
     | Usar `--mode Complete` para "limpiar" un grupo compartido. | Borra todo lo que la plantilla no nombra, lo haya creado quien lo haya creado. Con *deployment stacks* se borra solo lo gestionado; en Terraform, solo lo del estado. |
     | Retirar un recurso de una plantilla Bicep y creer que desaparecerá. | En Incremental —por defecto— sigue ahí —paso 3—. Es la diferencia práctica más importante con Terraform y la causa habitual de recursos "fantasma" facturados. |
-    | Tratar `what-if` como un plan aplicable. | Es un informe; el despliegue recalcula, y hay diferencias documentadas —"ruido"— en algunos tipos. El plan de Terraform se guarda y se aplica ese mismo fichero —página 14—. |
+    | Tratar `what-if` como un plan aplicable. | Es un informe; el despliegue recalcula, y hay diferencias documentadas —"ruido"— en algunos tipos. El plan de Terraform se guarda y se aplica ese mismo fichero —[página 14](index.md#pagina-14)—. |
     | Mezclar dos herramientas sobre los mismos recursos. | Cada una cree que el recurso es suyo y revierte lo que hizo la otra: deriva perpetua. Una herramienta por recurso; si conviven, por grupo de recursos o por capa —Terraform la infraestructura, Ansible el interior de la VM—. |
     | Un bucle `for` en Pulumi que llama a la API directamente. | Es imperativo dentro de lo declarativo: el estado no lo ve. El bucle debe construir recursos —`new storage.StorageAccount`—, no ejecutar acciones. |
     | En Topaz: `az deployment group create` falla con un tipo no soportado. | La versión no implementa `Microsoft.Resources/deployments`. `bicep build/lint/decompile` siguen funcionando —son locales—; el paso 3 pasa al bloque de Azure real. El de Terraform no se ve afectado. |
@@ -570,4 +570,4 @@ sed -i '/name: Storage de moodledata/,$d' storage.yml &&
   —incluido Azure Blob—.
 - [Colección `azure.azcollection`](https://docs.ansible.com/ansible/latest/collections/azure/azcollection/)
   y [modo check y diff](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_checkmode.html).
-- [Azure Local Emulator —Topaz—](https://github.com/Azure/azure-local-emulator).
+- [Azure Local Emulator —Topaz—](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md).

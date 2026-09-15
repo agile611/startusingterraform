@@ -457,4 +457,4 @@ az group list -o table          # rg-demo-001 ya no aparece
 - [Validación de variables](https://developer.hashicorp.com/terraform/language/expressions/custom-conditions#input-variable-validation)
 - [Recurso `azurerm_virtual_network`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_network), [`azurerm_subnet`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subnet) y [`azurerm_storage_account`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_account)
 - [Reglas de nombre de las cuentas de almacenamiento](https://learn.microsoft.com/es-es/azure/storage/common/storage-account-overview#storage-account-name)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

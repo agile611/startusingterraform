@@ -9,7 +9,7 @@
 - Aplicar ahorros estructurales: apagado programado, Spot, niveles de almacenamiento, retención de logs.
 - Crear presupuestos que avisan y actúan; entender qué son y qué no son las reservas, y cómo se compran desde Terraform.
 
-> **🔷 Requisitos previos.** Páginas 1 a 13 completadas y destruidas, `~/tf-st/providers.tf`, Terraform `>= 1.10`, providers `http` y `azapi`, `jq`, opcionalmente `infracost` (clave gratuita), salida a Internet para `prices.azure.com`, `az account show --query environmentName -o tsv` → `Topaz`.
+> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 13 completadas y destruidas, `~/tf-st/providers.tf`, Terraform `>= 1.10`, providers `http` y `azapi`, `jq`, opcionalmente `infracost` (clave gratuita), salida a Internet para `prices.azure.com`, `az account show --query environmentName -o tsv` → `Topaz`.
 
 ---
 
@@ -396,7 +396,7 @@ resource "azapi_resource" "reserva" {
 }
 ```
 
-> ⚠️ **Una reserva es dinero, no infraestructura.** Quien la ejecuta necesita el rol *Reservation Purchaser* (o *Owner*) sobre la suscripción de facturación; la identidad de `apply` de la página 12 no debe tenerlo. Mantén las reservas en un estado y un pipeline aparte, con aprobación de quien firma el presupuesto, y con `var.comprar` a `false` por defecto para que un `apply` rutinario nunca compre nada. La cobertura y el uso se revisan cada mes: una reserva al 60 % de utilización es dinero tirado.
+> ⚠️ **Una reserva es dinero, no infraestructura.** Quien la ejecuta necesita el rol *Reservation Purchaser* (o *Owner*) sobre la suscripción de facturación; la identidad de `apply` de la [página 12](index.md#pagina-12) no debe tenerlo. Mantén las reservas en un estado y un pipeline aparte, con aprobación de quien firma el presupuesto, y con `var.comprar` a `false` por defecto para que un `apply` rutinario nunca compre nada. La cobertura y el uso se revisan cada mes: una reserva al 60 % de utilización es dinero tirado.
 
 ---
 
@@ -674,4 +674,4 @@ az consumption reservation recommendation list --scope Shared -o table
 - [Reservas de Azure](https://learn.microsoft.com/es-es/azure/cost-management-billing/reservations/save-compute-costs-reservations), [savings plans](https://learn.microsoft.com/es-es/azure/cost-management-billing/savings-plan/savings-plan-compute-overview), [API `Microsoft.Capacity/reservationOrders`](https://learn.microsoft.com/es-es/rest/api/reserved-vm-instances/reservation-order/purchase) y [`azapi_resource`](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/azapi_resource)
 - [`data "azurerm_advisor_recommendations"`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/advisor_recommendations) y [recomendaciones de coste de Advisor](https://learn.microsoft.com/es-es/azure/advisor/advisor-cost-recommendations)
 - [Well-Architected Framework: optimización de costes](https://learn.microsoft.com/es-es/azure/well-architected/cost-optimization/) y [FinOps en Azure](https://learn.microsoft.com/es-es/cloud-computing/finops/)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

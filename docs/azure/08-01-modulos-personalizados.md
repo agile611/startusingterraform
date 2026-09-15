@@ -1,6 +1,6 @@
 # 📦 Módulos personalizados: diseñar, consumir, publicar
 
-> Un módulo es una **función**: recibe variables, crea recursos y devuelve outputs. No es un "sub-proyecto" ni una carpeta donde guardar código: es la unidad con la que un equipo encapsula una decisión ("así se crea un NSG en esta empresa") para que nadie tenga que volver a tomarla. La página 6 usó un módulo de red; esta enseña a escribirlos bien: una interfaz pequeña y validada, una estructura estándar que las herramientas reconocen, consumo desde Git o un registry con versión fijada, y evolución sin romper a los consumidores. Todo funciona en **Topaz**: el laboratorio construye un módulo de grupos de seguridad de red y lo compone con el de red de la página 9.
+> Un módulo es una **función**: recibe variables, crea recursos y devuelve outputs. No es un "sub-proyecto" ni una carpeta donde guardar código: es la unidad con la que un equipo encapsula una decisión ("así se crea un NSG en esta empresa") para que nadie tenga que volver a tomarla. La [página 6](index.md#pagina-6) usó un módulo de red; esta enseña a escribirlos bien: una interfaz pequeña y validada, una estructura estándar que las herramientas reconocen, consumo desde Git o un registry con versión fijada, y evolución sin romper a los consumidores. Todo funciona en **Topaz**: el laboratorio construye un módulo de grupos de seguridad de red y lo compone con el de red de la [página 9](index.md#pagina-9).
 
 **🎯 Objetivos de aprendizaje**
 - Decidir qué entra y qué no en un módulo, y qué recibe frente a qué crea.
@@ -9,7 +9,7 @@
 - Documentar con terraform-docs, probar con `terraform test` y publicar con etiquetas semánticas.
 - Cambiar un módulo sin destruir recursos de quien lo usa (`moved` dentro del módulo).
 
-> **🔷 Requisitos previos.** Páginas 1 a 10 completadas y destruidas, `~/tf-st/providers.tf` y `~/tf-cmd/modules/red` (página 9) disponibles, Terraform `>= 1.7`, opcionalmente `terraform-docs`, `az account show --query environmentName -o tsv` → `Topaz`.
+> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 10 completadas y destruidas, `~/tf-st/providers.tf` y `~/tf-cmd/modules/red` ([página 9](index.md#pagina-9)) disponibles, Terraform `>= 1.7`, opcionalmente `terraform-docs`, `az account show --query environmentName -o tsv` → `Topaz`.
 
 ---
 
@@ -19,7 +19,7 @@
 |---|---|---|
 | ¿Crea el grupo de recursos o lo recibe? | Lo recibe (`resource_group_name`, `location`) | El grupo es la unidad de ciclo de vida y permisos del root. Un módulo que lo crea no puede convivir con otro en el mismo grupo (el original creaba grupo + VNet juntos) |
 | ¿Cuántos recursos? | Los que forman **una** cosa con sentido: NSG + reglas + asociaciones; VNet + subredes; cuenta + contenedores | Un módulo "todo el entorno" no se reutiliza; un módulo de un solo recurso sin lógica no aporta nada sobre el `resource` |
-| ¿Bloque `provider` o `backend` dentro? | Nunca (página 6). Solo `required_providers` con la versión mínima | Un módulo con provider propio no admite `for_each` ni se puede retirar limpiamente |
+| ¿Bloque `provider` o `backend` dentro? | Nunca ([página 6](index.md#pagina-6)). Solo `required_providers` con la versión mínima | Un módulo con provider propio no admite `for_each` ni se puede retirar limpiamente |
 | ¿Nombres fijos o variables? | Variables con `validation` de convención; el módulo puede componer sufijos (`snet-${each.key}`) pero no inventar el prefijo | El nombre pertenece a quien llama; el módulo garantiza que cumple la norma |
 | ¿Valores fijos (CIDR, SKU, región)? | Todo lo que pueda variar entre dos usos es variable, con `default` seguro si tiene sentido | El `address_space = ["10.0.0.0/16"]` del original impedía instanciarlo dos veces |
 | ¿Módulos que llaman a módulos? | Un nivel: el root compone módulos "hoja". Evita hoja → hoja → hoja | Cada nivel añade variables de paso y oculta el plan. Componer es tarea del root |
@@ -114,7 +114,7 @@ output "reglas" {
 | `map(object)` frente a `list(object)` | Con `map`, `for_each` usa la clave como dirección estable: borrar la regla "ssh" no renumera las demás. Con `list`, quitar el elemento 0 recrea todos |
 | `validation` (varias por variable) | Falla en `plan`, antes de tocar Azure, con un mensaje que explica la norma. Puede referenciar otras variables desde 1.9 |
 | `nullable = false` | Impide que el consumidor pase `null` "para usar el default": con `nullable = false`, `null` se convierte en el default |
-| `sensitive = true` en variables y outputs | Oculta en consola; no protege el estado (página 7). Los outputs derivados de un valor sensible deben marcarse o Terraform se niega |
+| `sensitive = true` en variables y outputs | Oculta en consola; no protege el estado ([página 7](index.md#pagina-7)). Los outputs derivados de un valor sensible deben marcarse o Terraform se niega |
 | `ephemeral = true` (≥ 1.10) | Secretos que atraviesan el módulo sin quedar en estado ni plan |
 | Alias estables como claves (`subnet_ids = { web = … }`) | Nunca indexar `for_each` por un valor que Terraform no conoce hasta el apply (un id): *"for_each keys must be known"* |
 
@@ -161,7 +161,7 @@ module "nsg_hub" {
 
 ```bash
 mkdir -p ~/tf-mod/modules/nsg/{examples/basico,tests} && cd ~/tf-mod && cp ~/tf-st/providers.tf .
-cp -r ~/tf-cmd/modules/red modules/                 # el módulo de red de la página 9
+cp -r ~/tf-cmd/modules/red modules/                 # el módulo de red de la [página 9](index.md#pagina-9)
 
 # ─── 1. El módulo ───────────────────────────────────────────────────────────────
 cat > modules/nsg/versions.tf <<'EOF'
@@ -404,7 +404,7 @@ git tag -a v1.2.0 -m "nsg: variable denegar_resto_inbound" && git push --tags
 > | Tras quitar una regla del mapa, el `plan` destruye y recrea otras | La variable es `list(object)` y el `for_each` se indexa por posición. Cámbiala a `map(object)` (major) con `moved` de `[0]` a `["https"]` |
 > | *Optional object type attributes are not allowed* / *Invalid default value for variable* | `optional()` exige Terraform ≥ 1.3 y solo vale dentro de `object({…})`. El default de un `optional` debe ser del tipo declarado |
 > | *Output refers to sensitive values* | Un output deriva de una variable o atributo sensible: marca `sensitive = true` en el output (o replantea si debe salir del módulo) |
-> | Actualizas el `ref` del módulo y el `plan` quiere destruir todo | La versión nueva renombró recursos sin `moved` (o cambió el tipo de `for_each`). No apliques: pide al autor los `moved`, o hazlos tú en el root con `state mv` (página 9) |
+> | Actualizas el `ref` del módulo y el `plan` quiere destruir todo | La versión nueva renombró recursos sin `moved` (o cambió el tipo de `for_each`). No apliques: pide al autor los `moved`, o hazlos tú en el root con `state mv` ([página 9](index.md#pagina-9)) |
 > | `terraform test`: *Provider configuration not present* o pide credenciales | Los tests cargan los providers del directorio del módulo; con `command = plan` el provider azurerm igualmente se inicializa. En Topaz, copia `providers.tf` junto al módulo solo durante el test, o declara el `provider` en el propio `.tftest.hcl` |
 > | `terraform test`: *Expected failure … but the check passed* | La `validation` no rechaza lo que creías. Buena noticia: el test ha encontrado el bug antes que el consumidor |
 > | El README no coincide con las variables | Se editó a mano. Solo el párrafo de propósito es manual; el resto lo regenera terraform-docs en el pipeline |
@@ -449,4 +449,4 @@ git tag -a v1.2.0 -m "nsg: variable denegar_resto_inbound" && git push --tags
 - [Azure Verified Modules](https://azure.github.io/Azure-Verified-Modules/) y [AVM: Network Security Group](https://registry.terraform.io/modules/Azure/avm-res-network-networksecuritygroup/azurerm/latest)
 - [terraform-docs](https://terraform-docs.io/), [TFLint ruleset azurerm](https://github.com/terraform-linters/tflint-ruleset-azurerm), [Trivy config](https://aquasecurity.github.io/trivy/latest/docs/scanner/misconfiguration/) y [Versionado semántico](https://semver.org/lang/es/)
 - [`azurerm_network_security_rule`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_security_rule) y [`azurerm_subnet_network_security_group_association`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subnet_network_security_group_association)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

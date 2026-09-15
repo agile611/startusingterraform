@@ -10,7 +10,7 @@
 - Reconocer y documentar las diferencias entre el emulador y Azure real mediante `lifecycle { ignore_changes }`.
 - Verificar el despliegue con Azure CLI y conectarse por SSH (Azure real).
 
-> **🔷 Requisitos previos.** Página 1 completada (provider configurado para Topaz en `~/tf-intro/providers.tf`), `az account show --query environmentName -o tsv` → `Topaz`, y una clave SSH: si no tienes, `ssh-keygen -t ed25519 -f ~/.ssh/tf-lab -N ""`.
+> **🔷 Requisitos previos.** [Página 1](index.md#pagina-1) completada (provider configurado para Topaz en `~/tf-intro/providers.tf`), `az account show --query environmentName -o tsv` → `Topaz`, y una clave SSH: si no tienes, `ssh-keygen -t ed25519 -f ~/.ssh/tf-lab -N ""`.
 
 ---
 
@@ -48,7 +48,7 @@ cp ~/tf-intro/providers.tf .        # imprescindible: fija azurerm ~> 4.0 y apun
 ls                                  # providers.tf   ← y nada más, de momento
 ```
 
-> ⚠️ **Copia solo `providers.tf`.** Si copias también el `main.tf` de la página 1, tendrás el grupo de recursos y la red virtual declarados dos veces (allí y en `red.tf`) y `validate` fallará con *Duplicate resource*. En este laboratorio cada recurso vive en su archivo: `red.tf`, `nic.tf`, `vm.tf`, `variables.tf` y `outputs.tf`. Y si al hacer `init` ves *Finding latest version of hashicorp/azurerm* e instala una 5.x, es que falta `providers.tf`: sin la versión fijada, el `plan` fallará.
+> ⚠️ **Copia solo `providers.tf`.** Si copias también el `main.tf` de la [página 1](index.md#pagina-1), tendrás el grupo de recursos y la red virtual declarados dos veces (allí y en `red.tf`) y `validate` fallará con *Duplicate resource*. En este laboratorio cada recurso vive en su archivo: `red.tf`, `nic.tf`, `vm.tf`, `variables.tf` y `outputs.tf`. Y si al hacer `init` ves *Finding latest version of hashicorp/azurerm* e instala una 5.x, es que falta `providers.tf`: sin la versión fijada, el `plan` fallará.
 
 ```hcl
 # variables.tf
@@ -425,4 +425,4 @@ terraform destroy -var desplegar_vm=true -auto-approve   # cuando termines: una 
 - [Buscar imágenes de VM con Azure CLI](https://learn.microsoft.com/es-es/azure/virtual-machines/linux/cli-ps-findimage)
 - [Estados de una VM y facturación](https://learn.microsoft.com/es-es/azure/virtual-machines/states-billing)
 - [Función `one()`](https://developer.hashicorp.com/terraform/language/functions/one) y [meta-argumento `count`](https://developer.hashicorp.com/terraform/language/meta-arguments/count)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

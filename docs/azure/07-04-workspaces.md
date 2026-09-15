@@ -9,7 +9,7 @@
 - Decidir entre workspaces y directorio por entorno con criterios concretos.
 - Serializar por workspace en CI y separar permisos por estado en Azure real.
 
-> **🔷 Requisitos previos.** Páginas 1 a 9 completadas y destruidas, `~/tf-st/providers.tf` disponible, `az account show --query environmentName -o tsv` → `Topaz`.
+> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 9 completadas y destruidas, `~/tf-st/providers.tf` disponible, `az account show --query environmentName -o tsv` → `Topaz`.
 
 ---
 
@@ -52,7 +52,7 @@ una credencial   └── …
 
 El original proponía "un workspace por entorno" y a la vez un directorio por entorno. Son dos patrones distintos y hay que elegir. La regla práctica: si dos copias de la infraestructura deben tener **distinta suscripción, distintos permisos o distinta gente que puede aplicar**, son directorios. Si son copias equivalentes del mismo equipo, son workspaces.
 
-| **Criterio** | **Workspaces** | **Directorio por entorno (página 7.5)** |
+| **Criterio** | **Workspaces** | **Directorio por entorno ([página 7](index.md#pagina-7).5)** |
 |---|---|---|
 | Suscripción / tenant | La misma para todos (el `provider` es común) | Una por entorno: `pro` en su propia suscripción |
 | Permisos sobre el estado | Mismo contenedor: quien lee `dev` lee `pro` (salvo ABAC, 10.7) | Contenedor o cuenta distintos; RBAC distinto; OIDC con `subject` distinto |
@@ -221,7 +221,7 @@ az role assignment create --assignee-object-id <sp-ci-pr> --assignee-principal-t
 on:
   pull_request: { types: [opened, synchronize, closed] }
 concurrency:
-  group: moodle-dev-pr-${{ github.event.number }}      # un lock de cola por workspace (página 8)
+  group: moodle-dev-pr-${{ github.event.number }}      # un lock de cola por workspace ([página 8](index.md#pagina-8))
   cancel-in-progress: false
 env:
   TF_WORKSPACE: pr-${{ github.event.number }}          # todos los pasos usan este workspace; nada de "select" con estado en el runner
@@ -259,8 +259,8 @@ jobs:
 > | *Variables not allowed* al usar `terraform.workspace` en el bloque `backend` | El backend no admite expresiones. Los workspaces ya separan el estado por sí solos (sufijo `env:`); no hace falta cambiar la `key` |
 > | El `environments/dev/terraform.tfvars` del original no tiene efecto | Terraform solo carga solo `terraform.tfvars` y `*.auto.tfvars` del directorio actual. Pásalo con `-var-file` o, mejor, usa el mapa de 10.4 |
 > | `workspace list` con backend `azurerm` muestra workspaces que nadie creó | Cualquier blob `<key>env:<x>` del contenedor cuenta como workspace: restos de PRs cuyo job `destruir` falló. `state list` en cada uno; si están vacíos, `workspace delete` |
-> | Un `random_password` distinto por workspace "se pierde" al borrar el workspace | Comportamiento esperado: vive en ese estado. Si la contraseña debe sobrevivir, guárdala en Key Vault (página 6) antes de destruir |
-> | En Topaz, los grupos de dos workspaces aparecen con la misma tag `entorno` | El grupo lleva `ignore_changes = [tags]` por la lectura de tags del emulador (página 2): la tag se pone al crear y no se corrige después. Compruébalo en `vnet` o en la cuenta, que sí las actualizan |
+> | Un `random_password` distinto por workspace "se pierde" al borrar el workspace | Comportamiento esperado: vive en ese estado. Si la contraseña debe sobrevivir, guárdala en Key Vault ([página 6](index.md#pagina-6)) antes de destruir |
+> | En Topaz, los grupos de dos workspaces aparecen con la misma tag `entorno` | El grupo lleva `ignore_changes = [tags]` por la lectura de tags del emulador ([página 2](index.md#pagina-2)): la tag se pone al crear y no se corrige después. Compruébalo en `vnet` o en la cuenta, que sí las actualizan |
 
 ---
 
@@ -301,4 +301,4 @@ jobs:
 - [Condiciones ABAC en RBAC de Azure](https://learn.microsoft.com/es-es/azure/role-based-access-control/conditions-overview) y [ejemplos ABAC para blobs](https://learn.microsoft.com/es-es/azure/storage/blobs/storage-auth-abac-examples) (permisos por prefijo de blob)
 - [Concurrencia en GitHub Actions](https://docs.github.com/actions/using-jobs/using-concurrency) y [evento `pull_request`](https://docs.github.com/actions/using-workflows/events-that-trigger-workflows#pull_request) (entornos efímeros por PR)
 - [Documentación de Moodle para administradores](https://docs.moodle.org/es/Administrador) (contexto de la aplicación del laboratorio final)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

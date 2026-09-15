@@ -840,4 +840,4 @@ Ocho de diez áreas se practican íntegramente en el emulador. Las dos restantes
 - [Convención de nombres (Cloud Adoption Framework)](https://learn.microsoft.com/es-es/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming) y [estrategia de etiquetado](https://learn.microsoft.com/es-es/azure/cloud-adoption-framework/ready/azure-best-practices/resource-tagging)
 - [Azure Verified Modules](https://azure.github.io/Azure-Verified-Modules/)
 - [tflint](https://github.com/terraform-linters/tflint), [ruleset azurerm](https://github.com/terraform-linters/tflint-ruleset-azurerm), [trivy](https://trivy.dev/) y [terraform-docs](https://terraform-docs.io/)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

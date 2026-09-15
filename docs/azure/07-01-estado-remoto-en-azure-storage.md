@@ -1,6 +1,6 @@
 # 🔐 Estado remoto en Azure Storage
 
-> El estado es la memoria de Terraform: el archivo que relaciona cada bloque `resource` con el id real en Azure. Hasta ahora ha vivido en `terraform.tfstate`, en tu disco. Esta página lo saca de ahí: qué contiene, cómo se inspecciona y repara, cómo se comparte con bloqueo entre varias personas y un pipeline, y cómo se recupera cuando algo sale mal. En **Topaz** el backend `azurerm` no funciona (lee y escribe el blob por el plano de datos, página 5), pero todo lo demás sí: la cuenta que lo aloja, las operaciones de estado, los bloqueos y la mecánica de migración se practican en el emulador con la misma secuencia de comandos que usarás en Azure real.
+> El estado es la memoria de Terraform: el archivo que relaciona cada bloque `resource` con el id real en Azure. Hasta ahora ha vivido en `terraform.tfstate`, en tu disco. Esta página lo saca de ahí: qué contiene, cómo se inspecciona y repara, cómo se comparte con bloqueo entre varias personas y un pipeline, y cómo se recupera cuando algo sale mal. En **Topaz** el backend `azurerm` no funciona (lee y escribe el blob por el plano de datos, [página 5](index.md#pagina-5)), pero todo lo demás sí: la cuenta que lo aloja, las operaciones de estado, los bloqueos y la mecánica de migración se practican en el emulador con la misma secuencia de comandos que usarás en Azure real.
 
 **🎯 Objetivos de aprendizaje**
 - Leer un `tfstate`: versión, `serial`, `lineage`, recursos y secretos en claro.
@@ -9,7 +9,7 @@
 - Explicar cómo bloquea el backend `azurerm`, provocar un bloqueo, esperarlo y liberarlo.
 - Configurar el backend con Entra ID, OIDC o identidad gestionada, migrar el estado y restaurar una versión anterior.
 
-> **🔷 Requisitos previos.** Páginas 1 a 6 completadas y destruidas, `~/tf-st/providers.tf` disponible (incluye `data_plane_available = false`), `jq` instalado, Terraform `>= 1.7` (bloque `removed`), `az account show --query environmentName -o tsv` → `Topaz`.
+> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 6 completadas y destruidas, `~/tf-st/providers.tf` disponible (incluye `data_plane_available = false`), `jq` instalado, Terraform `>= 1.7` (bloque `removed`), `az account show --query environmentName -o tsv` → `Topaz`.
 
 ---
 
@@ -35,7 +35,7 @@
 }
 ```
 
-> ⚠️ **El estado contiene secretos en claro.** La contraseña de SQL de la página 4, la clave de la cuenta de almacenamiento de la página 5 (`primary_access_key`) y cualquier `random_password` están en `attributes` tal cual. `sensitive = true` solo los oculta en la consola. Quien pueda leer el estado puede leer todos los secretos de la infraestructura: por eso el contenedor del estado se protege como un Key Vault, y por eso `*.tfstate*` está en el `.gitignore` desde la página 1.
+> ⚠️ **El estado contiene secretos en claro.** La contraseña de SQL de la [página 4](index.md#pagina-4), la clave de la cuenta de almacenamiento de la [página 5](index.md#pagina-5) (`primary_access_key`) y cualquier `random_password` están en `attributes` tal cual. `sensitive = true` solo los oculta en la consola. Quien pueda leer el estado puede leer todos los secretos de la infraestructura: por eso el contenedor del estado se protege como un Key Vault, y por eso `*.tfstate*` está en el `.gitignore` desde la [página 1](index.md#pagina-1).
 
 | **Necesidad** | **Estado local** | **Backend `azurerm`** |
 |---|---|---|
@@ -105,7 +105,7 @@ resource "azurerm_storage_account" "estado" {
 
 resource "azurerm_storage_container" "tfstate" {
   name                  = "tfstate"
-  storage_account_id    = azurerm_storage_account.estado.id      # ARM: funciona en Topaz (página 5)
+  storage_account_id    = azurerm_storage_account.estado.id      # ARM: funciona en Topaz ([página 5](index.md#pagina-5))
   container_access_type = "private"
 }
 
@@ -260,7 +260,7 @@ terraform init -backend-config=backends/pro.hcl -reconfigure # cambiar de entorn
 |---|---|---|
 | Personas del equipo | `az login` + `use_azuread_auth` | *Storage Blob Data Contributor* sobre el contenedor `tfstate`, asignado a un **grupo** de Entra ID (`tf-operadores`), no persona a persona |
 | Revisores, auditoría | Igual | *Storage Blob Data Reader*: pueden `plan` y `state list`, no `apply` |
-| GitHub Actions / Azure DevOps | OIDC: `use_oidc = true` o `ARM_USE_OIDC=true` (página 6) | Contributor sobre el **contenedor**, con `key` restringida por condición ABAC si hay varios equipos en la misma cuenta |
+| GitHub Actions / Azure DevOps | OIDC: `use_oidc = true` o `ARM_USE_OIDC=true` ([página 6](index.md#pagina-6)) | Contributor sobre el **contenedor**, con `key` restringida por condición ABAC si hay varios equipos en la misma cuenta |
 | Agente en una VM de Azure | `use_msi = true`: identidad gestionada de la VM (`identity { type = "SystemAssigned" }` en `azurerm_linux_virtual_machine`) | Igual que el pipeline. No hay ningún secreto en la VM |
 | Cualquiera con la clave de cuenta | Imposible: `shared_access_key_enabled = false` | La clave no se puede auditar ni caduca; el original la usaba incluso para crear el contenedor |
 
@@ -497,4 +497,4 @@ terraform destroy -auto-approve
 - [Desactivar la autorización por clave compartida](https://learn.microsoft.com/es-es/azure/storage/common/shared-key-authorization-prevent) y [roles RBAC de datos](https://learn.microsoft.com/es-es/azure/storage/blobs/assign-azure-role-data-access)
 - [Monitorizar Blob Storage](https://learn.microsoft.com/es-es/azure/storage/blobs/monitor-blob-storage) y [tabla `StorageBlobLogs`](https://learn.microsoft.com/es-es/azure/azure-monitor/reference/tables/storagebloblogs)
 - [Identidades gestionadas](https://learn.microsoft.com/es-es/entra/identity/managed-identities-azure-resources/overview) y [OIDC desde GitHub Actions](https://learn.microsoft.com/es-es/azure/developer/github/connect-from-azure-openid-connect)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

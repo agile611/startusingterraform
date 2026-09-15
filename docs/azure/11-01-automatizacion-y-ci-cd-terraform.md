@@ -1,6 +1,6 @@
 # 🤖 CI/CD para Terraform: planificar en la PR, aplicar con aprobación
 
-> Un pipeline de aplicación compila, prueba y publica. Un pipeline de Terraform hace otra cosa: **propone un cambio en infraestructura real y espera a que alguien lo apruebe**. Eso cambia el diseño. El `plan` es el artefacto que se revisa (en la pull request, como comentario), el `apply` ocurre una sola vez por cambio y detrás de una puerta, y un tercer flujo, programado, comprueba cada mañana que nadie ha tocado Moodle desde el portal. Esta página construye esos tres flujos para GitHub Actions y Azure DevOps sobre la identidad federada de la página 12, de modo que la plataforma de CI no guarda ningún secreto: ni de Azure ni de Moodle. También cubre lo que suele salir mal: el estado bloqueado, el plan que ya no vale cuando llega el apply, el `terraform_version: latest` que cambia entre un paso y otro. En **Topaz** se ejecutan los mismos pasos que el pipeline, desde un script idéntico al del workflow, contra el emulador: los códigos de salida, el resumen del plan, la deriva y el bloqueo del estado se ven en local; la federación y las aprobaciones se prueban en el bloque de Azure real.
+> Un pipeline de aplicación compila, prueba y publica. Un pipeline de Terraform hace otra cosa: **propone un cambio en infraestructura real y espera a que alguien lo apruebe**. Eso cambia el diseño. El `plan` es el artefacto que se revisa (en la pull request, como comentario), el `apply` ocurre una sola vez por cambio y detrás de una puerta, y un tercer flujo, programado, comprueba cada mañana que nadie ha tocado Moodle desde el portal. Esta página construye esos tres flujos para GitHub Actions y Azure DevOps sobre la identidad federada de la [página 12](index.md#pagina-12), de modo que la plataforma de CI no guarda ningún secreto: ni de Azure ni de Moodle. También cubre lo que suele salir mal: el estado bloqueado, el plan que ya no vale cuando llega el apply, el `terraform_version: latest` que cambia entre un paso y otro. En **Topaz** se ejecutan los mismos pasos que el pipeline, desde un script idéntico al del workflow, contra el emulador: los códigos de salida, el resumen del plan, la deriva y el bloqueo del estado se ven en local; la federación y las aprobaciones se prueban en el bloque de Azure real.
 
 **🎯 Objetivos de aprendizaje**
 - Diseñar el flujo *comprobar → planificar → aprobar → aplicar → vigilar* y justificar por qué el `apply` no se ejecuta en cada push.
@@ -10,7 +10,7 @@
 - Gestionar el estado desde CI: bloqueo, concurrencia, desbloqueo seguro y detección de deriva con `-detailed-exitcode`.
 - Reproducir el pipeline en local contra Topaz con el mismo script que ejecuta el runner.
 
-> **🔷 Requisitos previos.** Páginas 1 a 12 completadas y destruidas, backend `azurerm` de la página 4 operativo en Topaz, `~/tf-st/providers.tf`, Terraform `1.11.x`, `jq`, `tflint`, `trivy`, `gitleaks` (o Docker), un repositorio Git local, `az account show --query environmentName -o tsv` → `Topaz`.
+> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 12 completadas y destruidas, backend `azurerm` de la [página 4](index.md#pagina-4) operativo en Topaz, `~/tf-st/providers.tf`, Terraform `1.11.x`, `jq`, `tflint`, `trivy`, `gitleaks` (o Docker), un repositorio Git local, `az account show --query environmentName -o tsv` → `Topaz`.
 
 ---
 
@@ -22,16 +22,16 @@ El pipeline del original tiene un disparador (`push` a `main`) y un resultado (`
 |---|---|---|---|
 | **Comprobar** | Cada commit de la PR | `fmt -check`, `validate`, `tflint`, `trivy config`, `gitleaks` | Ninguno: no toca Azure (`init -backend=false`) |
 | **Planificar** | PR hacia `main` | `plan -detailed-exitcode` por entorno; resumen como comentario en la PR | Lectura del estado y de los recursos (la identidad de dev) |
-| **Aprobar y aplicar** | Merge en `main` (dev automático; pro tras aprobación) | `plan -out` + `apply` del mismo fichero, en el mismo job | Los roles de `id-moodle-tf-<entorno>` (página 12) |
+| **Aprobar y aplicar** | Merge en `main` (dev automático; pro tras aprobación) | `plan -out` + `apply` del mismo fichero, en el mismo job | Los roles de `id-moodle-tf-<entorno>` ([página 12](index.md#pagina-12)) |
 | **Vigilar** | `schedule` diario | `plan -detailed-exitcode`; código 2 = deriva → issue o alerta | Lectura |
 
-> **🔷 Por qué plan y apply van en el mismo job.** El fichero de plan contiene todas las variables no efímeras y todos los atributos conocidos (página 10): es un secreto. Subirlo como artefacto para que otro job lo aplique lo deja descargable por cualquiera con acceso de lectura al repositorio. Y con variables `ephemeral` el artefacto ni siquiera es aplicable sin volver a pasarlas. Por eso el job de apply replanifica y aplica el fichero que acaba de generar; la puerta de aprobación está delante del job, y el revisor decide con el plan de la PR y la rama protegida como garantía de que el código no cambió entre medias.
+> **🔷 Por qué plan y apply van en el mismo job.** El fichero de plan contiene todas las variables no efímeras y todos los atributos conocidos ([página 10](index.md#pagina-10)): es un secreto. Subirlo como artefacto para que otro job lo aplique lo deja descargable por cualquiera con acceso de lectura al repositorio. Y con variables `ephemeral` el artefacto ni siquiera es aplicable sin volver a pasarlas. Por eso el job de apply replanifica y aplica el fichero que acaba de generar; la puerta de aprobación está delante del job, y el revisor decide con el plan de la PR y la rama protegida como garantía de que el código no cambió entre medias.
 
 ---
 
 ## 2. Sin secretos: lo que el pipeline necesita saber
 
-El runner necesita cuatro datos para hablar con Azure, y ninguno es secreto: el `client_id` de `id-moodle-tf`, el `tenant_id`, el `subscription_id` y la orden de usar OIDC. El token lo emite la plataforma de CI en cada job y el provider lo intercambia por uno de Azure gracias a la credencial federada de la página 12. Los secretos de Moodle (la clave del proveedor de SMS, por ejemplo) tampoco viven en el CI: el job los lee de Key Vault con la identidad ya autenticada y los pasa como variables efímeras.
+El runner necesita cuatro datos para hablar con Azure, y ninguno es secreto: el `client_id` de `id-moodle-tf`, el `tenant_id`, el `subscription_id` y la orden de usar OIDC. El token lo emite la plataforma de CI en cada job y el provider lo intercambia por uno de Azure gracias a la credencial federada de la [página 12](index.md#pagina-12). Los secretos de Moodle (la clave del proveedor de SMS, por ejemplo) tampoco viven en el CI: el job los lee de Key Vault con la identidad ya autenticada y los pasa como variables efímeras.
 
 ```hcl
 # Variables del provider y del backend: ninguna secreta. En GitHub van en "vars", en Azure DevOps en un variable group sin candado.
@@ -39,7 +39,7 @@ ARM_USE_OIDC=true                 # GitHub: el provider lee ACTIONS_ID_TOKEN_REQ
 ARM_CLIENT_ID=<client_id de id-moodle-tf-dev>
 ARM_TENANT_ID=<tenant>
 ARM_SUBSCRIPTION_ID=<suscripción>
-ARM_USE_AZUREAD=true              # el backend azurerm autentica por Entra ID; sin access_key (página 10)
+ARM_USE_AZUREAD=true              # el backend azurerm autentica por Entra ID; sin access_key ([página 10](index.md#pagina-10))
 TF_IN_AUTOMATION=true             # Terraform omite las sugerencias interactivas de los mensajes
 TF_INPUT=0                        # nunca esperar a stdin: si falta una variable, falla
 
@@ -77,7 +77,7 @@ env:
   TF_INPUT: "0"
   ARM_USE_OIDC: "true"
   ARM_USE_AZUREAD: "true"
-  ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}        # vars, no secrets: no son secretos (página 12)
+  ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}        # vars, no secrets: no son secretos ([página 12](index.md#pagina-12))
   ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
 defaults: { run: { working-directory: infra } }
@@ -183,13 +183,13 @@ jobs:
             await github.rest.issues.create({ ...context.repo, title: `Deriva en ${{ matrix.entorno }} (${new Date().toISOString().slice(0,10)})`, labels: ['deriva'], body: '```\n' + body + '\n```' });
 ```
 
-> **⚠️ El *environment* es la puerta, no `workflow_run`.** El original propone `workflow_run` para "approvals": ese disparador encadena workflows, no pide aprobación a nadie. Las aprobaciones son un *environment* con *required reviewers* y *deployment branches* limitado a `main`; el job se detiene antes de empezar hasta que alguien aprueba, y la credencial federada de pro tiene como sujeto `environment:moodle-pro` (página 12), así que ni un workflow de otra rama puede obtener un token de producción.
+> **⚠️ El *environment* es la puerta, no `workflow_run`.** El original propone `workflow_run` para "approvals": ese disparador encadena workflows, no pide aprobación a nadie. Las aprobaciones son un *environment* con *required reviewers* y *deployment branches* limitado a `main`; el job se detiene antes de empezar hasta que alguien aprueba, y la credencial federada de pro tiene como sujeto `environment:moodle-pro` ([página 12](index.md#pagina-12)), así que ni un workflow de otra rama puede obtener un token de producción.
 
 ---
 
 ## 4. Azure DevOps: el mismo flujo con etapas
 
-En Azure DevOps la autenticación la resuelve la **conexión de servicio** con *workload identity federation*: al crearla, DevOps genera el emisor y el sujeto que tú registras en `azurerm_federated_identity_credential` (página 12, bloque B), y la tarea `AzureCLI@2` con `addSpnToEnvironment` deja en el entorno un token OIDC que el provider acepta con `ARM_OIDC_TOKEN`. Las tareas `TerraformTaskV4` del original son una extensión de terceros (Microsoft DevLabs): funcionan, pero esconden justo lo que esta página quiere que veas, así que el ejemplo usa la CLI directamente. Las aprobaciones son *Environments* con *Approvals and checks*.
+En Azure DevOps la autenticación la resuelve la **conexión de servicio** con *workload identity federation*: al crearla, DevOps genera el emisor y el sujeto que tú registras en `azurerm_federated_identity_credential` ([página 12](index.md#pagina-12), bloque B), y la tarea `AzureCLI@2` con `addSpnToEnvironment` deja en el entorno un token OIDC que el provider acepta con `ARM_OIDC_TOKEN`. Las tareas `TerraformTaskV4` del original son una extensión de terceros (Microsoft DevLabs): funcionan, pero esconden justo lo que esta página quiere que veas, así que el ejemplo usa la CLI directamente. Las aprobaciones son *Environments* con *Approvals and checks*.
 
 ```yaml
 # azure-pipelines.yml
@@ -347,7 +347,7 @@ terraform plan -refresh-only -detailed-exitcode    # 2 = solo deriva: qué cambi
 
 ## 6. Laboratorio en Topaz
 
-El laboratorio pone los pasos del pipeline en un script, `ci/tf.sh`, y lo ejecuta contra el emulador con el backend de la página 4. Así se comprueban en local las tres cosas que el runner hace sin que las veas: los códigos de salida del plan, el bloqueo del estado y la detección de deriva. La federación y las aprobaciones, que dependen de la plataforma de CI, van en el bloque de Azure real.
+El laboratorio pone los pasos del pipeline en un script, `ci/tf.sh`, y lo ejecuta contra el emulador con el backend de la [página 4](index.md#pagina-4). Así se comprueban en local las tres cosas que el runner hace sin que las veas: los códigos de salida del plan, el bloqueo del estado y la detección de deriva. La federación y las aprobaciones, que dependen de la plataforma de CI, van en el bloque de Azure real.
 
 ```bash
 mkdir -p ~/tf-ci/infra/{envs,backends,ci} && cd ~/tf-ci && git init -q && cp ~/tf-st/providers.tf infra/
@@ -357,7 +357,7 @@ cat > infra/backend.tf <<'EOF'
 terraform { backend "azurerm" {} }          # los valores van en backends/<entorno>.tfbackend: un fichero por entorno, mismo código
 EOF
 cat > infra/backends/dev.tfbackend <<'EOF'
-resource_group_name  = "rg-tfstate"          # la cuenta de la página 4
+resource_group_name  = "rg-tfstate"          # la cuenta de la [página 4](index.md#pagina-4)
 storage_account_name = "sttfstatetopaz"
 container_name       = "tfstate"
 key                  = "moodle/dev.tfstate"
@@ -432,7 +432,7 @@ git checkout infra/main.tf
 
 # ─── 4. Plan con código de salida, apply, plan limpio ────────────────────────────
 env=dev infra/ci/tf.sh plan dev; echo "salida: $?"           # código 2, resumen.md: **dev** — 2 cambios: 2 create
-terraform -chdir=infra show -json plan.tfplan | jq -c '.variables'   # el plan contiene los valores: por eso no es un artefacto público (página 10)
+terraform -chdir=infra show -json plan.tfplan | jq -c '.variables'   # el plan contiene los valores: por eso no es un artefacto público ([página 10](index.md#pagina-10))
 infra/ci/tf.sh apply dev
 env=dev infra/ci/tf.sh plan dev; echo "salida: $?"           # código 0: sin cambios
 
@@ -482,7 +482,7 @@ gh pr merge --squash --delete-branch
 gh run watch                                                # aplicar/dev corre; aplicar/pro queda en "Waiting for review"
 gh api repos/{owner}/{repo}/actions/runs/$(gh run list -w terraform-moodle -L1 --json databaseId --jq '.[0].databaseId')/pending_deployments \
   -X POST -f state=approved -f comment="ZRS revisado" -F "environment_ids[]=$(gh api repos/{owner}/{repo}/environments/moodle-pro --jq .id)"
-az monitor activity-log list --caller "$(gh variable get AZURE_CLIENT_ID_pro)" --offset 1h --query "[].{cuando:eventTimestamp, que:operationName.localizedValue}" -o table   # quién hizo el cambio: la identidad de pro (página 14)
+az monitor activity-log list --caller "$(gh variable get AZURE_CLIENT_ID_pro)" --offset 1h --query "[].{cuando:eventTimestamp, que:operationName.localizedValue}" -o table   # quién hizo el cambio: la identidad de pro ([página 14](index.md#pagina-14))
 
 # B. Azure DevOps: la conexión de servicio federada genera issuer y subject; regístralos en la credencial (página 12, bloque B)
 az devops service-endpoint list --org https://dev.azure.com/<org> -p <proyecto> --query "[?name=='sc-moodle-pro'].{issuer:authorization.parameters.workloadIdentityFederationIssuer, subject:authorization.parameters.workloadIdentityFederationSubject}" -o json
@@ -500,18 +500,18 @@ az pipelines run --name terraform-moodle --branch main --org … -p …
 > |---|---|
 > | `terraform apply -auto-approve` en cada push a `main` (el original) | Nadie ve el plan antes de que se ejecute. Plan en la PR como comentario; apply detrás de un *environment* con revisores. `-auto-approve` solo tiene sentido aplicando un fichero de plan ya revisado |
 > | *Unable to get ACTIONS_ID_TOKEN_REQUEST_URL env variable* | Falta `permissions: id-token: write` en el job (la raíz tiene `contents: read` y cada job amplía lo suyo). En PRs desde *forks* el token no se emite: el plan solo corre para ramas del propio repositorio |
-> | *AADSTS70021: No matching federated identity record found* | El sujeto del token no coincide con la credencial: `pull_request`, `ref:refs/heads/main` y `environment:moodle-pro` son tres sujetos y necesitan tres credenciales (página 12). En DevOps, el sujeto es `sc://org/proyecto/conexión` |
+> | *AADSTS70021: No matching federated identity record found* | El sujeto del token no coincide con la credencial: `pull_request`, `ref:refs/heads/main` y `environment:moodle-pro` son tres sujetos y necesitan tres credenciales ([página 12](index.md#pagina-12)). En DevOps, el sujeto es `sc://org/proyecto/conexión` |
 > | `-detailed-exitcode` devuelve siempre 0; `\| tee` no recibe nada | El wrapper de `setup-terraform`. `terraform_wrapper: false` en todos los jobs que ejecuten scripts |
 > | *state snapshot was created by Terraform v1.12.x, which is newer than current v1.11.4* | `terraform_version: latest` del original: un job actualizó el estado con una versión nueva y el siguiente ya no puede leerlo. Versión fijada en una sola variable (`TF_VERSION`) y `required_version` en el código |
 > | *Error acquiring the state lock* en cada ejecución | Un apply cancelado dejó el lease (`cancel-in-progress: true` o un runner perdido). Confirma que el job dueño no corre, `force-unlock` con el ID del mensaje, y pon `cancel-in-progress: false`. Nunca `state push` |
 > | *Saved plan is stale* | El plan se aplicó contra un estado distinto del que lo generó: artefacto entre jobs, o deriva entre plan y apply. Plan y apply en el mismo job; el plan de la PR es para revisar, no para aplicar |
-> | *No value for required variable "api_key_sms"* en el apply | Es `ephemeral`: no está en el fichero de plan. El paso de apply la lee de Key Vault en la misma línea, igual que el plan (página 10) |
+> | *No value for required variable "api_key_sms"* en el apply | Es `ephemeral`: no está en el fichero de plan. El paso de apply la lee de Key Vault en la misma línea, igual que el plan ([página 10](index.md#pagina-10)) |
 > | *Value for undeclared variable* tras `echo "ARM_CLIENT_ID=…" > terraform.tfvars` | `ARM_*` configuran el provider por entorno, no son variables de Terraform. Borra ese paso; y el `ARM_CLIENT_SECRET` que lo acompañaba desaparece con la federación |
 > | El log muestra `***` y, dos líneas después, el valor en claro | El *masking* solo cubre el valor exacto del secreto registrado; un JSON, un `-raw` o un `base64` lo destapan. El pipeline de esta página no posee el secreto: lo lee del vault y lo pasa como variable efímera en la misma línea, sin `echo` ni `-var`. El `echo "Contraseña: …"` del original imprime el secreto y lo llama "ocultar en logs" |
-> | `plan.tfplan` subido con `upload-artifact` para que otro job lo aplique | Contiene los valores de todas las variables no efímeras y los atributos conocidos (página 10): cualquiera con lectura del repositorio lo descarga. Plan y apply en el mismo job; si necesitas separarlos, el artefacto va cifrado y con retención de horas |
+> | `plan.tfplan` subido con `upload-artifact` para que otro job lo aplique | Contiene los valores de todas las variables no efímeras y los atributos conocidos ([página 10](index.md#pagina-10)): cualquiera con lectura del repositorio lo descarga. Plan y apply en el mismo job; si necesitas separarlos, el artefacto va cifrado y con retención de horas |
 > | `workflow_run` como "aprobación" (el original) | Encadena workflows; no pide nada a nadie. La puerta es un *environment* con *required reviewers* y *deployment branches*; en DevOps, *Approvals and checks* sobre el environment |
 > | El job de pro se ejecuta desde una rama de prueba | El environment no limita las ramas. *Deployment branches* = `main`; y la credencial federada de pro con sujeto `environment:moodle-pro`, así que aunque el job arranque, no obtiene token |
-> | *AuthorizationFailed* al crear un recurso desde el pipeline; en local funciona | En local usas tu usuario (Owner); el pipeline es `id-moodle-tf` con roles acotados (página 12). No añadas *Owner* sobre la suscripción como propone el original: añade el rol de datos concreto que falta y, si es una asignación de rol, el GUID a la lista de la condición |
+> | *AuthorizationFailed* al crear un recurso desde el pipeline; en local funciona | En local usas tu usuario (Owner); el pipeline es `id-moodle-tf` con roles acotados ([página 12](index.md#pagina-12)). No añadas *Owner* sobre la suscripción como propone el original: añade el rol de datos concreto que falta y, si es una asignación de rol, el GUID a la lista de la condición |
 > | *Error: building account: … subscription ID could not be determined* | azurerm 4.x exige `ARM_SUBSCRIPTION_ID` aunque la conexión ya sepa la suscripción. En DevOps, léelo con `az account show` dentro de `AzureCLI@2` |
 > | DevOps: *idToken: unbound variable* o `$idToken` vacío | Falta `addSpnToEnvironment: true`, o la conexión de servicio es de tipo secreto (entonces expone `servicePrincipalKey`, no `idToken`). Recrea la conexión con *Workload identity federation* |
 > | DevOps: `scriptType: 'ps'` falla en `ubuntu-latest` | `ps` es Windows PowerShell. En agentes Linux, `bash` (o `pscore` si de verdad quieres PowerShell) |
@@ -565,4 +565,4 @@ az pipelines run --name terraform-moodle --branch main --org … -p …
 - [Approvals and checks en Azure DevOps](https://learn.microsoft.com/es-es/azure/devops/pipelines/process/approvals) (aprobaciones, control de rama, bloqueo exclusivo) y [desencadenadores programados](https://learn.microsoft.com/es-es/azure/devops/pipelines/process/scheduled-triggers)
 - [Comandos de registro de Azure Pipelines](https://learn.microsoft.com/es-es/azure/devops/pipelines/scripts/logging-commands) (`##vso[task.setvariable]`, `uploadsummary`)
 - [Pruebas de extremo a extremo con Terraform en Azure](https://learn.microsoft.com/es-es/azure/developer/terraform/best-practices-end-to-end-testing)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)

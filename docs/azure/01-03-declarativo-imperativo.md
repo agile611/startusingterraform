@@ -13,9 +13,9 @@ planificar, aplicar, guardar estado y detectar deriva.
 | Sí hace | No hace | Dónde se hace de verdad |
 |---|---|---|
 | Aceptar, guardar y devolver recursos ARM: grupos, redes, storage, Key Vault y otros según versión. | Arrancar una máquina: no hay CPU, ni disco, ni SSH al que conectarse. | Azure real —bloque final de cada laboratorio—. |
-| Plano de datos de storage —blobs, tablas, colas— y de Key Vault —secretos—. | Métricas, logs, costes: no hay Azure Monitor ni Cost Management. | Azure Monitor —página 17—; Infracost sobre el plan para estimar coste sin desplegar —página 18—. |
+| Plano de datos de storage —blobs, tablas, colas— y de Key Vault —secretos—. | Métricas, logs, costes: no hay Azure Monitor ni Cost Management. | Azure Monitor —[página 17](index.md#pagina-17)—; Infracost sobre el plan para estimar coste sin desplegar —[página 18](index.md#pagina-18)—. |
 | Lo que este curso necesita: plan, apply, estado, deriva, módulos, import, pipelines. | Inyección de fallos: no hay "Chaos Engineering". | Azure Chaos Studio, sobre recursos reales. |
-| Responder sin coste, sin suscripción y sin riesgo de borrar algo real. | Evaluar RBAC, Azure Policy ni bloqueos en las peticiones. | Azure real —páginas 12 y 15—. |
+| Responder sin coste, sin suscripción y sin riesgo de borrar algo real. | Evaluar RBAC, Azure Policy ni bloqueos en las peticiones. | Azure real —[páginas 12](index.md#pagina-12) y 15—. |
 
 Lo que sí se puede "romper" en Topaz es la plataforma misma: parar el contenedor
 en mitad de un despliegue equivale a un corte de red o una caída de ARM. Es el
@@ -196,7 +196,7 @@ resource "azurerm_linux_virtual_machine" "moodle" {
     recibir soporte en 2023.
 
     Y una contraseña escrita en `os_profile` acaba en Git y en el estado: la
-    página 10 explica por qué eso es un incidente, no un descuido. Aquí la
+    [página 10](index.md#pagina-10) explica por qué eso es un incidente, no un descuido. Aquí la
     máquina solo admite clave SSH.
 
 ## 4. Comparación: dónde vive cada cosa
@@ -477,11 +477,11 @@ az monitor metrics list \
     |---|---|
     | Buscar el dashboard "FinOps" o "Chaos" de Topaz —el original—. | No existen. Topaz emula el plano de control; coste con Infracost sobre el plan, caos con Chaos Studio en Azure real —bloques B y C—. |
     | `azurerm_virtual_machine` con `storage_image_reference` —el original—. | Recurso antiguo. `azurerm_linux_virtual_machine` con `source_image_reference`, `os_disk` y `admin_ssh_key`. |
-    | `admin_password` en el código —el original—. | Queda en Git y en el estado. Clave SSH con `disable_password_authentication = true`; si hace falta contraseña, `random_password` a Key Vault —página 10—. |
+    | `admin_password` en el código —el original—. | Queda en Git y en el estado. Clave SSH con `disable_password_authentication = true`; si hace falta contraseña, `random_password` a Key Vault —[página 10](index.md#pagina-10)—. |
     | `Error: Missing required argument "ip_configuration"` en la NIC —el original—. | Una interfaz sin configuración IP ni subred no es válida; y sin VNet no hay dónde ponerla. El `main.tf` de P.3 tiene la red completa. |
-    | `client_secret` en el bloque `provider` —FAQ del original—. | Nunca. En local, `az login` y el provider lo usa; en el pipeline, OIDC sin secretos —página 12—. Un secreto en `provider` acaba en Git. |
+    | `client_secret` en el bloque `provider` —FAQ del original—. | Nunca. En local, `az login` y el provider lo usa; en el pipeline, OIDC sin secretos —[página 12](index.md#pagina-12)—. Un secreto en `provider` acaba en Git. |
     | El corte del bloque 3 llega demasiado tarde o demasiado pronto. | El `sleep 4` depende de la máquina. Ajusta el valor hasta que el corte caiga entre el segundo y el cuarto recurso; o usa dos terminales y para el contenedor a mano al ver el segundo "Creating…". |
-    | `Error acquiring the state lock` tras el corte. | Con estado local no ocurre; con backend remoto —página 4—, el bloqueo quedó huérfano. `terraform force-unlock <id>` tras comprobar que no hay otro apply en marcha. |
+    | `Error acquiring the state lock` tras el corte. | Con estado local no ocurre; con backend remoto —[página 4](index.md#pagina-4)—, el bloqueo quedó huérfano. `terraform force-unlock <id>` tras comprobar que no hay otro apply en marcha. |
     | Un recurso aparece como *tainted* tras el corte. | Terraform lo creó pero no pudo confirmar la respuesta. Lo reemplaza en el siguiente apply; si sabes que quedó bien, `terraform untaint <dirección>`. |
     | En Topaz: la VM devuelve un error de tipo o proveedor no soportado. | Tu versión no emula `Microsoft.Compute`. Comenta el bloque de la VM y la línea de `az vm create`; los bloques 1 a 4 funcionan con la red; la máquina va al bloque A de Azure real. |
     | "La declaración tiene más líneas: el script es mejor". | La longitud no era la comparación. Compara qué pasa la segunda vez, tras un fallo a medias y tras una deriva —bloques 2 a 4—. |
@@ -557,7 +557,7 @@ az monitor metrics list \
 
 ## 9. Referencias
 
-- [Azure Local Emulator —Topaz—](https://github.com/Azure/azure-local-emulator):
+- [Azure Local Emulator —Topaz—](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md):
   lista de proveedores emulados por versión.
 - [`azurerm_linux_virtual_machine`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/linux_virtual_machine),
   [`azurerm_network_interface`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_interface)

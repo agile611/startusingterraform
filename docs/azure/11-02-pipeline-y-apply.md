@@ -1,6 +1,6 @@
 # 🧾 Plan y apply en automatización: el fichero, las políticas y el fallo a medias
 
-> La página 13 construyó el pipeline alrededor de dos comandos sin abrirlos. Esta los abre. Un `plan` no es un texto en pantalla: es un fichero con el estado previo, la configuración completa, los valores de las variables y la lista exacta de acciones, y ese fichero solo se puede aplicar mientras nada haya cambiado. Un `apply` no es atómico: si falla el recurso ocho de doce, los siete anteriores existen y el estado lo sabe. Entender las dos cosas cambia cómo se diseña la automatización: qué se guarda, qué se compara, qué se comprueba antes de aplicar y qué se hace cuando la ejecución se rompe. La página recorre el contenido del plan con `terraform show -json`, las tres formas legítimas de separar plan y apply, las políticas que se evalúan sobre el JSON (con `jq`, con OPA y con `terraform test`), las salvaguardas en el código (`prevent_destroy`, precondiciones) y la recuperación de un apply parcial. Todo el laboratorio funciona en **Topaz**: son ficheros que Terraform produce y comandos que ejecuta contra el emulador.
+> La [página 13](index.md#pagina-13) construyó el pipeline alrededor de dos comandos sin abrirlos. Esta los abre. Un `plan` no es un texto en pantalla: es un fichero con el estado previo, la configuración completa, los valores de las variables y la lista exacta de acciones, y ese fichero solo se puede aplicar mientras nada haya cambiado. Un `apply` no es atómico: si falla el recurso ocho de doce, los siete anteriores existen y el estado lo sabe. Entender las dos cosas cambia cómo se diseña la automatización: qué se guarda, qué se compara, qué se comprueba antes de aplicar y qué se hace cuando la ejecución se rompe. La página recorre el contenido del plan con `terraform show -json`, las tres formas legítimas de separar plan y apply, las políticas que se evalúan sobre el JSON (con `jq`, con OPA y con `terraform test`), las salvaguardas en el código (`prevent_destroy`, precondiciones) y la recuperación de un apply parcial. Todo el laboratorio funciona en **Topaz**: son ficheros que Terraform produce y comandos que ejecuta contra el emulador.
 
 **🎯 Objetivos de aprendizaje**
 - Describir qué contiene un fichero de plan, quién puede leerlo y cuándo deja de ser aplicable.
@@ -9,7 +9,7 @@
 - Escribir políticas sobre el plan con `jq`, OPA/conftest y `terraform test`, y salvaguardas en el código.
 - Recuperar un apply parcial, un `errored.tfstate` y un recurso *tainted*; usar `-replace` y `-target` solo como emergencia auditada.
 
-> **🔷 Requisitos previos.** Páginas 1 a 13 completadas y destruidas, backend `azurerm` de la página 4 en Topaz, `~/tf-st/providers.tf`, Terraform `1.11.x`, `jq`, `unzip`, Docker (para conftest), `az account show --query environmentName -o tsv` → `Topaz`.
+> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 13 completadas y destruidas, backend `azurerm` de la [página 4](index.md#pagina-4) en Topaz, `~/tf-st/providers.tf`, Terraform `1.11.x`, `jq`, `unzip`, Docker (para conftest), `az account show --query environmentName -o tsv` → `Topaz`.
 
 ---
 
@@ -19,7 +19,7 @@
 
 | **Pieza** | **Contenido** | **Consecuencia** |
 |---|---|---|
-| `tfplan` | Acciones por recurso, valores planificados, **valores de todas las variables no efímeras**, versión de Terraform, hash del backend | El fichero es tan secreto como el estado (página 10) |
+| `tfplan` | Acciones por recurso, valores planificados, **valores de todas las variables no efímeras**, versión de Terraform, hash del backend | El fichero es tan secreto como el estado ([página 10](index.md#pagina-10)) |
 | `tfstate` | El estado previo refrescado, con *lineage* y *serial* | Si el estado remoto cambia de serial, el plan queda *stale* |
 | `tfstate-prev` | El estado antes de refrescar | Permite mostrar la deriva detectada durante el plan |
 | `tfconfig/` | Copia completa de los `.tf` y módulos | El apply no relee tu directorio: aplica lo que el plan capturó |
@@ -53,8 +53,8 @@ terraform show -no-color plan.tfplan > plan.txt
 
 ```bash
 terraform apply plan.tfplan                         # sin prompt; -auto-approve no hace nada aquí. -var no está permitido…
-TF_VAR_api_key_sms="$(…)" terraform apply plan.tfplan   # …salvo para variables ephemeral, que no viajan en el plan y hay que volver a dar (página 10)
-terraform apply -lock-timeout=10m plan.tfplan       # espera el lease hasta 10 min en lugar de fallar al instante (no lo libera: página 13)
+TF_VAR_api_key_sms="$(…)" terraform apply plan.tfplan   # …salvo para variables ephemeral, que no viajan en el plan y hay que volver a dar ([página 10](index.md#pagina-10))
+terraform apply -lock-timeout=10m plan.tfplan       # espera el lease hasta 10 min en lugar de fallar al instante (no lo libera: [página 13](index.md#pagina-13))
 terraform apply -parallelism=4 plan.tfplan          # menos concurrencia: útil con límites de API de Azure (429) o Topaz en una máquina pequeña
 terraform apply -json plan.tfplan | jq -r 'select(.type == "apply_complete" or .type == "apply_errored") | "\(.hook.resource.addr): \(.type)"'
 #   salida legible por máquinas, línea a línea: qué recurso terminó, cuál falló, cuánto tardó (.hook.elapsed_seconds)
@@ -68,7 +68,7 @@ terraform apply -var-file=envs/dev.tfvars -auto-approve
 | Un recurso (Azure devuelve error) | Los anteriores creados y en el estado; los dependientes no se intentan; el apply termina con código 1 | Corrige la causa y vuelve a planificar: el nuevo plan solo contiene lo que falta |
 | Un provisioner | El recurso existe pero queda *tainted*: el siguiente plan lo reemplaza | Si el recurso está bien, `terraform untaint`; si no, deja que lo reemplace |
 | La escritura del estado al backend | Terraform escribe `errored.tfstate` en el directorio y avisa | `terraform state push errored.tfstate`: el único caso en que `state push` es correcto |
-| El runner (cancelado, perdido) | Estado parcial guardado hasta el último recurso completado; el lease queda tomado | `force-unlock` con el ID (página 13), luego plan: detecta lo creado que no llegó al estado solo si tiene `import`; revisa en Azure |
+| El runner (cancelado, perdido) | Estado parcial guardado hasta el último recurso completado; el lease queda tomado | `force-unlock` con el ID ([página 13](index.md#pagina-13)), luego plan: detecta lo creado que no llegó al estado solo si tiene `import`; revisa en Azure |
 
 ---
 
@@ -78,7 +78,7 @@ El original separa plan y apply subiendo `tfplan` como artefacto y descargándol
 
 | **Patrón** | **Cómo** | **Cuándo** |
 |---|---|---|
-| **Mismo job** (página 13) | `plan -out` y `apply` seguidos, detrás de la puerta del *environment*; el plan de la PR es solo para revisar | Por defecto. Sin artefactos, sin caducidad, compatible con variables efímeras |
+| **Mismo job** ([página 13](index.md#pagina-13)) | `plan -out` y `apply` seguidos, detrás de la puerta del *environment*; el plan de la PR es solo para revisar | Por defecto. Sin artefactos, sin caducidad, compatible con variables efímeras |
 | **Mismo job + comparación** | Antes de aplicar, se reduce el plan a una huella (direcciones + acciones) y se compara con la huella que la PR publicó; si difieren, el job se detiene | Producción: garantiza que lo aprobado es lo aplicado, aunque haya pasado tiempo o alguien tocara Azure |
 | **Artefacto** (el original, bien hecho) | El fichero se cifra antes de subir (`age`, clave de Key Vault), retención de horas, misma versión de Terraform fijada, y el apply asume que puede estar *stale* | Solo si una norma exige aplicar el fichero exacto que se revisó. Incompatible con variables efímeras |
 
@@ -330,7 +330,7 @@ terraform plan -replace=terraform_data.post -out=rep.tfplan >/dev/null && terraf
 #   replace_by_request
 terraform plan -target=terraform_data.post -no-color 2>&1 | grep -A3 "Warning: Resource targeting"
 #   "…The -target option is not for routine use, and is provided only for exceptional situations…"
-terraform plan -refresh-only -detailed-exitcode >/dev/null; echo "deriva: $?"       # 0 ahora; 2 tras tocar algo con az (página 13)
+terraform plan -refresh-only -detailed-exitcode >/dev/null; echo "deriva: $?"       # 0 ahora; 2 tras tocar algo con az ([página 13](index.md#pagina-13))
 
 # ─── 8. Limpiar ──────────────────────────────────────────────────────────────────
 sed -i 's/prevent_destroy = true/prevent_destroy = false/' main.tf                   # la salvaguarda protege también de este comando: hay que quitarla a propósito
@@ -367,21 +367,21 @@ terraform apply -parallelism=5 -json plan.tfplan | jq -r 'select(.type == "diagn
 > | **Mensaje o síntoma** | **Causa y solución** |
 > |---|---|
 > | *Saved plan is stale* | El serial del estado cambió entre plan y apply (otro apply, un import, un `state mv`). Plan y apply en el mismo job; el plan de la PR es para revisar. Si necesitas garantía de identidad, la huella (14.3) |
-> | *The plan file was created by Terraform v1.11.4 but this is v1.12.x* | Versiones distintas entre jobs (`terraform_version: latest`). Una sola variable `TF_VERSION` y `required_version` en el código (página 13) |
-> | *Can't set variables when applying a saved plan* | Las variables ya están dentro del fichero; `-var` no se admite. La excepción son las `ephemeral`, que no viajan y hay que volver a dar por `TF_VAR_` (página 10) |
+> | *The plan file was created by Terraform v1.11.4 but this is v1.12.x* | Versiones distintas entre jobs (`terraform_version: latest`). Una sola variable `TF_VERSION` y `required_version` en el código ([página 13](index.md#pagina-13)) |
+> | *Can't set variables when applying a saved plan* | Las variables ya están dentro del fichero; `-var` no se admite. La excepción son las `ephemeral`, que no viajan y hay que volver a dar por `TF_VAR_` ([página 10](index.md#pagina-10)) |
 > | `-auto-approve` junto a un fichero de plan, o `deployInputs: {"autoApprove": false}` (el original) | Aplicar un fichero de plan nunca pregunta: `-auto-approve` es redundante y `deployInputs` no existe en `TerraformTaskV4`. La aprobación es del pipeline (*environment*), no del comando |
 > | `tfplan` subido con `upload-artifact` y descargado en otro job | Contiene los valores de todas las variables no efímeras y el estado previo: es un secreto descargable y, además, caduca. Mismo job; si una norma exige el fichero exacto, cifrado y con retención de horas (14.3) |
 > | `terraform init && terraform validate` falla en el job de validación sin credenciales | `init` intenta conectar al backend. Para validar sin tocar Azure: `init -backend=false` |
 > | *Error: Instance cannot be destroyed … prevent_destroy* en un destroy legítimo | Está haciendo su trabajo. Quita la marca en un commit propio (que pasa por la PR y queda auditado), aplica, y vuelve a ponerla si el recurso sigue existiendo. Nunca `-target` para esquivarla |
 > | *Resource precondition failed* en un entorno donde no debería aplicar | La condición no distingue entornos. Formúlala como implicación: `var.entorno != "pro" || <regla>` |
 > | El apply falla en el recurso 8 de 12 y "no se ha creado nada" | Sí se ha creado: los siete anteriores están en el estado. No borres nada a mano: corrige la causa y planifica; el nuevo plan solo contiene lo que falta |
-> | *… is tainted, so must be replaced* | Un provisioner falló tras crear el recurso. Si el recurso es correcto, `terraform untaint`; si no, deja que el plan lo reemplace. Y plantéate si ese provisioner debería ser cloud-init o una extensión (página 15) |
+> | *… is tainted, so must be replaced* | Un provisioner falló tras crear el recurso. Si el recurso es correcto, `terraform untaint`; si no, deja que el plan lo reemplace. Y plantéate si ese provisioner debería ser cloud-init o una extensión ([página 15](index.md#pagina-15)) |
 > | *Failed to save state … wrote the state to errored.tfstate* | Los recursos se crearon pero el backend no aceptó la escritura (rol quitado, token caducado, red). Restaura el acceso y `terraform state push errored.tfstate`: el único `state push` correcto. Comprueba con un plan a 0 |
 > | "Retroceder" con `state push` de un estado antiguo | El estado describe lo que existe, no lo que quieres: un estado viejo hace que Terraform recree recursos que existen o dé por existentes los que no. Retroceso = `git revert` → PR → plan → apply |
 > | "Ordena los recursos en el fichero para arreglar dependencias" (el original) | HCL es declarativo: el orden lo dan las referencias entre atributos. Si la dependencia no aparece en ningún atributo (una asignación de rol que debe existir antes del cloud-init), `depends_on` |
 > | `-target` en el flujo normal "para probar" | Deja el estado sin reconciliar con el código y Terraform lo advierte. Solo emergencias, por `workflow_dispatch` con motivo, y siempre seguido de un plan completo |
 > | `terraform refresh` (el original) | Retirado. `plan -refresh-only` muestra la deriva; `apply -refresh-only` la acepta en el estado sin tocar Azure |
-> | "Timeout en el pipeline para liberar locks" (el original) | `-lock-timeout` espera, no libera. El lease lo libera el proceso que lo tomó o `force-unlock` con su ID tras confirmar que ese proceso murió (página 13) |
+> | "Timeout en el pipeline para liberar locks" (el original) | `-lock-timeout` espera, no libera. El lease lo libera el proceso que lo tomó o `force-unlock` con su ID tras confirmar que ese proceso murió ([página 13](index.md#pagina-13)) |
 > | conftest no encuentra las reglas o pasa todo | Las reglas van en `package main` o hay que pasar `--all-namespaces`; `deny` falla el test, `warn` solo avisa. Prueba la política contra un plan que sabes que debe fallar, como en el laboratorio |
 > | `terraform test` crea recursos reales | Sin `command = plan`, el `run` hace apply (y destroy al final). Para políticas sobre el plan, siempre `command = plan` |
 > | *429 TooManyRequests* en applies grandes | Límites de la API de Azure con diez operaciones en paralelo. `-parallelism=5` y cambios más pequeños; el provider reintenta pero el tiempo crece |
@@ -428,4 +428,4 @@ terraform apply -parallelism=5 -json plan.tfplan | jq -r 'select(.type == "diagn
 - [conftest](https://www.conftest.dev/) y [OPA con planes de Terraform](https://www.openpolicyagent.org/docs/latest/terraform/)
 - [Terraform en automatización](https://developer.hashicorp.com/terraform/tutorials/automation/automate-terraform) (plan y apply separados, `TF_IN_AUTOMATION`)
 - [Límites de la API de Azure Resource Manager](https://learn.microsoft.com/es-es/azure/azure-resource-manager/management/request-limits-and-throttling) (429)
-- [Azure Local Emulator (Topaz)](https://github.com/Azure/azure-local-emulator)
+- [Azure Local Emulator (Topaz)](01-05-Entorno-Practico-Terraform-Azure-Emulator-Topaz-en-Docker.md)
