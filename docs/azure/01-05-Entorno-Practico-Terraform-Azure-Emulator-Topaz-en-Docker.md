@@ -380,14 +380,7 @@ az cloud set --name Topaz
 az config set core.instance_discovery=false
 ```
 
-> **IMPORTANTE: Si la CLI dice que `Topaz` ya existe** (el intento fallido llegó a crear la entrada a medias), elimínala y vuelve a registrarla:
->
-> ```bash
-> az cloud set --name AzureCloud && az cloud unregister --name Topaz
-> # ...y repite el az cloud register de arriba
-> ```
-
-#### Si aún falla
+#### Si aún existe algun error en este punto
 
 | Síntoma | Significado | Acción |
 |---|---|---|
