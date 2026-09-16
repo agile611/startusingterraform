@@ -1,19 +1,4 @@
-# 📤 Salidas (outputs) en Terraform
-
-> Las variables son la **entrada** de una configuración; los **outputs** son su **salida**: los valores que Terraform expone al terminar para que los lea una persona, un script o otro módulo. En esta página declararás outputs de todos los tipos, los consumirás desde la Azure CLI y `jq`, protegerás los que contienen secretos y verás qué ocurre con ellos en el estado. Todo contra el **emulador Topaz**; las diferencias con Azure real van en recuadros **🔷 En Topaz**.
-
-**🎯 Objetivos de aprendizaje**
-- Explicar para qué sirve un output y de dónde lee Terraform su valor.
-- Declarar outputs de tipo `string`, `number`, `bool`, `list`, `map` y `object`.
-- Consumirlos con `terraform output`, `-raw` y `-json` desde un script.
-- Marcar outputs sensibles y saber qué protege esa marca.
-- Escribir outputs condicionales y con `precondition`.
-
-> **🔷 Requisitos previos.** Contenedor `azure-environment` en marcha, Terraform ≥ 1.5, `jq` instalado y Azure CLI en la nube `Topaz` (`az account show --query environmentName -o tsv` → `Topaz`). Páginas de variables básicas y avanzadas completadas.
-
----
-
-## 3.1. ¿Para qué sirven los outputs?
+## 1. ¿Para qué sirven los outputs?
 
 Cuando creas infraestructura, Azure genera datos que no conocías de antemano: el ID completo de un recurso, el endpoint de una cuenta de almacenamiento, la clave de acceso que te permite usarla. Terraform los guarda en el estado, pero no te los muestra a menos que se lo pidas. Un output es esa petición. Se usa para:
 
@@ -25,7 +10,7 @@ Un detalle que ahorra confusiones: `terraform output` **lee del estado**, no de 
 
 ---
 
-## 3.2. Sintaxis
+## 2. Sintaxis
 
 ```hcl
 output "storage_endpoint_blob" {
@@ -46,7 +31,7 @@ Por convención los outputs van en `outputs.tf`, igual que las variables en `var
 
 ---
 
-## 3.3. Ejemplo práctico en Topaz
+## 3. Ejemplo práctico en Topaz
 
 > **🔷 En Topaz.** El emulador no incluye `Microsoft.Compute`, así que el ejemplo original (VM con IP pública y Apache) no puede ejecutarse. Una cuenta de almacenamiento ofrece los mismos tipos de output que una VM y uno mejor: una **clave de acceso real** que Terraform obtiene de la API, perfecta para practicar outputs sensibles.
 
@@ -192,7 +177,7 @@ Los outputs aparecen al final de cada `apply`. Fíjate en que el mapa `subredes`
 
 ---
 
-## 3.4. Tipos de datos en outputs
+## 4. Tipos de datos en outputs
 
 Un output no declara tipo: lo hereda de la expresión. Añade estos a `outputs.tf`; cubren los cinco tipos básicos más `object`, con valores que existen de verdad en el emulador:
 
@@ -251,7 +236,7 @@ Sobre `one(azurerm_storage_account.lab[*].x)`: con `count`, el recurso es una li
 
 ---
 
-## 3.5. Consumir outputs
+## 5. Consumir outputs
 
 ```bash
 terraform output                        # todos, en formato HCL legible
@@ -295,7 +280,7 @@ done
 
 ---
 
-## 3.6. Outputs sensibles
+## 6. Outputs sensibles
 
 La cuenta de almacenamiento tiene dos claves de acceso; quien las tenga puede leer y escribir todo su contenido. Terraform las obtiene de la API y las expone como `primary_access_key` y `primary_connection_string`, ambos atributos marcados como sensibles por el provider. Si quieres publicarlos, el output **debe** llevar `sensitive = true`; si no, Terraform se niega:
 
@@ -333,7 +318,7 @@ jq '.outputs.storage_clave_primaria.value' terraform.tfstate     # también en c
 
 ---
 
-## 3.7. Outputs dinámicos: condicionales, plantillas y precondiciones
+## 7. Outputs dinámicos: condicionales, plantillas y precondiciones
 
 El `value` es una expresión completa, así que puedes construir mensajes, comandos listos para copiar o valores que dependen de la configuración:
 
@@ -391,7 +376,7 @@ echo 'keys(azurerm_subnet.lab)' | terraform console
 
 ---
 
-## 3.8. Outputs entre módulos
+## 8. Outputs entre módulos
 
 Hasta ahora los outputs están en el **módulo raíz** y los lee una persona o un script. Cuando el mismo código se convierte en un módulo hijo, sus outputs son la única forma de que el exterior acceda a lo que ha creado:
 
@@ -416,7 +401,7 @@ Un recurso del módulo que no está en un output es invisible desde fuera: no se
 
 ---
 
-## 3.9. Ejemplo completo: script de verificación
+## 9. Ejemplo completo: script de verificación
 
 Este es el uso más habitual de los outputs en un equipo: un script que, tras el `apply`, comprueba contra la API que lo que Terraform cree haber creado existe de verdad. Guárdalo como `verificar.sh`:
 
@@ -481,7 +466,7 @@ az group list -o table           # rg-outputs-001 ya no aparece
 
 ---
 
-## 3.10. Buenas prácticas
+## 10. Buenas prácticas
 
 ✅ **Recomendaciones clave:**
 - **Nombres descriptivos y consistentes**: `storage_endpoint_blob`, no `endpoint`. Prefijo por recurso cuando hay varios.
@@ -508,7 +493,7 @@ az group list -o table           # rg-outputs-001 ya no aparece
 
 ---
 
-## 3.11. Autoevaluación
+## 11. Autoevaluación
 
 1. **¿De dónde lee su valor `terraform output`?**
    Del estado. Un output añadido al `.tf` no aparece hasta el siguiente `apply`.
@@ -527,7 +512,7 @@ az group list -o table           # rg-outputs-001 ya no aparece
 
 ---
 
-## 3.12. Referencias
+## 12. Referencias
 
 - [Valores de salida](https://developer.hashicorp.com/terraform/language/values/outputs) (sintaxis, `sensitive`, `precondition`)
 - [Comando `terraform output`](https://developer.hashicorp.com/terraform/cli/commands/output) (`-raw`, `-json`)

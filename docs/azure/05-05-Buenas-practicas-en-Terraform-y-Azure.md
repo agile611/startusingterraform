@@ -1,20 +1,4 @@
-# ✅ Buenas prácticas en Terraform y Azure
-
-> Ya sabes declarar variables, exponer outputs y gestionar el estado. Esta página reúne las prácticas que convierten ese conocimiento en código que un equipo puede mantener durante años: cómo organizar el proyecto, cuándo crear un módulo, cómo proteger el estado y los secretos, qué comprobar antes de cada `apply` y cómo documentarlo sin esfuerzo. Cada práctica viene con un fragmento ejecutable en el **emulador Topaz**, y al final montarás un proyecto completo que las aplica todas. Las que solo tienen sentido en una suscripción real van marcadas con **🔷 En Topaz**.
-
-**🎯 Objetivos de aprendizaje**
-- Organizar un proyecto con módulos locales y archivos de valores por entorno.
-- Fijar versiones de Terraform y providers y versionar el *lock file*.
-- Proteger el estado y los secretos, y saber qué mecanismos existen en Azure real.
-- Aplicar convenciones de nombres y etiquetas obligatorias validadas en el `plan`.
-- Ejecutar `fmt`, `validate`, `tflint`, `trivy` y `terraform test` antes de cada commit.
-- Generar la documentación de un módulo con `terraform-docs`.
-
-> **🔷 Requisitos previos.** Contenedor `azure-environment` en marcha, Terraform ≥ 1.6 (necesario para `terraform test`), `git`, `jq` y Azure CLI en la nube `Topaz` (`az account show --query environmentName -o tsv` → `Topaz`). Páginas de variables, outputs y estado completadas.
-
----
-
-## 5.1. Estructura del proyecto
+## 1. Estructura del proyecto
 
 Terraform lee todos los `.tf` de un directorio como una sola configuración, así que la división en archivos es para las personas. La convención que verás en casi cualquier repositorio profesional es esta, y es la que construirás en la sección 5.8:
 
@@ -63,7 +47,7 @@ crash.log
 
 ---
 
-## 5.2. Módulos
+## 2. Módulos
 
 Un módulo es un directorio con archivos `.tf` que se invoca con un bloque `module`. Sus variables son la entrada, sus outputs la única salida. Conviene crear uno cuando un conjunto de recursos se repite (la red de cada entorno, la cuenta de almacenamiento con la configuración corporativa) o cuando quieres imponer una configuración segura por defecto.
 
@@ -97,9 +81,9 @@ output "subredes" {
 
 ---
 
-## 5.3. Versiones, variables y estado
+## 3. Versiones, variables y estado
 
-### 5.3.1. Fijar versiones
+### 3.1. Fijar versiones
 
 ```hcl
 terraform {
@@ -114,14 +98,14 @@ terraform {
 ```
 El `~>` en el provider dice "cualquier 4.x"; la versión exacta que se descargó queda en `.terraform.lock.hcl`. Versionar ese archivo es lo que garantiza que el compañero, el pipeline y tú usáis el mismo binario. Para actualizar de forma consciente: `terraform init -upgrade`, revisar el `plan`, y hacer commit del lock.
 
-### 5.3.2. Variables
+### 3.2. Variables
 
 - `type`, `description` y, cuando hay un valor razonable, `default`. Sin excepciones.
 - `validation` para todo lo que la API rechazaría: nombres, rangos, listas cerradas, CIDR. En Topaz importa más aún, porque el emulador no siempre reproduce los mensajes de error de Azure.
 - Un `.tfvars` por entorno con solo lo que difiere; los cálculos (`merge`, prefijos) en `locals`.
 - `sensitive = true` en secretos, valores fuera del repositorio (`TF_VAR_` o `*.auto.tfvars` ignorado).
 
-### 5.3.3. Estado
+### 3.3. Estado
 
 El estado contiene todo: IDs, atributos y cualquier secreto que un recurso haya devuelto. Se trata como un secreto en sí mismo:
 
@@ -149,9 +133,9 @@ terraform workspace list                          # un estado por entorno
 
 ---
 
-## 5.4. Seguridad
+## 4. Seguridad
 
-### 5.4.1. Autenticación
+### 4.1. Autenticación
 
 El provider `azurerm` admite varias formas de autenticarse. De mejor a peor:
 
@@ -175,7 +159,7 @@ provider "azurerm" {
 
 > **🔷 En Topaz.** El emulador no tiene Entra ID: la autenticación la aporta la sesión de `az login` contra la nube `Topaz`, y el provider la hereda sin más configuración que `metadata_host`, `resource_provider_registrations = "none"` y `subscription_id`. OIDC e identidades administradas no existen en el emulador.
 
-### 5.4.2. Secretos
+### 4.2. Secretos
 
 Tres reglas, ya conocidas de las páginas anteriores, que aquí se convierten en política:
 
@@ -207,11 +191,11 @@ data "azurerm_key_vault_secret" "token" {
 
 ---
 
-## 5.5. Nombres, etiquetas y coste
+## 5. Nombres, etiquetas y coste
 
 La gobernanza empieza en el código: si el nombre y las etiquetas son correctos desde el primer `apply`, el informe de costes, la auditoría y el *on-call* funcionan solos.
 
-### 5.5.1. Convención de nombres (Cloud Adoption Framework)
+### 5.1. Convención de nombres (Cloud Adoption Framework)
 
 | **Recurso** | **Prefijo** | **Ejemplo** | **Restricción** |
 |---|---|---|---|
@@ -231,7 +215,7 @@ locals {
 }
 ```
 
-### 5.5.2. Etiquetas obligatorias, validadas en el plan
+### 5.2. Etiquetas obligatorias, validadas en el plan
 
 ```hcl
 variable "tags" {
@@ -256,7 +240,7 @@ locals {
 
 > **🔷 En Topaz.** La validación se ejecuta en el `plan` y funciona igual en el emulador. Las etiquetas se aplican bien a redes y cuentas de almacenamiento; el grupo de recursos no las devuelve al leer, de ahí el `lifecycle { ignore_changes = [tags] }` que ya conoces. En Azure real, la misma regla se refuerza con **Azure Policy** (efecto *deny* si falta la etiqueta), que el emulador no implementa.
 
-### 5.5.3. Coste
+### 5.3. Coste
 
 - **Destruye lo efímero**: un laboratorio o un entorno de pruebas termina con `terraform destroy`. `terraform plan -destroy` muestra antes qué se va a eliminar.
 - **SKU por entorno**: `LRS` en dev, `GRS` o `ZRS` en prod; tamaños de VM pequeños fuera de producción. Son variables, no código.
@@ -265,7 +249,7 @@ locals {
 
 ---
 
-## 5.6. Documentación
+## 6. Documentación
 
 La documentación de un módulo son sus `description`. `terraform-docs` las convierte en un `README.md` con tablas de variables, outputs y recursos, y lo mantiene al día en cada commit:
 
@@ -283,7 +267,7 @@ Con un archivo `.terraform-docs.yml` en la raíz puedes inyectar las tablas entr
 
 ---
 
-## 5.7. Pruebas y validación
+## 7. Pruebas y validación
 
 Hay cuatro niveles, de más barato a más caro. Los tres primeros no necesitan Azure; el cuarto funciona contra Topaz:
 
@@ -366,7 +350,7 @@ Lo ejecutarás en la sección siguiente, cuando el proyecto exista. La regla de 
 
 ---
 
-## 5.8. Ejemplo completo: un proyecto con todas las prácticas
+## 8. Ejemplo completo: un proyecto con todas las prácticas
 
 Vas a construir la estructura de la sección 5.1 desde cero. Es el mismo trío red-subredes-almacenamiento de las páginas anteriores, ahora organizado como lo haría un equipo: dos módulos locales con valores seguros por defecto, validaciones, etiquetas obligatorias, dos entornos, pruebas y documentación generada.
 
@@ -769,7 +753,7 @@ az group list -o table                          # vacío
 
 ---
 
-## 5.9. Lista de comprobación
+## 9. Lista de comprobación
 
 Resumen de todo lo anterior en una tabla para revisar antes de cada *pull request*. La última columna indica qué puedes practicar en el emulador:
 
@@ -790,7 +774,7 @@ Ocho de diez áreas se practican íntegramente en el emulador. Las dos restantes
 
 ---
 
-## 5.10. Errores comunes
+## 10. Errores comunes
 
 > ⚠️ **Solución de problemas**
 > 
@@ -809,7 +793,7 @@ Ocho de diez áreas se practican íntegramente en el emulador. Las dos restantes
 
 ---
 
-## 5.11. Autoevaluación
+## 11. Autoevaluación
 
 1. **¿Por qué se versiona `.terraform.lock.hcl` pero no `.terraform/`?**
    El lock fija la versión exacta del provider para todo el equipo; `.terraform/` es la descarga, reproducible con `init`.
@@ -830,7 +814,7 @@ Ocho de diez áreas se practican íntegramente en el emulador. Las dos restantes
 
 ---
 
-## 5.12. Referencias
+## 12. Referencias
 
 - [Guía de estilo de Terraform](https://developer.hashicorp.com/terraform/language/style) (HashiCorp)
 - [Desarrollo de módulos](https://developer.hashicorp.com/terraform/language/modules/develop) y [estructura estándar](https://developer.hashicorp.com/terraform/language/modules/develop/structure)

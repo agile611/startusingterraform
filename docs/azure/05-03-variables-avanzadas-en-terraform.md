@@ -1,18 +1,4 @@
-# 🔧 Variables avanzadas en Terraform
-
-> En la página anterior declaraste variables y les pasaste valores. Aquí darás el siguiente paso: un archivo de valores por entorno, reglas que rechacen valores incorrectos antes de tocar la API, protección de secretos y tipos compuestos (`object`, `map(object)`) que describen infraestructura completa en un solo valor. Todo se ejecuta contra el **emulador Topaz**; donde difiere de Azure real, lo verás en un recuadro **🔷 En Topaz**.
-
-**🎯 Objetivos de aprendizaje**
-- Gestionar dos entornos con `dev.tfvars` y `prod.tfvars` sobre un único código.
-- Escribir validaciones con `contains`, rangos numéricos y `regex`.
-- Saber qué protege `sensitive` y qué no.
-- Declarar `object` con `optional()` y `map(object)`, y recorrerlos con `for_each`.
-
-> **🔷 Requisitos previos.** Contenedor `azure-environment` en marcha, Terraform ≥ 1.5 y Azure CLI en la nube `Topaz` (`az account show --query environmentName -o tsv` → `Topaz`). Página "Variables básicas" completada.
-
----
-
-## 2.1. Archivos `.tfvars` por entorno
+## 1. Archivos `.tfvars` por entorno
 
 Un archivo `.tfvars` contiene solo asignaciones `nombre = valor`, sin bloques `variable`. La convención es un archivo por entorno, con únicamente lo que difiere de los `default`:
 
@@ -47,7 +33,7 @@ Si una variable aparece en varios sitios gana el último de esta cadena: `defaul
 
 ---
 
-## 2.2. Validación de variables
+## 2. Validación de variables
 
 Cada bloque `validation` tiene una `condition` que debe ser verdadera y un `error_message`. Se evalúan en el `plan`, antes de cualquier llamada a la API. Tres patrones cubren casi todos los casos:
 
@@ -89,7 +75,7 @@ variable "proyecto" {
 
 ---
 
-## 2.3. Variables sensibles
+## 3. Variables sensibles
 
 `sensitive = true` hace que Terraform oculte el valor en la salida de `plan`, `apply` y `output`, y obliga a marcar también como sensibles los outputs que lo usen. Es una protección contra *logs*, no un cifrado. Compruébalo sin tocar Azure:
 
@@ -126,7 +112,7 @@ Marca sensible la variable concreta, no un objeto completo: si `vm_config` enter
 
 ---
 
-## 2.4. Tipos complejos
+## 4. Tipos complejos
 
 `list` y `map` ya los conoces. Los dos que cambian la forma de trabajar son `object` con atributos opcionales y `map(object)`:
 
@@ -176,7 +162,7 @@ Con `for_each` sobre un mapa, cada instancia se identifica por su clave (`azurer
 
 ---
 
-## 2.5. Ejemplo práctico en Topaz
+## 5. Ejemplo práctico en Topaz
 
 > **🔷 En Topaz.** El emulador no incluye `Microsoft.Compute`, así que el ejemplo original con máquinas virtuales no puede ejecutarse. Red, subredes y almacenamiento sí están soportados y ejercitan los mismos conceptos: un `map(object)` decide cuántas subredes hay y cómo son, y un `object` configura la cuenta de almacenamiento.
 
@@ -337,7 +323,7 @@ az group list -o table                      # vacío
 
 ---
 
-## 2.6. Buenas prácticas
+## 6. Buenas prácticas
 
 ✅ **Recomendaciones clave:**
 - **Un `.tfvars` por entorno** con solo lo que difiere; los `default` cubren el resto.
@@ -361,7 +347,7 @@ az group list -o table                      # vacío
 
 ---
 
-## 2.7. Autoevaluación
+## 7. Autoevaluación
 
 1. **¿Qué protege `sensitive = true` y qué no?**
    Oculta el valor en consola y obliga a marcar los outputs. No lo cifra: sigue en claro en `terraform.tfstate`.
@@ -378,7 +364,7 @@ az group list -o table                      # vacío
 
 ---
 
-## 2.8. Referencias
+## 8. Referencias
 
 - [Variables de entrada](https://developer.hashicorp.com/terraform/language/values/variables) (precedencia, `sensitive`, `validation`)
 - [Restricciones de tipo](https://developer.hashicorp.com/terraform/language/expressions/type-constraints) (`object`, `optional()`)
