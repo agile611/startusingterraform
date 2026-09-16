@@ -332,9 +332,9 @@ curl --noproxy '*' \
   'https://topaz.local.dev:8899/metadata/endpoints?api-version=2022-09-01'
 ```
 
-Una respuesta `HTTP/1.1 200 OK` seguida de un JSON con los endpoints confirma que el emulador está operativo y el certificado es válido. Si obtienes otro resultado, localiza tu error en la tabla:
+Una respuesta `HTTP/1.1 200 OK` seguida de un JSON con los endpoints confirma que el emulador está operativo y el certificado es válido.
 
-#### 6. Despliegue total de los certificados
+### 6. Despliegue total de los certificados
 
 El bloque es idempotente: puedes ejecutarlo entero aunque parte ya esté hecha.
 
