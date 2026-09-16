@@ -1,21 +1,5 @@
 # ⚙️ Comandos clave de Terraform: init, plan, apply, destroy
 
-> **Terraform** gestiona infraestructura de forma declarativa: tú describes el estado deseado y la herramienta calcula y ejecuta los cambios. Cuatro comandos forman el ciclo de vida de cualquier proyecto: `init`, `plan`, `apply` y `destroy`. En este módulo los ejecutarás contra el **emulador Topaz** y aprenderás a leer lo que cada uno responde. Donde el emulador difiere de Azure real, lo verás en un recuadro **🔷 En Topaz**.
-
-**🎯 Objetivos de aprendizaje**
-- Entender qué hace cada comando, cuándo se ejecuta y con qué habla (Internet, disco o emulador).
-- Ejecutar el flujo completo y verificarlo con Azure CLI.
-- Leer un plan: los símbolos `+`, `~`, `-` y `-/+`.
-- Usar planes guardados, `-auto-approve` y `-target` sabiendo sus riesgos.
-- Reconocer los errores habituales de cada fase y resolverlos.
-
-> **🔷 Requisitos previos**
-> - Contenedor `azure-environment` en marcha y certificado del emulador instalado.
-> - Terraform ≥ 1.5 y Azure CLI autenticada en la nube `Topaz`: `az account show --query environmentName -o tsv` → `Topaz`.
-> - Laboratorio "Crear tu primer Resource Group" completado.
-
----
-
 ## 1. Visión general del flujo
 
 ```text

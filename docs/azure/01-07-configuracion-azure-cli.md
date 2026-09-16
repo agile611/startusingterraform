@@ -1,17 +1,5 @@
 # ⚙️ Configuración de Azure CLI: sesiones, suscripciones y valores por defecto, en Topaz y en Azure real
 
-> En un curso de Terraform, `az` tiene un papel distinto del que tiene en un curso de Azure: no es la herramienta con la que se crea la infraestructura, sino la que **presta la sesión** al provider, la que **comprueba desde fuera** que lo que Terraform dice haber hecho es cierto, y la que en los laboratorios **provoca derivas** a propósito para ver cómo el plan las detecta. Eso cambia qué configuración importa. Importa mucho saber en qué nube y en qué suscripción está la sesión, porque el provider la hereda. Importa saber qué variables lee `az` y cuáles lee Terraform, porque no son las mismas y el original las confunde. E importa desconfiar de los "valores por defecto" que `az` ofrece, porque Terraform no los ve y porque un grupo de recursos por defecto convierte `az group delete --yes` en un comando que borra sin que nadie haya escrito qué. La página trabaja en dos planos: el emulador para todo lo que se puede practicar sin riesgo, y Azure real para lo que el emulador no tiene: tenants, RBAC, registro de proveedores, tokens y autenticación sin secretos.
-
-> **🎯 Objetivos de aprendizaje**
->
-> - Explicar dónde guarda `az` su sesión y su configuración, y por qué el curso usa dos perfiles separados.
-> - Distinguir las variables que lee `az` de las que lee el provider azurerm, y saber cuál afecta a qué.
-> - Aplicar la precedencia parámetro → variable de entorno → fichero de configuración, y demostrarla.
-> - Decidir qué valores por defecto son seguros en un flujo con Terraform y cuáles no.
-> - En Azure real: elegir el método de autenticación adecuado a cada contexto, gestionar tenants y suscripciones, comprobar permisos y proveedores registrados.
-
-> **🔷 Requisitos previos.** [Página 3](index.md#pagina-3): Topaz en marcha, `topaz.env` creado y el `providers.tf` en `~/tf-st`. El bloque de Azure real necesita una suscripción con al menos el rol Colaborador en un grupo de recursos; puede hacerse más adelante.
-
 ## 1. Para qué sirve `az` cuando Terraform gestiona la infraestructura
 
 | Uso | Ejemplo en el curso | Regla |

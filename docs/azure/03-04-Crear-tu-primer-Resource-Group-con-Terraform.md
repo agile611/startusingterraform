@@ -1,24 +1,5 @@
 # 🧪 Lab: Crear tu primer Resource Group con Terraform
 
-> **Un Resource Group (grupo de recursos)** es el contenedor lógico de Azure Resource Manager (ARM) en el que viven casi todos los recursos: redes, cuentas de almacenamiento, aplicaciones web. Es el primer recurso que se crea en cualquier proyecto y, por eso, el primero que vas a gestionar con Terraform. Trabajarás contra el **emulador Topaz**; donde difiere de Azure real, lo verás en un recuadro **🔷 En Topaz**.
-
-**🎯 Objetivos de aprendizaje**
-- Comprender qué es un Resource Group y por qué es el punto de partida.
-- Definirlo en HCL con variables, etiquetas y outputs.
-- Ejecutar el flujo completo: `init` → `plan` → `apply` → `destroy`.
-- Verificar el resultado con Azure CLI, un cliente independiente de Terraform.
-- Leer el estado local y entender qué guarda.
-- Crear varios grupos con `for_each`.
-
-> **🔷 Requisitos previos**
-> - Contenedor `azure-environment` en marcha y certificado del emulador instalado.
-> - Terraform ≥ 1.5 y Azure CLI autenticada en la nube `Topaz`.
-> - Prueba de humo del módulo de instalación superada.
-> 
-> Comprobación en cinco segundos: `az account show --query environmentName -o tsv` debe responder `Topaz`.
-
----
-
 ## 1. ¿Por qué empezar con un Resource Group?
 
 - **Organización:** agrupa todo lo que pertenece a una solución (la red, la base de datos y la web de una misma aplicación).

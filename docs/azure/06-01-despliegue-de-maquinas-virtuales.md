@@ -1,20 +1,6 @@
 # 🖥️ Despliegue de máquinas virtuales
 
-> Una máquina virtual en Azure no es un recurso, son seis: la subred donde vive, un grupo de seguridad que filtra el tráfico, una IP pública, una interfaz de red que lo une todo y, al final, la VM con su disco e imagen. En esta página construirás esa cadena completa. El plano de red se despliega y verifica en **Topaz**; la máquina virtual, que necesita `Microsoft.Compute`, se declara con un interruptor que la deja apagada en el emulador y la enciende en una suscripción real sin tocar el resto del código.
-
-**🎯 Objetivos de aprendizaje**
-- Explicar la cadena de dependencias subred → NSG → IP pública → NIC → VM.
-- Crear un grupo de seguridad de red con una regla SSH restringida a una IP de origen.
-- Configurar IP pública estática y IP privada estática en una NIC.
-- Declarar una VM Linux con clave SSH e imagen actual de Ubuntu, activable por variable.
-- Reconocer y documentar las diferencias entre el emulador y Azure real mediante `lifecycle { ignore_changes }`.
-- Verificar el despliegue con Azure CLI y conectarse por SSH (Azure real).
-
-> **🔷 Requisitos previos.** [Página 1](index.md#pagina-1) completada (provider configurado para Topaz en `~/tf-intro/providers.tf`), `az account show --query environmentName -o tsv` → `Topaz`, y una clave SSH: si no tienes, `ssh-keygen -t ed25519 -f ~/.ssh/tf-lab -N ""`.
-
----
-
-## 2.1. Anatomía de una VM en Azure
+## 1. Anatomía de una VM en Azure
 
 ```text
 Grupo de recursos
@@ -40,7 +26,7 @@ La cadena de referencias (`subnet_id = azurerm_subnet.vm.id`, `network_interface
 
 ---
 
-## 2.2. Preparar el directorio y las variables
+## 2. Preparar el directorio y las variables
 
 ```bash
 mkdir -p ~/tf-vm && cd ~/tf-vm
@@ -93,7 +79,7 @@ ip_admin = "203.0.113.7/32"
 
 ---
 
-## 2.3. Plano de red: red, subred y NSG
+## 3. Plano de red: red, subred y NSG
 
 ```hcl
 # red.tf
@@ -174,7 +160,7 @@ resource "azurerm_network_security_rule" "ssh" {
 
 ---
 
-## 2.4. IP pública e interfaz de red
+## 4. IP pública e interfaz de red
 
 ```hcl
 # nic.tf
@@ -216,7 +202,7 @@ Dos cambios respecto al original. La IP pública `Dynamic` con SKU Basic dejó d
 
 ---
 
-## 2.5. La máquina virtual (activable)
+## 5. La máquina virtual (activable)
 
 ```hcl
 # vm.tf
@@ -263,7 +249,7 @@ Con `count`, la VM pasa a ser una lista: se referencia como `azurerm_linux_virtu
 
 ---
 
-## 2.6. Outputs
+## 6. Outputs
 
 ```hcl
 # outputs.tf
@@ -292,7 +278,7 @@ output "comando_ssh" {
 
 ---
 
-## 2.7. Despliegue en Topaz
+## 7. Despliegue en Topaz
 
 ```bash
 ls                                                 # nic.tf outputs.tf providers.tf red.tf terraform.tfvars variables.tf vm.tf
@@ -344,7 +330,7 @@ az group list -o table                             # vacío
 
 ---
 
-## 2.8. Despliegue y conexión en Azure real
+## 8. Despliegue y conexión en Azure real
 
 Mismo directorio, con estos ajustes:
 
@@ -371,7 +357,7 @@ terraform destroy -var desplegar_vm=true -auto-approve   # cuando termines: una 
 
 ---
 
-## 2.9. Errores comunes
+## 9. Errores comunes
 
 > ⚠️ **Solución de problemas**
 > 
@@ -395,7 +381,7 @@ terraform destroy -var desplegar_vm=true -auto-approve   # cuando termines: una 
 
 ---
 
-## 2.10. Autoevaluación
+## 10. Autoevaluación
 
 1. **¿Cuántos recursos de red necesita una VM con acceso SSH desde Internet y en qué orden se crean?**
    Red virtual, subred, NSG con su regla, IP pública, NIC y asociación NIC-NSG (siete con el grupo de recursos); el orden lo deduce Terraform de las referencias.
@@ -416,7 +402,7 @@ terraform destroy -var desplegar_vm=true -auto-approve   # cuando termines: una 
 
 ---
 
-## 2.11. Referencias
+## 11. Referencias
 
 - [`azurerm_linux_virtual_machine`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/linux_virtual_machine), [`azurerm_network_interface`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_interface), [`azurerm_public_ip`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/public_ip), [`azurerm_network_security_group`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_security_group) (bloque `security_rule`), [`azurerm_network_security_rule`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_security_rule)
 - [Meta-argumento `lifecycle`: `ignore_changes`](https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle#ignore_changes)

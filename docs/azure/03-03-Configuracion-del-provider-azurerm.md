@@ -1,21 +1,5 @@
 # 🔌 Configuración del provider azurerm
 
-> **El provider azurerm** es el plugin que conecta Terraform con Azure Resource Manager (ARM). Se encarga de autenticarse, traducir tu HCL a llamadas a la API y gestionar las particularidades de cada tipo de recurso. En este módulo verás su sintaxis, los métodos de autenticación y la configuración avanzada, y lo verificarás con un laboratorio contra el **emulador Topaz**. Donde el emulador difiere de Azure real, lo verás en un recuadro **🔷 En Topaz**.
-
-**Tabla de contenidos**
-1. [Sintaxis básica y configuración del curso](#1-sintaxis-básica-y-configuración-del-curso)
-2. [Métodos de autenticación](#2-métodos-de-autenticación)
-3. [Configuración avanzada](#3-configuración-avanzada)
-4. [Relación con `terraform` y `resource`](#4-relación-con-terraform-y-resource)
-5. [LAB: verificar el provider](#5-lab-verificar-el-provider)
-6. [Preguntas frecuentes](#6-preguntas-frecuentes)
-7. [Buenas prácticas y errores comunes](#7-buenas-prácticas-y-errores-comunes)
-8. [Referencias](#8-referencias)
-
-> **🔷 Requisitos previos.** Contenedor `azure-environment` en marcha, certificado instalado, Azure CLI autenticada en la nube `Topaz` y la Prueba de humo superada. Comprueba en cinco segundos: `az account show --query environmentName -o tsv` debe responder `Topaz`.
-
----
-
 ## 1. Sintaxis básica y configuración del curso
 
 La configuración mínima contra Azure real es un bloque con `features {}`, obligatorio desde la versión 2.0 del provider, y, en azurerm 4.x, la suscripción:

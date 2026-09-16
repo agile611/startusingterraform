@@ -1,19 +1,5 @@
 # 🤖 CI/CD para Terraform: planificar en la PR, aplicar con aprobación
 
-> Un pipeline de aplicación compila, prueba y publica. Un pipeline de Terraform hace otra cosa: **propone un cambio en infraestructura real y espera a que alguien lo apruebe**. Eso cambia el diseño. El `plan` es el artefacto que se revisa (en la pull request, como comentario), el `apply` ocurre una sola vez por cambio y detrás de una puerta, y un tercer flujo, programado, comprueba cada mañana que nadie ha tocado Moodle desde el portal. Esta página construye esos tres flujos para GitHub Actions y Azure DevOps sobre la identidad federada de la [página 12](index.md#pagina-12), de modo que la plataforma de CI no guarda ningún secreto: ni de Azure ni de Moodle. También cubre lo que suele salir mal: el estado bloqueado, el plan que ya no vale cuando llega el apply, el `terraform_version: latest` que cambia entre un paso y otro. En **Topaz** se ejecutan los mismos pasos que el pipeline, desde un script idéntico al del workflow, contra el emulador: los códigos de salida, el resumen del plan, la deriva y el bloqueo del estado se ven en local; la federación y las aprobaciones se prueban en el bloque de Azure real.
-
-**🎯 Objetivos de aprendizaje**
-- Diseñar el flujo *comprobar → planificar → aprobar → aplicar → vigilar* y justificar por qué el `apply` no se ejecuta en cada push.
-- Autenticar el pipeline con OIDC (GitHub) o federación (Azure DevOps) sin ningún secreto almacenado.
-- Escribir un workflow de GitHub Actions con permisos mínimos, versiones fijadas, comentario del plan en la PR y aprobación por *environment*.
-- Escribir el equivalente en Azure DevOps con etapas, conexión de servicio federada y *environments* con aprobadores.
-- Gestionar el estado desde CI: bloqueo, concurrencia, desbloqueo seguro y detección de deriva con `-detailed-exitcode`.
-- Reproducir el pipeline en local contra Topaz con el mismo script que ejecuta el runner.
-
-> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 12 completadas y destruidas, backend `azurerm` de la [página 4](index.md#pagina-4) operativo en Topaz, `~/tf-st/providers.tf`, Terraform `1.11.x`, `jq`, `tflint`, `trivy`, `gitleaks` (o Docker), un repositorio Git local, `az account show --query environmentName -o tsv` → `Topaz`.
-
----
-
 ## 1. El flujo: cuatro momentos, tres disparadores
 
 El pipeline del original tiene un disparador (`push` a `main`) y un resultado (`apply -auto-approve`). Eso significa que el primer momento en que alguien ve qué va a cambiar es cuando ya ha cambiado. El flujo correcto separa la revisión de la ejecución y añade una vigilancia que el original no contempla.

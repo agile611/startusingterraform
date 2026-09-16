@@ -1,17 +1,5 @@
 # 🧰 Instalación de herramientas y arranque de Topaz
 
-> Una página de instalación suele ser una lista de descargas. Esta tiene otro objetivo: dejar un puesto de trabajo en el que **sea difícil equivocarse**. Eso significa versiones fijadas (para que el plan que ves tú sea el que ve el pipeline), un emulador local al que apuntan todos los laboratorios (para que un `destroy` mal escrito no cueste nada), y una separación clara entre ese emulador y Azure real (para que nunca dudes de a dónde estás aplicando). Al terminar tendrás Terraform, Azure CLI, Git, jq y Docker instalados; Topaz en marcha y registrado como una nube más de `az`; el `providers.tf` que el resto del curso copia desde `~/tf-st`; y la prueba de que todo funciona, que no es ver un número de versión sino crear y borrar un recurso.
-
-> **🎯 Objetivos de aprendizaje**
->
-> - Instalar Terraform con versión fijada, Azure CLI desde el repositorio oficial, Git, jq y Docker en Ubuntu/WSL2, macOS o Windows.
-> - Arrancar Topaz, registrarlo como nube en `az` y autenticarse contra él.
-> - Escribir el `providers.tf` del curso y explicar cada línea, incluida la ausencia de credenciales.
-> - Cambiar entre Topaz y Azure real sin mezclar sesiones ni estados.
-> - Verificar la instalación con un `apply` y un `destroy`, no con `--version`.
-
-> **🔷 Requisitos previos.** Un equipo con 8 GB de RAM y permisos para instalar software. En Windows, WSL2 con Ubuntu: todos los comandos del curso son `bash`. No hace falta suscripción de Azure para esta página ni para la mayoría de los laboratorios; los bloques "Solo Azure real" la piden y pueden hacerse más adelante.
-
 ## 1. Qué se instala y para qué
 
 | Herramienta | Versión del curso | Para qué |

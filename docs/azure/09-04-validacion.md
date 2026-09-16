@@ -1,19 +1,5 @@
 # ✅ Validación: la escalera de comprobaciones antes del `apply`
 
-> Un error en Terraform cuesta más cuanto más tarde aparece: nada si lo detecta el editor, segundos si lo detecta `validate`, minutos si lo detecta el plan, y una VM o unos datos si lo detecta el apply. La validación consiste en poner comprobaciones baratas *antes* de las caras, y en saber qué atrapa cada una, porque ninguna lo atrapa todo: `terraform validate` acepta una cuenta de almacenamiento con el nombre en mayúsculas y una variable que nadie usa; `tflint` acepta un NSG abierto al mundo; `trivy` acepta un plan que destruye la base de datos. Esta página monta esa escalera con siete peldaños, del que corre en milisegundos sin ninguna nube al que aplica de verdad contra el emulador, y la lleva al pipeline con cada peldaño en su sitio. El original tenía dos peldaños y un pipeline que no arrancaba; aquí cada comando se ejecuta y cada fallo se provoca a propósito para verlo. Lo que necesita Azure real (el plan del PR con OIDC y Azure Policy como última barrera) va al bloque final.
-
-**🎯 Objetivos de aprendizaje**
-- Ordenar las comprobaciones por coste y explicar qué atrapa y qué se le escapa a cada una.
-- Ejecutar `validate` sin backend ni credenciales, y saber por qué necesita `init`.
-- Configurar `tflint` con el ruleset de Azure y reglas de convención propias.
-- Añadir análisis de seguridad con `trivy config` y justificar excepciones.
-- Escribir pruebas con `terraform test`: unitarias con `mock_provider` e integración contra Topaz.
-- Montar el pipeline (GitHub Actions y GitLab CI) para que falle en el peldaño correcto, y el gancho local que evita llegar a él.
-
-> **🔷 Requisitos previos.** [Páginas 5](index.md#pagina-5) a 7 (sintaxis, `validation`, `precondition`). Herramientas: `tflint`, `trivy` y `pre-commit` (`brew install tflint trivy pre-commit` o los binarios de sus releases; la [página 3](index.md#pagina-3) tiene la lista). Terraform ≥ 1.7 para `mock_provider`.
-
----
-
 ## 1. La escalera
 
 | **#** | **Comprobación** | **Atrapa** | **Se le escapa** | **Necesita** |

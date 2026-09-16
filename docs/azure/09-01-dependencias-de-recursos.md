@@ -1,19 +1,5 @@
 # 🔗 Dependencias: el grafo, `depends_on`, `count` y `for_each`
 
-> En la práctica 1 se vio que el orden de creación no está escrito en ningún sitio: Terraform lo deduce de las referencias. Esta página cuenta el resto de esa historia. Primero, qué pasa cuando dos recursos deben ir en orden pero *no hay dato que referenciar*: para eso existe `depends_on`, y para eso solamente. Después, cómo se pasa de escribir un recurso a escribir *N*: `count` los numera y `for_each` les da nombre, y esa diferencia, que parece cosmética, decide si quitar un elemento del medio destruye uno o destruye dos. El laboratorio lo demuestra con cuentas de almacenamiento en el emulador, migra de un mecanismo al otro sin destruir nada con bloques `moved`, y muestra el error que aparece cuando las claves de `for_each` dependen de algo que Terraform aún no conoce. Al terminar, la red del Moodle (tres subredes, tres NSG y sus reglas) sale de un solo mapa.
-
-**🎯 Objetivos de aprendizaje**
-- Leer el grafo de dependencias y distinguir una dependencia de datos de una dependencia de orden.
-- Usar `depends_on` solo cuando no hay referencia posible, y conocer su coste.
-- Explicar por qué `count` renumera al quitar un elemento y `for_each` no.
-- Construir mapas con expresiones `for` para alimentar `for_each`, incluido el caso de conjuntos de números.
-- Migrar de `count` a `for_each` con `moved` sin destruir recursos.
-- Reconocer el error de claves desconocidas hasta el apply y saber evitarlo.
-
-> **🔷 Requisitos previos.** [Página 5](index.md#pagina-5) (sintaxis de HCL: variables, locals, tipos, expresiones `for`) y la práctica 1. Topaz con `Microsoft.Network` y `Microsoft.Storage`, que son la base del laboratorio.
-
----
-
 ## 1. El grafo: dependencias implícitas
 
 Cada vez que un argumento contiene una referencia a otro recurso (`azurerm_subnet.web.id`), Terraform añade una arista al grafo. Antes de aplicar, ordena el grafo: lo que no depende de nada va primero, en paralelo (hasta 10 a la vez por defecto); lo demás espera a lo que referencia. Al destruir, recorre el grafo al revés. Esto cubre el 95 % de los casos, y tiene una ventaja que `depends_on` no tiene: Terraform sabe *qué dato* viaja por la arista, así que puede planificar con precisión qué cambia si ese dato cambia.

@@ -1,18 +1,5 @@
 # 🚧 Aprobaciones y puertas: seis capas entre el commit y Azure
 
-> Las [páginas 13](index.md#pagina-13) y 14 dejaron un pipeline con una aprobación delante de producción y políticas sobre el plan. Esta página se pregunta qué pasa cuando alguien no usa el pipeline. Un revisor cansado aprueba sin mirar; un `workflow_dispatch` mal condicionado aplica desde una rama equivocada; un compañero con permisos ejecuta `terraform destroy` desde su portátil un viernes. Ninguna puerta del pipeline detiene eso. Por eso las puertas se organizan en **capas**: la rama (quién puede fusionar y con qué comprobaciones), el código (análisis estático), el plan (políticas), el humano (revisores, ventanas horarias), Azure (políticas con *deny*, bloqueos de borrado, roles acotados) y la verificación posterior (pruebas de humo, plan a cero). Cada capa para algo que la anterior no ve, y cada una se abre de una forma explícita que deja rastro. El laboratorio ejecuta en **Topaz** todas las puertas que son scripts (destrucción, etiquetas, horario, humo) y crea los recursos de protección (bloqueos, asignaciones de política); su *efecto*, que lo evalúa ARM, se comprueba en el bloque de Azure real.
-
-**🎯 Objetivos de aprendizaje**
-- Situar cada control en una de las seis capas y explicar qué detiene y a quién.
-- Configurar reglas de rama, CODEOWNERS y comprobaciones requeridas para que la fusión sea la primera puerta.
-- Poner la aprobación humana en el job correcto, con *wait timer*, ramas permitidas y sin auto-aprobación; en Azure DevOps, los *checks* equivalentes.
-- Desplegar con Terraform las puertas que viven en Azure (bloqueos, Azure Policy) y aplicar el patrón de dos PRs para cambios destructivos.
-- Añadir puertas posteriores al apply (pruebas de humo, plan a cero) entre dev y pro, y auditar quién aprobó qué.
-
-> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 14 completadas y destruidas, backend de la [página 4](index.md#pagina-4) en Topaz, `~/tf-st/providers.tf`, Terraform `1.11.x`, `jq`, `az account show --query environmentName -o tsv` → `Topaz`. Para el bloque de Azure real: `gh` autenticado con permisos de administración del repositorio.
-
----
-
 ## 1. Seis capas, y a quién detiene cada una
 
 El original clasifica las puertas por tipo (automática, manual, temporal, de seguridad). Es más útil clasificarlas por **dónde viven**, porque eso determina a quién detienen. Las cuatro primeras capas están en el pipeline: detienen al pipeline. Las dos últimas están en Azure o miran a Azure: detienen a cualquiera.

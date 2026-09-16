@@ -1,18 +1,5 @@
 # 🗂️ Workspaces: varios estados para un mismo código
 
-> Un **workspace** es un estado alternativo: mismo código, mismo backend, mismas credenciales, otro `tfstate`. Sirve para desplegar la misma infraestructura varias veces sin duplicar archivos: una copia por desarrollador, una por rama, una por cliente. Es una herramienta útil y también la más malinterpretada de Terraform, porque su nombre sugiere "entorno" y no lo es: *dev* y *pro* con distinta suscripción, distintos permisos y distinto radio de explosión no deberían compartir backend ni credenciales, y eso es justo lo que un workspace obliga a compartir. Esta página enseña cómo funcionan, cómo usarlos sin aplicar en el sitio equivocado, y cuándo elegir en su lugar un directorio por entorno. Todo funciona en **Topaz**.
-
-**🎯 Objetivos de aprendizaje**
-- Explicar qué es y qué no es un workspace, y dónde guarda su estado con backend `local` y `azurerm`.
-- Usar `workspace new/select/list/show/delete`, `-or-create` y `TF_WORKSPACE`.
-- Parametrizar el código con un mapa indexado por `terraform.workspace` y bloquear el workspace `default`.
-- Decidir entre workspaces y directorio por entorno con criterios concretos.
-- Serializar por workspace en CI y separar permisos por estado en Azure real.
-
-> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 9 completadas y destruidas, `~/tf-st/providers.tf` disponible, `az account show --query environmentName -o tsv` → `Topaz`.
-
----
-
 ## 1. Qué es un workspace (y qué comparte)
 
 ```text

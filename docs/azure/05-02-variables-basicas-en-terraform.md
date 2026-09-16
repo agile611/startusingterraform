@@ -1,22 +1,5 @@
 # 🧩 Variables básicas en Terraform
 
-> Las **variables** son el mecanismo con el que una misma configuración de Terraform sirve para desarrollo, pruebas y producción sin duplicar código: el `.tf` describe la infraestructura y las variables aportan los valores que cambian. En esta página aprenderás a declararlas, a elegir su tipo y a pasarles valores, con un ejemplo que ejecutarás contra el **emulador Topaz**. Donde el emulador difiere de Azure real, lo verás en un recuadro **🔷 En Topaz**.
-
-**🎯 Objetivos de aprendizaje**
-- Explicar qué es una variable de entrada y qué problema resuelve.
-- Declarar variables con `description`, `type` y `default`.
-- Usar los cinco tipos básicos: `string`, `number`, `bool`, `list` y `map`.
-- Referenciarlas con `var.nombre` y ver cómo un cambio de valor cambia la infraestructura.
-- Pasar valores por `terraform.tfvars`, `*.auto.tfvars`, `-var` y `TF_VAR_`.
-- Escribir una primera regla de `validation`.
-
-> **🔷 Requisitos previos**
-> - Contenedor `azure-environment` en marcha y certificado del emulador instalado.
-> - Terraform ≥ 1.5 y Azure CLI autenticada en la nube `Topaz`: `az account show --query environmentName -o tsv` → `Topaz`.
-> - Laboratorio "Crear tu primer Resource Group" completado.
-
----
-
 ## 1. ¿Qué es una variable en Terraform?
 
 Una **variable de entrada** es un parámetro de la configuración. Se declara una vez en un archivo `.tf`, se usa en tantos sitios como haga falta con `var.nombre`, y su valor lo decide quien ejecuta Terraform: en un archivo `.tfvars`, en la línea de comandos, en una variable de entorno o, si no lo recibe de ninguna parte, respondiendo a una pregunta interactiva.

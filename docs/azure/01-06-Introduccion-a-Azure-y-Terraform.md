@@ -1,15 +1,5 @@
 # 🌐 Introducción a Azure y Terraform
 
-> Este curso enseña a describir infraestructura de Azure como código con Terraform. En esta primera página verás las tres piezas que usarás en todos los laboratorios: **Azure** (qué es y cómo organiza sus recursos), **Terraform** (qué hace y cómo se trabaja con él) y **Topaz**, el emulador local de Azure contra el que ejecutarás cada ejemplo sin necesidad de suscripción ni coste. Al final desplegarás tu primera infraestructura y la verificarás con la Azure CLI.
-
-> **🎯 Objetivos de aprendizaje**
->
-> - Explicar la jerarquía de Azure: tenant, suscripción, grupo de recursos y recurso.
-> - Describir qué es la infraestructura como código y qué aporta Terraform.
-> - Entender qué es Topaz, qué emula y qué no.
-> - Configurar el provider `azurerm` para el emulador y saber cómo cambia en Azure real.
-> - Ejecutar el ciclo `init → plan → apply → destroy` sobre un grupo de recursos y una red virtual.
-
 ## 1. ¿Qué es Azure?
 
 Microsoft Azure es la plataforma de nube pública de Microsoft: más de doscientos servicios (cómputo, red, almacenamiento, bases de datos, contenedores, IA) que se alquilan por uso y se gestionan a través de una única API, **Azure Resource Manager (ARM)**. Todo lo que hagas en Azure, desde el Portal, la CLI o Terraform, acaba en una llamada a esa API. Por eso Terraform puede gestionar cualquier recurso: habla con ARM igual que lo haría el Portal.

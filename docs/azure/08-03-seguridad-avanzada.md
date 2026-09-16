@@ -1,18 +1,5 @@
 # 🔐 Seguridad avanzada: secretos, identidad, guardarraíles
 
-> La seguridad de una plataforma gestionada con Terraform tiene cuatro capas y cada una falla de forma distinta: el **código** (un secreto en un `.tf` vive para siempre en Git), el **estado** (guarda en claro todo lo que el provider devuelve, marcado como `sensitive` o no), la **identidad** con la que Terraform actúa (si puede hacerlo todo, un error lo hace todo) y la **configuración de los recursos** que despliega. Esta página recorre las cuatro con las herramientas que el propio Terraform trae desde 1.10/1.11 (valores `ephemeral`, atributos *write-only*, bloques `check`) y con las de Azure (Key Vault con RBAC, identidades gestionadas, Azure Policy, locks). Todo lo que es plano de gestión y todo lo que es puro Terraform funciona en **Topaz**; lo que exige el plano de datos de Key Vault, Policy o RBAC se marca como Azure real.
-
-**🎯 Objetivos de aprendizaje**
-- Demostrar que `sensitive` no protege el estado y evitar que un secreto llegue a él con `ephemeral` y `value_wo`.
-- Crear un Key Vault endurecido (RBAC, *soft delete*, *purge protection*, red cerrada, diagnóstico) y escribir y leer secretos sin exponerlos.
-- Configurar el provider con identidad gestionada u OIDC y repartir permisos con mínimo privilegio.
-- Poner guardarraíles en dos tiempos: `plan` (`validation`, `check`, Trivy/Checkov) y `apply` (Azure Policy, locks).
-- Tratar el estado como el secreto que es.
-
-> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 12 completadas y destruidas, `~/tf-st/providers.tf` disponible, Terraform `>= 1.11` (atributos *write-only*), provider `random >= 3.7` (recurso `ephemeral`), `jq`, opcionalmente `trivy` y `gitleaks`, `az account show --query environmentName -o tsv` → `Topaz`.
-
----
-
 ## 1. Dónde se filtra un secreto
 
 | **Lugar** | **Cómo llega** | **Defensa** |

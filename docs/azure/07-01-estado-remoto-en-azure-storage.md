@@ -1,18 +1,5 @@
 # 🔐 Estado remoto en Azure Storage
 
-> El estado es la memoria de Terraform: el archivo que relaciona cada bloque `resource` con el id real en Azure. Hasta ahora ha vivido en `terraform.tfstate`, en tu disco. Esta página lo saca de ahí: qué contiene, cómo se inspecciona y repara, cómo se comparte con bloqueo entre varias personas y un pipeline, y cómo se recupera cuando algo sale mal. En **Topaz** el backend `azurerm` no funciona (lee y escribe el blob por el plano de datos, [página 5](index.md#pagina-5)), pero todo lo demás sí: la cuenta que lo aloja, las operaciones de estado, los bloqueos y la mecánica de migración se practican en el emulador con la misma secuencia de comandos que usarás en Azure real.
-
-**🎯 Objetivos de aprendizaje**
-- Leer un `tfstate`: versión, `serial`, `lineage`, recursos y secretos en claro.
-- Crear la cuenta del estado endurecida (sin claves, versionada, con soft delete) y resolver el problema del huevo y la gallina.
-- Usar `state list/show/pull/push/mv/rm`, los bloques `moved`, `import` y `removed`, y detectar drift con `-refresh-only`.
-- Explicar cómo bloquea el backend `azurerm`, provocar un bloqueo, esperarlo y liberarlo.
-- Configurar el backend con Entra ID, OIDC o identidad gestionada, migrar el estado y restaurar una versión anterior.
-
-> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 6 completadas y destruidas, `~/tf-st/providers.tf` disponible (incluye `data_plane_available = false`), `jq` instalado, Terraform `>= 1.7` (bloque `removed`), `az account show --query environmentName -o tsv` → `Topaz`.
-
----
-
 ## 1. Qué contiene el estado y por qué sacarlo del disco
 
 ```json

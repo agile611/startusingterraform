@@ -1,18 +1,5 @@
 # 🧭 Cirugía del estado: importar, mover, recrear, olvidar
 
-> El estado relaciona cada dirección del código (`module.red.azurerm_subnet.this["web"]`) con un id real de Azure. Cuando cambias el código sin que cambie la infraestructura (renombrar, mover a un módulo, pasar de `count` a `for_each`) o cuando la infraestructura existe sin que exista el código (recursos creados a mano), esa relación se rompe y el `plan` propone destruir y crear. Esta página enseña a reparar la relación sin tocar Azure: los bloques declarativos `import`, `moved` y `removed`, sus equivalentes imperativos `terraform import`, `state mv` y `state rm`, y `apply -replace` para cuando sí quieres recrear. Todo funciona en **Topaz**: el laboratorio usa recursos de red y una cuenta de almacenamiento por el plano de gestión.
-
-**🎯 Objetivos de aprendizaje**
-- Escribir direcciones de estado correctas: módulos, `count`, `for_each` y cuándo hacen falta comillas.
-- Adoptar un recurso creado a mano con el bloque `import` y generar su configuración con `-generate-config-out`.
-- Renombrar recursos, moverlos a un módulo y pasar de `count` a `for_each` con `moved`, sin destruir nada.
-- Recrear un recurso concreto con `apply -replace` y saber por qué `taint` ya no se usa.
-- Sacar un recurso del estado sin borrarlo (`removed`) y dividir un proyecto en dos con `state mv -state-out`.
-
-> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 8 completadas y destruidas, `~/tf-st/providers.tf` disponible, Terraform `>= 1.7` (bloque `removed`; `import` y `-generate-config-out` desde 1.5), `jq`, `az account show --query environmentName -o tsv` → `Topaz`.
-
----
-
 ## 1. Direcciones: cómo se llama cada cosa en el estado
 
 Todos los comandos de esta página reciben una *dirección*. El original usaba `module.red.mi_ip`, que no existe: dentro de un módulo la dirección sigue necesitando tipo y nombre.

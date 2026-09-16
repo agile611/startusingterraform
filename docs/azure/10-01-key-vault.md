@@ -1,19 +1,5 @@
 # 🔐 Key Vault: secretos que no pasan por el estado
 
-> Moodle necesita una contraseña de MySQL, una clave de la cuenta de almacenamiento y, en producción, un certificado TLS. La pregunta no es dónde guardarlos (Key Vault) sino **por dónde pasan** antes de llegar allí y después de salir: el código, el `plan`, el estado, los logs del pipeline, el `cloud-init` de la VM. Cada uno de esos lugares es una copia, y una copia en claro en el estado es tan grave como una en Git. Esta página construye el vault con RBAC, genera y escribe secretos **sin que Terraform los guarde** (recursos efímeros y argumentos *write-only*, Terraform 1.11), los lee del mismo modo para configurar MySQL, y deja que la VM de Moodle los obtenga sola con identidad gestionada. Cierra con rotación real, claves y certificados. En **Topaz** funciona el plano de gestión de Key Vault y el de datos para secretos: crear, versionar, leer con la CLI, inspeccionar el estado. Lo que Topaz no hace es evaluar permisos ni emular IMDS: eso se valida con `plan` y se prueba en Azure real.
-
-**🎯 Objetivos de aprendizaje**
-- Distinguir secretos, claves y certificados, y decidir qué *no* va a Key Vault.
-- Crear un vault con RBAC, soft delete y purge protection adecuados a cada entorno.
-- Generar y escribir secretos con `ephemeral` y `value_wo`, y comprobar en el estado que no están.
-- Leer secretos con recursos efímeros y argumentos *write-only* en lugar de `data`.
-- Dar a la VM de Moodle acceso a su contraseña con identidad gestionada y ámbito por secreto.
-- Rotar una contraseña de MySQL en un solo `apply` y configurar rotación automática de claves.
-
-> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 10 completadas y destruidas, `~/tf-st/providers.tf`, Terraform `>= 1.11` (argumentos *write-only*), azurerm 4.x reciente, providers `random >= 3.7` y `time`, `jq`, `az account show --query environmentName -o tsv` → `Topaz`.
-
----
-
 ## 1. Qué guarda Key Vault y qué no
 
 Key Vault gestiona tres tipos de objeto con tres APIs y tres juegos de roles distintos. Confundirlos lleva a guardar un certificado como secreto (funciona, pero pierdes la renovación) o a dar *Key Vault Administrator* a quien solo necesita leer una contraseña.

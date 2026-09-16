@@ -1,19 +1,5 @@
 # 🖥️ El interior de la VM: cloud-init, extensiones y Ansible (y por qué no provisioners)
 
-> Terraform sabe crear una VM; no sabe, ni debe, entrar en ella. Alguien tiene que instalar nginx, escribir la configuración de Moodle y arrancar servicios, y hay cuatro formas de conseguirlo sin que Terraform abra una conexión SSH: **cloud-init** (la plataforma lo ejecuta en el primer arranque, a partir de `custom_data`), una **extensión** (la plataforma lo ejecuta después, y lo repite si cambia), **Ansible** desde el pipeline (una herramienta distinta, después del apply) y una **imagen** ya cocinada con Packer. La quinta forma es el *provisioner*: Terraform mismo entra por SSH. El original la enseña primero, la desaconseja después y propone alternativas que son provisioners disfrazados. Esta página hace lo contrario: presenta los cuatro mecanismos con su momento, su ejecutor y su comportamiento ante cambios, y deja el provisioner para el final, para verlo fallar. En Topaz la VM existe como recurso pero no arranca, así que el laboratorio se centra en lo que sí se puede observar: la plantilla renderizada, la validación de cloud-init sin VM, qué cambio fuerza reemplazo y cuál no, y un provisioner que no encuentra a nadie al otro lado. Lo que necesita un sistema operativo va a Azure real.
-
-**🎯 Objetivos de aprendizaje**
-- Distinguir cloud-init de una extensión CustomScript: quién ejecuta, cuándo, y qué pasa al cambiar.
-- Escribir un `cloud-config` con `templatefile` y validarlo sin arrancar ninguna VM.
-- Explicar por qué cambiar `custom_data` reemplaza la VM y cómo se separan los datos para que eso no importe.
-- Integrar Ansible *después* de Terraform, con inventario de `terraform output`, sin `null_resource`.
-- Comprobar el interior de una VM sin SSH ni IP pública con `az vm run-command`.
-- Reconocer los problemas reales de los provisioners y descartar los que el original inventa.
-
-> **🔷 Requisitos previos.** [Páginas 6](index.md#pagina-6) y 7 (la red del Moodle desde el mapa, `lifecycle`, `terraform_data`). Topaz con `Microsoft.Compute` y `Microsoft.Network`. Para validar cloud-init en local: `sudo apt install cloud-init` (WSL/Ubuntu) o `pipx install cloud-init`.
-
----
-
 ## 1. Cinco formas de meter configuración en una VM
 
 | **Mecanismo** | **Quién ejecuta / cuándo** | **Si cambia el script** | **En Topaz** |

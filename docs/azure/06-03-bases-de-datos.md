@@ -1,19 +1,6 @@
 # 🗃️ Bases de datos
 
-> Una base de datos gestionada cambia el tipo de problema: ya no configuras discos ni parches, pero cada decisión que tomas (nombre, contraseña, firewall, nivel de servicio) queda escrita en un archivo que acabará en un repositorio. En esta página desplegarás un servidor lógico de Azure SQL con su base de datos, generarás el secreto de administrador sin que aparezca en el código, abrirás el firewall solo a tu IP y te conectarás desde la línea de comandos. El laboratorio está pensado para **Topaz**: lo que el emulador no implemente se desactiva con un interruptor y se deja listo para Azure real.
-
-**🎯 Objetivos de aprendizaje**
-- Distinguir servidor lógico, base de datos y modelo de compra (DTU / vCore / serverless) en Azure SQL.
-- Generar y proteger secretos con el provider `random`, outputs `sensitive` y un estado fuera del repositorio.
-- Configurar el firewall del servidor con reglas mínimas y entender qué significa realmente "permitir servicios de Azure".
-- Añadir un administrador de Microsoft Entra ID de forma opcional con un bloque `dynamic`.
-- Conectarte con `sqlcmd` y desde Python sin incrustar credenciales.
-
-> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 3 completadas y destruidas, `~/tf-intro/providers.tf` disponible, `az account show --query environmentName -o tsv` → `Topaz`. Para la sección de conexión en Azure real necesitarás `sqlcmd` (`az extension add -n sqlcmd` o el paquete `mssql-tools18`).
-
----
-
-## 4.1. Anatomía de Azure SQL Database
+## 1. Anatomía de Azure SQL Database
 
 ```text
 rg-sql-001
@@ -44,7 +31,7 @@ rg-sql-001
 
 ---
 
-## 4.2. Preparar el directorio, providers y variables
+## 2. Preparar el directorio, providers y variables
 
 Este laboratorio añade un segundo provider, `random`, que genera valores localmente sin llamar a Azure. Copia `providers.tf` como siempre y añade el bloque.
 
@@ -131,7 +118,7 @@ ip_admin = "203.0.113.7"
 
 ---
 
-## 4.3. Secretos: la contraseña nunca va en el código
+## 3. Secretos: la contraseña nunca va en el código
 
 El original tenía `administrator_login_password = "P@$$w0rd1234!"`. Una contraseña en un `.tf` acaba en Git, en el historial y en cada clon del repositorio. La alternativa mínima es generarla con `random_password`: Terraform la crea una vez, la guarda en el estado y no la vuelve a cambiar mientras no cambien sus argumentos.
 
@@ -162,7 +149,7 @@ resource "random_password" "admin" {
 
 ---
 
-## 4.4. Servidor lógico y base de datos
+## 4. Servidor lógico y base de datos
 
 ```hcl
 # sql.tf
@@ -226,7 +213,7 @@ resource "azurerm_mssql_database" "lab" {
 
 ---
 
-## 4.5. Firewall del servidor
+## 5. Firewall del servidor
 
 El servidor lógico tiene IP pública y escucha en el puerto 1433. Sin reglas de firewall, nadie entra (ni tú). Cada regla es un rango de IPs públicas de origen; los rangos privados como `192.168.x` del original no sirven porque el servidor nunca ve esas direcciones.
 
@@ -257,7 +244,7 @@ resource "azurerm_mssql_firewall_rule" "servicios_azure" {
 
 ---
 
-## 4.6. Outputs
+## 6. Outputs
 
 ```hcl
 # outputs.tf
@@ -291,7 +278,7 @@ output "cadena_sqlcmd" {
 
 ---
 
-## 4.7. Despliegue en Topaz
+## 7. Despliegue en Topaz
 
 ```bash
 ls                                                 # firewall.tf outputs.tf providers.tf secretos.tf sql.tf terraform.tfvars variables.tf
@@ -339,7 +326,7 @@ terraform destroy -auto-approve                    # limpieza
 
 ---
 
-## 4.8. Despliegue y conexión en Azure real
+## 8. Despliegue y conexión en Azure real
 
 Ajustes en `providers.tf` como en páginas anteriores (quitar `metadata_host` y `resource_provider_registrations`, poner tu `subscription_id`), quitar el `ignore_changes` del grupo y asegurar `desplegar_sql = true`. Opcionalmente, añade tu usuario como administrador de Entra ID:
 
@@ -415,7 +402,7 @@ with engine.connect() as conn:
 
 ---
 
-## 4.9. Errores comunes
+## 9. Errores comunes
 
 > ⚠️ **Solución de problemas**
 > 
@@ -439,7 +426,7 @@ with engine.connect() as conn:
 
 ---
 
-## 4.10. Autoevaluación
+## 10. Autoevaluación
 
 1. **¿Qué diferencia hay entre el servidor lógico y la base de datos, y qué se paga?**
    El servidor es un contenedor administrativo gratuito (login, firewall, FQDN); cada base de datos tiene su propio nivel de servicio y es lo que se factura.
@@ -462,7 +449,7 @@ with engine.connect() as conn:
 
 ---
 
-## 4.11. Referencias
+## 11. Referencias
 
 - [`azurerm_mssql_server`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/mssql_server), [`azurerm_mssql_database`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/mssql_database), [`azurerm_mssql_firewall_rule`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/mssql_firewall_rule), [`azurerm_mssql_virtual_network_rule`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/mssql_virtual_network_rule)
 - [`random_password`](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) y [outputs `sensitive`](https://developer.hashicorp.com/terraform/language/values/outputs#sensitive-suppressing-values-in-cli-output)

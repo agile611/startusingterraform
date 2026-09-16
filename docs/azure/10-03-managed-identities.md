@@ -1,22 +1,4 @@
-Aquí tienes la versión estructurada y limpia en Markdown de tu guía sobre identidades gestionadas en Azure. He mantenido la coherencia visual con los módulos anteriores, transformando las cajas de HTML en bloques de notas y asegurando que las tablas y el código queden perfectamente formateados. 👇
-
----
-
 # 🔑 Identidades gestionadas: acceso sin credenciales
-
-> En la [página 11](index.md#pagina-11) la VM de Moodle leyó su contraseña de Key Vault sin que nadie le diera una credencial. Lo hizo con una **identidad gestionada**: una cuenta en Entra ID cuyo secreto nunca existe fuera de Azure, que la plataforma rota sola y que la VM usa pidiendo un token a una dirección local. Esta página explica ese mecanismo y lo lleva a todos los puntos de la arquitectura de Moodle donde hoy habría una clave: el VMSS que monta `moodledata`, el Application Gateway que lee el certificado, el servidor MySQL que autentica a su administrador, el propio Terraform cuando se ejecuta dentro de Azure y, mediante federación, el pipeline que se ejecuta fuera. El hilo conductor es la **asignación de roles**: qué rol, sobre qué ámbito, y cómo evitar que la identidad de una VM web pueda borrar la base de datos. En **Topaz** funcionan las identidades de usuario y las asignaciones de rol como recursos; lo que el emulador no hace es emitir tokens ni evaluar permisos, así que la prueba real de "esta identidad puede leer este contenedor y ningún otro" se hace en Azure.
-
-**🎯 Objetivos de aprendizaje**
-- Explicar qué es una identidad gestionada, cómo obtiene tokens y qué significan `id`, `principal_id` y `client_id`.
-- Elegir entre identidad de sistema y de usuario según el ciclo de vida y el orden de creación.
-- Asignar roles de plano de datos con el ámbito mínimo, evitando los errores de propagación y replicación.
-- Configurar los consumidores de Moodle (blobfuse, Application Gateway, MySQL, Functions, AKS) para autenticarse con identidad.
-- Ejecutar Terraform bajo una identidad gestionada con permisos acotados, incluida la capacidad de asignar roles.
-- Federar una identidad gestionada con GitHub Actions o AKS sin ningún secreto de larga duración.
-
-> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 11 completadas y destruidas, `~/tf-st/providers.tf`, Terraform `>= 1.11`, azurerm 4.x, `jq`, `az account show --query environmentName -o tsv` → `Topaz`.
-
----
 
 ## 1. Qué es y cómo consigue un token
 

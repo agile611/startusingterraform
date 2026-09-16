@@ -1,18 +1,5 @@
 # 🧾 Plan y apply en automatización: el fichero, las políticas y el fallo a medias
 
-> La [página 13](index.md#pagina-13) construyó el pipeline alrededor de dos comandos sin abrirlos. Esta los abre. Un `plan` no es un texto en pantalla: es un fichero con el estado previo, la configuración completa, los valores de las variables y la lista exacta de acciones, y ese fichero solo se puede aplicar mientras nada haya cambiado. Un `apply` no es atómico: si falla el recurso ocho de doce, los siete anteriores existen y el estado lo sabe. Entender las dos cosas cambia cómo se diseña la automatización: qué se guarda, qué se compara, qué se comprueba antes de aplicar y qué se hace cuando la ejecución se rompe. La página recorre el contenido del plan con `terraform show -json`, las tres formas legítimas de separar plan y apply, las políticas que se evalúan sobre el JSON (con `jq`, con OPA y con `terraform test`), las salvaguardas en el código (`prevent_destroy`, precondiciones) y la recuperación de un apply parcial. Todo el laboratorio funciona en **Topaz**: son ficheros que Terraform produce y comandos que ejecuta contra el emulador.
-
-**🎯 Objetivos de aprendizaje**
-- Describir qué contiene un fichero de plan, quién puede leerlo y cuándo deja de ser aplicable.
-- Leer el JSON del plan: acciones, valores antes/después, marcas sensibles y motivos de reemplazo.
-- Elegir entre las tres formas de separar plan y apply y aplicar la comparación de planes para detectar cambios entre revisión y ejecución.
-- Escribir políticas sobre el plan con `jq`, OPA/conftest y `terraform test`, y salvaguardas en el código.
-- Recuperar un apply parcial, un `errored.tfstate` y un recurso *tainted*; usar `-replace` y `-target` solo como emergencia auditada.
-
-> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 13 completadas y destruidas, backend `azurerm` de la [página 4](index.md#pagina-4) en Topaz, `~/tf-st/providers.tf`, Terraform `1.11.x`, `jq`, `unzip`, Docker (para conftest), `az account show --query environmentName -o tsv` → `Topaz`.
-
----
-
 ## 1. Qué hay dentro de un plan
 
 `terraform plan` hace tres cosas en orden: **refresca** (lee cada recurso del estado en Azure para conocer su situación real), **compara** (configuración deseada contra situación real) y **ordena** (construye el grafo de acciones). Con `-out`, el resultado se guarda en un fichero que es, en realidad, un ZIP con cinco piezas.

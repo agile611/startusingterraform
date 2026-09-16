@@ -1,18 +1,5 @@
 # 📦 Módulos personalizados: diseñar, consumir, publicar
 
-> Un módulo es una **función**: recibe variables, crea recursos y devuelve outputs. No es un "sub-proyecto" ni una carpeta donde guardar código: es la unidad con la que un equipo encapsula una decisión ("así se crea un NSG en esta empresa") para que nadie tenga que volver a tomarla. La [página 6](index.md#pagina-6) usó un módulo de red; esta enseña a escribirlos bien: una interfaz pequeña y validada, una estructura estándar que las herramientas reconocen, consumo desde Git o un registry con versión fijada, y evolución sin romper a los consumidores. Todo funciona en **Topaz**: el laboratorio construye un módulo de grupos de seguridad de red y lo compone con el de red de la [página 9](index.md#pagina-9).
-
-**🎯 Objetivos de aprendizaje**
-- Decidir qué entra y qué no en un módulo, y qué recibe frente a qué crea.
-- Escribir variables con tipos `object`, `optional()` y `validation`, y outputs que expongan lo justo.
-- Consumir módulos locales, de Git y del registry con versión fijada, con `for_each` y con providers explícitos.
-- Documentar con terraform-docs, probar con `terraform test` y publicar con etiquetas semánticas.
-- Cambiar un módulo sin destruir recursos de quien lo usa (`moved` dentro del módulo).
-
-> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 10 completadas y destruidas, `~/tf-st/providers.tf` y `~/tf-cmd/modules/red` ([página 9](index.md#pagina-9)) disponibles, Terraform `>= 1.7`, opcionalmente `terraform-docs`, `az account show --query environmentName -o tsv` → `Topaz`.
-
----
-
 ## 1. Qué hace un módulo y qué no
 
 | **Pregunta de diseño** | **Respuesta habitual** | **Por qué** |

@@ -1,18 +1,5 @@
 # 🔒 Bloqueo del estado
 
-> Dos `terraform apply` a la vez sobre el mismo estado es la forma más rápida de corromperlo: el segundo lee un estado que el primero está a punto de cambiar, y al escribir pisa lo que el otro hizo. El bloqueo del estado lo impide, y en Azure Storage viene incluido: el backend `azurerm` toma un lease del blob al empezar y lo suelta al terminar, sin scripts ni pasos previos. Esta página explica esa mecánica, qué hacer cuando un bloqueo se queda huérfano, cómo se integra en CI/CD y qué problemas no resuelve. En **Topaz** el backend `azurerm` no funciona (plano de datos, [página 7](index.md#pagina-7)), pero el backend `local` bloquea con la misma interfaz y el mismo mensaje: el laboratorio se hace ahí.
-
-**🎯 Objetivos de aprendizaje**
-- Explicar cómo bloquea el backend `azurerm` (lease + metadato) y qué comandos toman el bloqueo.
-- Leer un Lock Info y decidir entre esperar, `-lock-timeout` y `force-unlock`.
-- Provocar, observar y liberar un bloqueo en Topaz; romper un lease huérfano en Azure real.
-- Distinguir el bloqueo del estado de los bloqueos de Azure Resource Manager y del serial.
-- Serializar ejecuciones en GitHub Actions y Azure DevOps sin scripts de lease.
-
-> **🔷 Requisitos previos.** [Página 7](index.md#pagina-7) completada (directorio `~/tf-estado/app` con `providers.tf`), dos terminales abiertas, `jq`, `az account show --query environmentName -o tsv` → `Topaz`.
-
----
-
 ## 1. Cómo bloquea el backend azurerm
 
 El proceso de bloqueo sigue una secuencia estricta para garantizar que nadie más modifique el estado mientras se evalúan o aplican cambios.

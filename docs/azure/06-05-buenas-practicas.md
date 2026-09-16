@@ -1,19 +1,6 @@
 # 🛠️ Buenas prácticas
 
-> En las cinco páginas anteriores has aplicado, casi sin nombrarlas, la mayoría de las prácticas que aquí se consolidan: interruptores con `count`, `locals` para las tags, sufijos aleatorios, validaciones, secretos fuera del código. Esta página las ordena y añade las que faltan: módulos, convención de nombres, estado remoto, mínimos privilegios, bloqueos, alertas, pruebas automáticas y un pipeline. El laboratorio es un módulo local de red que se prueba con `terraform test` contra **Topaz**; lo que el emulador no implementa (`Microsoft.Authorization`, `Microsoft.Insights`, `Microsoft.KeyVault`) se queda en `plan`.
-
-**🎯 Objetivos de aprendizaje**
-- Estructurar un proyecto con módulos locales, variables validadas, `locals` y outputs documentados.
-- Aplicar una convención de nombres y tags obligatorias.
-- Gestionar el estado: comandos `state`, backend remoto con Entra ID y bloqueo.
-- Aplicar mínimos privilegios, bloqueos de borrado y alertas con los recursos correctos.
-- Automatizar `fmt`, `validate`, `test`, análisis estático y `plan` en un pipeline sin secretos.
-
-> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 5 completadas y destruidas, `~/tf-sql/providers.tf` disponible, Terraform `>= 1.6` (para `terraform test`; `terraform version`), `az account show --query environmentName -o tsv` → `Topaz`.
-
----
-
-## 6.1. Estructura del proyecto y módulos
+## 1. Estructura del proyecto y módulos
 
 Un módulo es un directorio con archivos `.tf` que se invoca con un bloque `module`. El original usaba `Azure/network/azurerm` del registro público: está en mantenimiento, fija provider 2.x y oculta lo que hace. Empieza siempre con módulos **locales** que puedas leer; pasa al registro (Azure Verified Modules) cuando entiendas qué reemplazan.
 
@@ -115,7 +102,7 @@ module "red" {
 
 ---
 
-## 6.2. Variables, locals, nombres y tags
+## 2. Variables, locals, nombres y tags
 
 ```hcl
 # variables.tf (root)
@@ -192,7 +179,7 @@ propietario = "equipo-plataforma"
 
 ---
 
-## 6.3. El estado: comandos y backend remoto
+## 3. El estado: comandos y backend remoto
 
 El original decía "validar estado: `terraform validate`". `validate` comprueba la sintaxis del código y no lee el estado. El estado se inspecciona y se corrige con la familia `terraform state`:
 
@@ -237,7 +224,7 @@ terraform {
 
 ---
 
-## 6.4. Seguridad: privilegios, secretos y cifrado
+## 4. Seguridad: privilegios, secretos y cifrado
 
 ```hcl
 # seguridad.tf
@@ -289,7 +276,7 @@ resource "azurerm_key_vault" "bp" {
 
 ---
 
-## 6.5. Gobernanza: bloqueos, alertas y coste
+## 5. Gobernanza: bloqueos, alertas y coste
 
 ```hcl
 # gobernanza.tf
@@ -355,7 +342,7 @@ resource "azurerm_monitor_metric_alert" "cpu" {
 
 ---
 
-## 6.6. Pruebas: fmt, validate, análisis estático y `terraform test`
+## 6. Pruebas: fmt, validate, análisis estático y `terraform test`
 
 El original reducía las pruebas a `tf validate` y `tf plan` (además, el binario se llama `terraform`). Hay cuatro niveles, de más barato a más caro, y cada uno detecta cosas que el anterior no ve:
 
@@ -445,7 +432,7 @@ run "apply_en_topaz" {
 
 ---
 
-## 6.7. Pipeline: plan en cada PR, apply con aprobación y sin secretos
+## 7. Pipeline: plan en cada PR, apply con aprobación y sin secretos
 
 El pipeline del original hacía `apply -auto-approve` en cada push a `main`, con acciones antiguas y, necesariamente, un secreto de service principal guardado en el repositorio. Tres cambios: el `plan` se ejecuta en la *pull request*, el `apply` solo tras aprobación humana, y la autenticación es **OIDC** (identidad federada): GitHub demuestra a Entra ID quién es y recibe un token de una hora. No hay ningún secreto que rotar ni que filtrar.
 
@@ -544,7 +531,7 @@ jobs:
 
 ---
 
-## 6.8. Outputs y despliegue en Topaz
+## 8. Outputs y despliegue en Topaz
 
 ```hcl
 # outputs.tf
@@ -613,7 +600,7 @@ terraform destroy -auto-approve
 
 ---
 
-## 6.9. Errores comunes
+## 9. Errores comunes
 
 > ⚠️ **Solución de problemas**
 > 
@@ -640,7 +627,7 @@ terraform destroy -auto-approve
 
 ---
 
-## 6.10. Autoevaluación
+## 10. Autoevaluación
 
 1. **¿Por qué un módulo no debe declarar su propio `provider`?**
    Lo hereda del root. Con provider propio no admite `count` ni `for_each`, y al quitar la llamada al módulo Terraform no puede destruir sus recursos porque el provider desaparece con él.
@@ -667,7 +654,7 @@ terraform destroy -auto-approve
 
 ---
 
-## 6.11. Referencias
+## 11. Referencias
 
 - [Desarrollo de módulos](https://developer.hashicorp.com/terraform/language/modules/develop), [guía de estilo de Terraform](https://developer.hashicorp.com/terraform/language/style) y [Azure Verified Modules](https://azure.github.io/Azure-Verified-Modules/)
 - [Comandos `terraform state`](https://developer.hashicorp.com/terraform/cli/commands/state), [bloque `moved`](https://developer.hashicorp.com/terraform/language/moved) e [bloque `import`](https://developer.hashicorp.com/terraform/language/import)

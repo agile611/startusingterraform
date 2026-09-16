@@ -1,18 +1,5 @@
 # 💶 Optimización: coste y escalado como código
 
-> El coste de una plataforma se decide en tres momentos. **Antes** de desplegar: qué tamaño, qué SKU, qué redundancia lleva cada entorno; aquí Terraform es la herramienta ideal porque el `plan` puede traducirse a euros sin tocar Azure. **Durante**: que la capacidad siga a la demanda (escalado con reglas en ambos sentidos, apagado fuera de horario, niveles de almacenamiento). **Después**: que alguien se entere cuando el gasto se desvía (presupuestos, alertas, Advisor) y que las decisiones de compromiso (reservas, *savings plans*) se tomen con datos de uso real. Esta página recorre los tres con Moodle como hilo. En **Topaz** funciona todo lo que es código y plano de gestión: tallaje por entorno, estimación de precios, Infracost, políticas de ciclo de vida de blobs, etiquetas de coste. Lo que toca facturación (presupuestos, reservas) o telemetría de escalado se marca como Azure real, y aun así se valida con `plan`.
-
-**🎯 Objetivos de aprendizaje**
-- Parametrizar tamaño, SKU y redundancia por entorno y ver la diferencia de coste en el `plan`.
-- Estimar el coste con la API pública de precios de Azure e Infracost, sin credenciales.
-- Escribir un autoescalado que sube *y* baja, con perfil por horario, sin oscilaciones.
-- Aplicar ahorros estructurales: apagado programado, Spot, niveles de almacenamiento, retención de logs.
-- Crear presupuestos que avisan y actúan; entender qué son y qué no son las reservas, y cómo se compran desde Terraform.
-
-> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 13 completadas y destruidas, `~/tf-st/providers.tf`, Terraform `>= 1.10`, providers `http` y `azapi`, `jq`, opcionalmente `infracost` (clave gratuita), salida a Internet para `prices.azure.com`, `az account show --query environmentName -o tsv` → `Topaz`.
-
----
-
 ## 1. Dónde se va el dinero
 
 | **Fuga habitual** | **Síntoma** | **Remedio en código** | **Topaz** |

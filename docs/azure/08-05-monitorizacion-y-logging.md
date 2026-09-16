@@ -1,20 +1,5 @@
 # 📈 Monitorización y logging: ver lo que pasa antes de que lo cuenten los usuarios
 
-> Un despliegue sin telemetría no está terminado: funciona hasta que deja de hacerlo, y entonces nadie sabe por qué. Azure Monitor agrupa cuatro piezas que conviene distinguir desde el principio. **Métricas**: números cada minuto (CPU, peticiones, latencia), casi gratis, los emite la plataforma sin configurar nada. **Logs**: eventos con texto (una consulta lenta de MySQL, un 403 en Key Vault, un `PutBlob`), hay que activarlos con *diagnostic settings* y se pagan por GB en un **Log Analytics workspace**. **Trazas** de aplicación (qué hizo Moodle con cada petición): Application Insights. Y **alertas**, que convierten cualquiera de las anteriores en un aviso a una persona o una acción. Todo se declara en Terraform, y por eso el diseño de la observabilidad es parte del módulo, no un añadido del portal. En **Topaz** funciona el plano de gestión de Log Analytics (workspace, tablas, retención); las piezas que dependen de `Microsoft.Insights` (diagnostic settings, agente, alertas, Application Insights) se validan con `plan`. Para **KQL**, el lenguaje de consulta, hay algo mejor que leer: el **emulador de Kusto** en Docker, que ejecuta las mismas consultas sobre datos que tú mismo generas.
-
-**🎯 Objetivos de aprendizaje**
-- Distinguir métricas, logs, trazas y alertas, y saber qué cuesta cada una.
-- Crear un Log Analytics workspace con retención, cuota y tablas *Basic* por entorno.
-- Activar diagnostic settings sobre el sub-recurso correcto con `for_each`, descubriendo las categorías en vez de adivinarlas.
-- Recoger syslog y rendimiento de las VMs con Azure Monitor Agent y una *data collection rule*.
-- Escribir consultas KQL útiles para Moodle y probarlas en el emulador de Kusto.
-- Conectar Application Insights (workspace-based) y entender cómo llega la telemetría desde PHP.
-- Definir alertas de métrica, de logs y de activity log con severidad, ventana y grupo de acción, y silenciarlas en mantenimientos.
-
-> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 13 completadas y destruidas, `~/tf-st/providers.tf`, Terraform `>= 1.10`, azurerm `~> 4.0`, Docker (para el emulador de Kusto, ≈ 4 GB de RAM), `jq`, `az account show --query environmentName -o tsv` → `Topaz`.
-
----
-
 ## 1. Mapa: qué señal, de dónde, a dónde
 
 | **Señal** | **Ejemplo en Moodle** | **Cómo se activa** | **Recurso Terraform** | **Topaz** |

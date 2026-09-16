@@ -1,22 +1,5 @@
 # 🧩 Variables en Terraform
 
-> Una **variable de entrada** es un parámetro de tu configuración: el mismo código crea un grupo de recursos en `dev` o en `prod`, con una red pequeña o grande, según los valores que le pases. Sin variables, cada entorno sería una copia del código con pequeños cambios; con ellas, hay un único código y varios archivos de valores. En este módulo trabajarás contra el **emulador Topaz**; donde difiere de Azure real, lo verás en un recuadro **🔷 En Topaz**.
-
-**🎯 Objetivos de aprendizaje**
-- Declarar variables con tipo, descripción, valor por defecto y reglas de validación.
-- Distinguir los tipos primitivos y compuestos, y elegir el adecuado.
-- Asignar valores de seis formas distintas y conocer su orden de precedencia.
-- Diferenciar `variable`, `locals` y `output`.
-- Proteger valores sensibles y evitar que aparezcan en la consola.
-- Desplegar la misma configuración en dos entornos con archivos `.tfvars`.
-
-> **🔷 Requisitos previos**
-> - Contenedor `azure-environment` en marcha y certificado del emulador instalado.
-> - Terraform ≥ 1.5 y Azure CLI autenticada en la nube `Topaz`: `az account show --query environmentName -o tsv` → `Topaz`.
-> - Módulos anteriores completados (sintaxis HCL, comandos clave, primer Resource Group).
-
----
-
 ## 1. Para qué sirven las variables
 
 - **Parametrizar:** cambiar nombre, región o tamaño sin tocar el código.

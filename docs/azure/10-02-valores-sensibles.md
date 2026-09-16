@@ -1,19 +1,5 @@
 # 🔒 Valores sensibles: por dónde pasan y dónde se quedan
 
-> Un secreto no se filtra porque esté en el sitio equivocado; se filtra porque tiene **copias** en sitios que nadie contó. Terraform es especialmente bueno haciendo copias: la contraseña de MySQL de Moodle que escribes una vez acaba en el fichero `.tf`, en el historial de Git, en el `plan` guardado, en el estado, en un output, en el log de depuración y en el `cloud-init` de la VM. Esta página recorre ese camino copia a copia y explica qué hace de verdad cada mecanismo del lenguaje: `sensitive` oculta la pantalla y nada más; `ephemeral` impide que el valor se persista; el estado y el plan guardan todo lo que no sea efímero, incluidas claves que tú no escribiste. Termina con cómo se autentica Terraform sin secretos en el código, cómo detectar una fuga antes del `push` y qué hacer cuando ya ha ocurrido. Todo el laboratorio funciona en **Topaz**: no necesita permisos ni red, solo mirar dentro de los ficheros que Terraform produce.
-
-**🎯 Objetivos de aprendizaje**
-- Enumerar las copias que Terraform hace de un valor sensible y quién puede leer cada una.
-- Distinguir `sensitive` de `ephemeral` y elegir el correcto en variables, outputs y recursos.
-- Decidir cómo entra un secreto (tfvars, entorno, gestor) y qué va y qué no va al repositorio.
-- Localizar en el estado y en el plan los secretos que Azure genera aunque tú no los escribas.
-- Autenticar Terraform y su backend sin credenciales en el código.
-- Montar un escáner de secretos en *pre-commit* y ejecutar un plan de respuesta a una fuga.
-
-> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 9 completadas y destruidas, `~/tf-st/providers.tf`, Terraform `>= 1.11`, `jq`, `git`, `gitleaks` y `trivy` instalados (o Docker para ejecutarlos), `az account show --query environmentName -o tsv` → `Topaz`.
-
----
-
 ## 1. El mapa de copias
 
 Antes de elegir herramienta conviene saber contra qué se defiende uno. Sigue la contraseña de MySQL desde que alguien la teclea hasta que Moodle la usa: cada fila es un lugar donde queda una copia, y cada copia tiene un público distinto.

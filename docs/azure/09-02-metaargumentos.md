@@ -1,20 +1,5 @@
 # 🎛️ Meta-argumentos: `lifecycle`, `provider`, y lo que no lo es (`dynamic`, provisioners)
 
-> Un meta-argumento es un argumento que acepta *cualquier* recurso, sea del provider que sea, porque no lo interpreta el provider sino Terraform. Hay cinco: `depends_on`, `count` y `for_each` ([página 6](index.md#pagina-6)), `provider` y `lifecycle`. Esta página cubre los dos que faltan, y dentro de `lifecycle` los seis ajustes que cambian cómo Terraform planifica: cuándo ignorar una diferencia, cuándo negarse a destruir, en qué orden reemplazar, qué obliga a reemplazar y qué condiciones deben cumplirse antes y después. Después trata dos cosas que el original llamaba meta-argumentos y no lo son: los bloques `dynamic`, que son una expresión para generar bloques anidados, y los *provisioners*, que son una puerta de escape del modelo declarativo con un coste que conviene ver antes de decidir usarlos. Cada ajuste tiene su experimento en el emulador: se provoca la situación y se lee el plan. Lo que Topaz no puede enseñar (bloqueos de Azure, dos suscripciones) va al bloque de Azure real.
-
-**🎯 Objetivos de aprendizaje**
-- Distinguir un meta-argumento de un argumento del provider y de una expresión del lenguaje.
-- Usar `ignore_changes` para convivir con cambios externos legítimos, y saber qué se pierde al hacerlo.
-- Explicar los límites de `prevent_destroy` y completarlo con bloqueos de Azure.
-- Leer un plan `+/-` frente a `-/+` y resolver el conflicto de nombres de `create_before_destroy`.
-- Forzar reemplazos con `replace_triggered_by` y validar con `precondition`/`postcondition`.
-- Generar bloques anidados con `dynamic` y decidir cuándo no hacerlo.
-- Observar por qué un provisioner rompe el modelo, y qué lo sustituye.
-
-> **🔷 Requisitos previos.** [Páginas 5](index.md#pagina-5) y 6: sintaxis, estado, `for_each` y bloques `moved`. Topaz con `Microsoft.Storage` y `Microsoft.Network`.
-
----
-
 ## 1. Qué es y qué no es un meta-argumento
 
 | **Nombre** | **Qué es** | **Quién lo interpreta** |

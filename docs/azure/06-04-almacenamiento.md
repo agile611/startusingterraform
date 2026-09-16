@@ -1,19 +1,6 @@
 # 💾 Almacenamiento
 
-> Una cuenta de almacenamiento es el recurso más barato y más ubicuo de Azure: guarda blobs, archivos compartidos, colas y tablas, y también el estado remoto de Terraform que usarás en la siguiente página. En este laboratorio crearás una cuenta con nombre válido y único, un contenedor privado, un compartido de Azure Files y una política de ciclo de vida que enfría y borra datos antiguos. Y aprenderás la diferencia que más importa en **Topaz**: el *plano de gestión* (crear la cuenta y sus contenedores) funciona en el emulador; el *plano de datos* (subir y leer blobs) solo existe en Azure real.
-
-**🎯 Objetivos de aprendizaje**
-- Elegir tipo de cuenta, redundancia y nivel de acceso, y estimar su coste.
-- Generar un nombre de cuenta válido (3-24 caracteres, minúsculas y dígitos, único global) y validarlo antes del `apply`.
-- Distinguir plano de gestión y plano de datos, y configurar el provider para un entorno sin acceso al segundo.
-- Endurecer la cuenta: TLS 1.2, solo HTTPS, sin blobs públicos, soft delete y versionado.
-- Escribir una política de ciclo de vida real y acceder a los datos con identidad (RBAC) en lugar de claves.
-
-> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) a 4 completadas y destruidas, `~/tf-intro/providers.tf` disponible, `az account show --query environmentName -o tsv` → `Topaz`.
-
----
-
-## 5.1. Anatomía de una cuenta de almacenamiento
+## 1. Anatomía de una cuenta de almacenamiento
 
 ```text
 rg-st-001
@@ -46,7 +33,7 @@ El `access_tier` (`Hot`, `Cool`, `Cold`) fija el valor por defecto de los blobs:
 
 ---
 
-## 5.2. Plano de gestión y plano de datos
+## 2. Plano de gestión y plano de datos
 
 Esta distinción explica casi todos los problemas de Storage con Terraform, y todos los de Topaz:
 
@@ -62,7 +49,7 @@ Esta distinción explica casi todos los problemas de Storage con Terraform, y to
 
 ---
 
-## 5.3. Preparar el directorio, providers y variables
+## 3. Preparar el directorio, providers y variables
 
 ```bash
 mkdir -p ~/tf-st && cd ~/tf-st
@@ -128,7 +115,7 @@ asignar_rbac = false
 
 ---
 
-## 5.4. La cuenta de almacenamiento
+## 4. La cuenta de almacenamiento
 
 ```hcl
 # storage.tf
@@ -188,7 +175,7 @@ resource "azurerm_storage_account" "lab" {
 
 ---
 
-## 5.5. Contenedor, compartido de archivos y blobs opcionales
+## 5. Contenedor, compartido de archivos y blobs opcionales
 
 En azurerm 4.x el contenedor y el compartido admiten `storage_account_id`: el provider los crea por ARM, sin tocar el plano de datos. El argumento antiguo `storage_account_name` del original sigue existiendo, pero obliga al provider a hablar con `blob.core.windows.net`, que en Topaz no existe.
 
@@ -251,7 +238,7 @@ resource "azurerm_role_assignment" "blob_contributor" {
 
 ---
 
-## 5.6. Política de ciclo de vida
+## 6. Política de ciclo de vida
 
 El original escribía la política con una sintaxis inventada (`policy { rules = [ { … } ] }`) que `terraform validate` rechaza. La estructura real son bloques `rule`, cada uno con `filters` y `actions`. La política se aplica una vez al día y actúa sobre la fecha de última modificación.
 
@@ -300,7 +287,7 @@ resource "azurerm_storage_management_policy" "lab" {
 
 ---
 
-## 5.7. Outputs y despliegue en Topaz
+## 7. Outputs y despliegue en Topaz
 
 ```hcl
 # outputs.tf
@@ -366,7 +353,7 @@ Si un `plan` posterior al `apply` propone cambios en `blob_properties`, `access_
 
 ---
 
-## 5.8. Azure real: RBAC, blobs y acceso sin claves
+## 8. Azure real: RBAC, blobs y acceso sin claves
 
 El original se conectaba con la clave de cuenta pegada en la cadena de conexión. Esa clave da control total sobre todos los datos, no caduca y no identifica a quién la usa. La alternativa es **RBAC de datos**: el rol *Storage Blob Data Contributor* que declaraste en `rbac.tf` (sección 5.5), ahora activado con `asignar_rbac = true` y tu Object ID, para tu usuario hoy y para la identidad gestionada de la aplicación después. Con `storage_use_azuread = true` en el provider, el propio Terraform sube el blob con tu identidad, no con la clave.
 
@@ -433,7 +420,7 @@ for blob in contenedor.list_blobs():
 
 ---
 
-## 5.9. Errores comunes
+## 9. Errores comunes
 
 > ⚠️ **Solución de problemas**
 > 
@@ -456,7 +443,7 @@ for blob in contenedor.list_blobs():
 
 ---
 
-## 5.10. Autoevaluación
+## 10. Autoevaluación
 
 1. **¿Por qué `storageaccountterraformdemo` no es un nombre válido?**
    Tiene 27 caracteres y el máximo es 24. Además debe ser único en todo Azure, por eso lleva sufijo aleatorio.
@@ -483,7 +470,7 @@ for blob in contenedor.list_blobs():
 
 ---
 
-## 5.11. Referencias
+## 11. Referencias
 
 - [`azurerm_storage_account`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_account), [`azurerm_storage_container`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_container), [`azurerm_storage_share`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_share), [`azurerm_storage_blob`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_blob)
 - [`azurerm_storage_management_policy`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_management_policy) y [`azurerm_role_assignment`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment)

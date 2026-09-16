@@ -1,19 +1,6 @@
 # 🌐 Redes virtuales
 
-> En la página anterior la red era un medio para llegar a la VM. Aquí es el protagonista: diseñarás un espacio de direcciones, lo dividirás en subredes con `for_each`, aislarás un nivel *backend* del nivel *web* con grupos de seguridad a nivel de subred y conectarás dos redes virtuales mediante *peering*. Todo el plano de red se despliega en **Topaz**; el peering lleva un interruptor por si tu versión del emulador aún no lo implementa.
-
-**🎯 Objetivos de aprendizaje**
-- Planificar un espacio de direcciones CIDR y dividirlo en subredes sin solapamientos.
-- Crear varias subredes desde un `map` con `for_each` y entender por qué es preferible a `count`.
-- Distinguir NSG asociado a subred de NSG asociado a NIC, y usar *service tags* y reglas `Deny` para aislar niveles.
-- Conectar dos redes virtuales con peering bidireccional y saber qué requisitos tiene.
-- Verificar la topología con Azure CLI y exponerla con outputs derivados de `for_each`.
-
-> **🔷 Requisitos previos.** [Páginas 1](index.md#pagina-1) y 2 completadas, `~/tf-intro/providers.tf` configurado para Topaz y `az account show --query environmentName -o tsv` → `Topaz`. Si dejaste recursos de la [página 2](index.md#pagina-2), ejecuta allí `terraform destroy`: este laboratorio usa otro grupo de recursos, pero conviene empezar limpio.
-
----
-
-## 3.1. Anatomía de una red virtual
+## 1. Anatomía de una red virtual
 
 ```text
 rg-red-001
@@ -43,7 +30,7 @@ Terraform tiene una función para calcular subredes sin errores de aritmética: 
 
 ---
 
-## 3.2. Preparar el directorio y las variables
+## 2. Preparar el directorio y las variables
 
 ```bash
 mkdir -p ~/tf-red && cd ~/tf-red
@@ -77,7 +64,7 @@ Fíjate en que la clave del `map` (`web`, `backend`) es un nombre lógico, no el
 
 ---
 
-## 3.3. Red virtual y subredes con `for_each`
+## 3. Red virtual y subredes con `for_each`
 
 ```hcl
 # red.tf
@@ -117,7 +104,7 @@ resource "azurerm_subnet" "app" {
 
 ---
 
-## 3.4. Grupos de seguridad a nivel de subred
+## 4. Grupos de seguridad a nivel de subred
 
 En la [página 2](index.md#pagina-2) el NSG se asoció a la NIC: filtra una máquina. Asociado a la subred filtra **todo lo que haya dentro**, presente y futuro, y es la forma habitual de expresar "el nivel web acepta 80/443 de Internet; el nivel backend solo acepta 8080 desde el nivel web". Si hay NSG en ambos sitios, el tráfico entrante debe pasar los dos.
 
@@ -195,7 +182,7 @@ resource "azurerm_subnet_network_security_group_association" "backend" {
 
 ---
 
-## 3.5. Peering entre redes virtuales
+## 5. Peering entre redes virtuales
 
 El original declaraba un peering hacia una `vnet2` que no existía y en un solo sentido. Un peering es un acuerdo **entre dos vnets**: hasta que ambos lados están creados, su estado es *Initiated* y no pasa tráfico. Aquí se declara la segunda vnet y las dos direcciones.
 
@@ -257,7 +244,7 @@ resource "azurerm_virtual_network_peering" "hub_to_app" {
 
 ---
 
-## 3.6. Outputs
+## 6. Outputs
 
 ```hcl
 # outputs.tf
@@ -290,7 +277,7 @@ El output `subredes` recorre el recurso con `for_each` y construye un `map` nuev
 
 ---
 
-## 3.7. Despliegue en Topaz
+## 7. Despliegue en Topaz
 
 ```bash
 ls                                                 # nsg.tf outputs.tf peering.tf providers.tf red.tf variables.tf
@@ -349,7 +336,7 @@ az group list -o table                             # vacío
 
 ---
 
-## 3.8. Qué cambia en Azure real
+## 8. Qué cambia en Azure real
 
 - `providers.tf`: quitar `metadata_host` y `resource_provider_registrations`, poner tu `subscription_id`.
 - Quitar los `lifecycle { ignore_changes }` del grupo y de las dos vnets: en Azure real esos atributos se devuelven y conviene vigilarlos.
@@ -373,7 +360,7 @@ terraform destroy -auto-approve                    # las vnets no cuestan; el tr
 
 ---
 
-## 3.9. Errores comunes
+## 9. Errores comunes
 
 > ⚠️ **Solución de problemas**
 >
@@ -395,7 +382,7 @@ terraform destroy -auto-approve                    # las vnets no cuestan; el tr
 
 ---
 
-## 3.10. Autoevaluación
+## 10. Autoevaluación
 
 1. **¿Cuántas direcciones útiles tiene una subred `/24` en Azure y por qué?**
    251: de las 256, Azure reserva las cuatro primeras (red, gateway, dos DNS) y la última (broadcast).
@@ -416,7 +403,7 @@ terraform destroy -auto-approve                    # las vnets no cuestan; el tr
 
 ---
 
-## 3.11. Referencias
+## 11. Referencias
 
 - [`azurerm_virtual_network`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_network), [`azurerm_subnet`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subnet), [`azurerm_network_security_group`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_security_group), [`azurerm_subnet_network_security_group_association`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subnet_network_security_group_association), [`azurerm_virtual_network_peering`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_network_peering)
 - [Meta-argumento `for_each`](https://developer.hashicorp.com/terraform/language/meta-arguments/for_each) y [función `cidrsubnet()`](https://developer.hashicorp.com/terraform/language/functions/cidrsubnet)
