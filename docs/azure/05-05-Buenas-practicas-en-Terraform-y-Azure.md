@@ -354,8 +354,8 @@ Lo ejecutarás en la sección siguiente, cuando el proyecto exista. La regla de 
 
 Vas a construir la estructura de la sección 5.1 desde cero. Es el mismo trío red-subredes-almacenamiento de las páginas anteriores, ahora organizado como lo haría un equipo: dos módulos locales con valores seguros por defecto, validaciones, etiquetas obligatorias, dos entornos, pruebas y documentación generada. 
 
-!!! info "Código completo de un proyecto profesional de Terraform"
-    El código completo del esqueleto se puede encontrar [https://github.com/agile611/startusingterraform/tree/main/azure/tf-buenas-practicas](aquí)
+!!! info "Código completo de un proyecto profesional de Terraform para Azure"
+    El código completo del esqueleto se puede encontrar: [Esqueleto Terraform para Azure](https://github.com/agile611/startusingterraform/tree/main/azure/tf-buenas-practicas)
 
 ### Paso 1. Esqueleto
 
@@ -705,8 +705,8 @@ Guarda el archivo de pruebas de la sección 5.7 como `tests/proyecto.tftest.hcl`
 
 ### Paso 6. La rutina completa
 
-!!! info "Código completo de un proyecto profesional de Terraform"
-    El código completo del esqueleto se puede encontrar [https://github.com/agile611/startusingterraform/tree/main/azure/tf-buenas-practicas](aquí)
+!!! info "Código completo de un proyecto profesional de Terraform para Azure"
+    El código completo del esqueleto se puede encontrar: [Esqueleto Terraform para Azure](https://github.com/agile611/startusingterraform/tree/main/azure/tf-buenas-practicas)
 
 ```bash
 terraform init
