@@ -1,169 +1,1185 @@
-/* Estilos corporativos Agile611 */
+/* =========================================================
+   Agile611 · Curso de Grafana
+   Material for MkDocs
+
+   Layout:
+   - Tres columnas estables, sin solapamiento
+   - Izquierda: navegación · Centro: contenido · Derecha: TOC
+   - Ambas columnas laterales fijas durante el scroll
+
+   Diseño lateral:
+   - Cabeceras azules a todo el ancho gris
+   - Anchuras internas uniformes
+   - Sin enlaces duplicados en la sección activa
+   ========================================================= */
+
+
+/* =========================================================
+   Variables corporativas
+   ========================================================= */
+
 :root {
-  --md-primary-fg-color: #057eb5;
-  --md-primary-fg-color--light: #057eb5;
-  --md-primary-fg-color--dark: #057eb5;
-  --md-accent-fg-color: #057eb5;
-  --md-accent-fg-color--transparent: rgba(5, 126, 181, 0.12);
-  --md-default-bg-color: #ffffff;
-  --md-default-fg-color: #242424;
-  --md-default-fg-color--light: #f5f5f5;
-  --md-code-bg-color: #f5f5f5;
-  --md-code-fg-color: #242424;
-  --md-footer-bg-color: #057eb5;
-  --md-footer-fg-color: #ffffff;
-  --md-typeset-color: #242424;
-  --md-typeset-a-color: #057eb5;
-  --md-shadow-z1: 0 0 0 rgba(0, 0, 0, 0);
+  /* Colores corporativos */
+  --agile-primary: #057eb5;
+  --agile-primary-dark: #045f89;
+  --agile-primary-soft: rgba(5, 126, 181, 0.12);
+
+  /* Colores generales */
+  --agile-white: #ffffff;
+  --agile-text: #242424;
+  --agile-sidebar: #f5f5f5;
+
+  /* Código */
+  --agile-code-bg: #f4f4f4;
+  --agile-code-border: #dedede;
+  --agile-inline-bg: #f1f1f1;
+  --agile-inline-border: #e1e1e1;
+  --agile-code-font: "Roboto Mono", "Ubuntu Mono", Consolas, monospace;
+
+  /* Tipografía */
+  --agile-font-size: 0.95625rem;       /* texto del contenido        */
+  --agile-ui-font-size: 1.0040625rem;  /* cabecera y footer          */
+  --agile-code-font-size: 0.84375rem;
+  --agile-code-line-height: 1.55;
+
+  /* Cabecera y pestañas (se redefinen en tablet) */
+  --agile-header-height: 3.05rem;
+  --agile-tabs-height: 2.41875rem;
+
+  /* Layout (se redefinen en pantallas medianas y móvil) */
+  --agile-page-width: 92vw;
+  --agile-left-width: 13rem;
+  --agile-right-width: 13rem;
+  --agile-gap: 1.25rem;
+
+  /* Columnas sticky: solo la cabecera es fija, las pestañas se van
+     con el scroll. Si activas navigation.tabs.sticky, suma también
+     var(--agile-tabs-height) en --agile-sticky-top. */
+  --agile-sticky-gap: 0.75rem;
+  --agile-sticky-top: calc(var(--agile-header-height) + var(--agile-sticky-gap));
 }
+
+
+/* =========================================================
+   Variables de Material for MkDocs
+   (mismo valor en cualquier esquema: el sitio es siempre claro)
+   ========================================================= */
+
+:root,
+[data-md-color-scheme="default"],
+[data-md-color-scheme="slate"] {
+  --md-grid-max-width: 100%;
+  --md-typeset-max-width: none;
+
+  --md-primary-fg-color: var(--agile-primary);
+  --md-primary-fg-color--light: var(--agile-primary);
+  --md-primary-fg-color--dark: var(--agile-primary-dark);
+
+  --md-accent-fg-color: var(--agile-primary);
+  --md-accent-fg-color--transparent: var(--agile-primary-soft);
+
+  --md-default-bg-color: var(--agile-white);
+  --md-default-fg-color: var(--agile-text);
+  --md-default-fg-color--light: var(--agile-sidebar);
+
+  --md-typeset-color: var(--agile-text);
+  --md-typeset-a-color: var(--agile-primary);
+
+  --md-code-bg-color: var(--agile-code-bg);
+  --md-code-fg-color: var(--agile-text);
+
+  --md-footer-bg-color: var(--agile-primary);
+  --md-footer-fg-color: var(--agile-white);
+
+  --md-shadow-z1: 0 0 0 rgba(0, 0, 0, 0);
+  --md-shadow-z2: 0 0 0 rgba(0, 0, 0, 0);
+  --md-shadow-z3: 0 0 0 rgba(0, 0, 0, 0);
+}
+
+[data-md-color-scheme="slate"] {
+  color-scheme: light;
+}
+
+
+/* =========================================================
+   Base general
+   ========================================================= */
 
 html {
-  font-family: "Nunito", sans-serif;
+  font-family: "Nunito", Arial, sans-serif;
+  font-size: 100%;
 }
 
+html,
 body {
-  background: #ffffff;
-  color: #242424;
+  margin: 0;
+  padding: 0;
 }
 
+html,
+body,
 .md-main,
 .md-content,
+.md-content__inner,
+.md-typeset {
+  background: var(--agile-white);
+  color: var(--agile-text);
+}
+
+
+/* =========================================================
+   Cabecera principal
+   ========================================================= */
+
+.md-header {
+  width: 100%;
+  max-width: none;
+  min-height: var(--agile-header-height);
+
+  margin: 0;
+  overflow: visible;
+
+  background: var(--agile-primary);
+  color: var(--agile-white);
+}
+
+.md-header__inner {
+  width: var(--agile-page-width);
+  max-width: none;
+  min-height: var(--agile-header-height);
+
+  margin-right: auto;
+  margin-left: auto;
+
+  background: transparent;
+  box-sizing: border-box;
+}
+
+.md-header__title,
+.md-header__topic,
+.md-header__button,
+.md-header .md-icon {
+  color: var(--agile-white);
+}
+
+.md-header__title,
+.md-header__topic,
+.md-header__button,
+.md-header__button .md-icon {
+  font-size: var(--agile-ui-font-size);
+}
+
+.md-header__title,
+.md-header__topic {
+  line-height: 1.2;
+}
+
+.md-header__button {
+  padding: 0.396rem;
+}
+
+.md-header__button:hover,
+.md-header__button:focus {
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--agile-white);
+}
+
+
+/* =========================================================
+   Logotipo
+   ========================================================= */
+
+.md-header .md-logo {
+  display: flex;
+  align-items: center;
+
+  margin: 0;
+  padding: 0.2rem 0.55rem;
+}
+
+.md-header .md-logo img,
+.md-header .md-logo svg {
+  display: block;
+
+  width: auto;
+  height: 2.55rem;
+  max-height: 2.55rem;
+
+  object-fit: contain;
+}
+
+
+/* =========================================================
+   Pestañas superiores
+   ========================================================= */
+
+.md-tabs,
+.md-tabs__container,
+.md-tabs__list,
+.md-tabs__item,
+.md-tabs__link {
+  height: var(--agile-tabs-height);
+}
+
+.md-tabs {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  background: var(--agile-primary);
+  color: var(--agile-white);
+
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.55) transparent;
+}
+
+.md-tabs::-webkit-scrollbar {
+  height: 4px;
+}
+
+.md-tabs::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.md-tabs::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 4px;
+}
+
+.md-tabs__container {
+  width: var(--agile-page-width);
+  max-width: none;
+
+  margin-right: auto;
+  margin-left: auto;
+
+  overflow: visible;
+  box-sizing: border-box;
+}
+
+.md-tabs__list {
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-start;
+
+  width: max-content;
+  min-width: 100%;
+  max-width: none;
+
+  margin: 0;
+  padding: 0;
+
+  white-space: nowrap;
+}
+
+.md-tabs__item {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.md-tabs__link {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+
+  margin: 0;
+  padding: 0 0.55rem;
+
+  color: var(--agile-white);
+  font-size: 0.921375rem;
+  line-height: 1;
+
+  white-space: nowrap;
+  opacity: 1;
+}
+
+.md-tabs__link:hover,
+.md-tabs__link:focus,
+.md-tabs__link--active {
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--agile-white);
+  opacity: 1;
+}
+
+
+/* =========================================================
+   Buscador
+   ========================================================= */
+
+.md-search__form {
+  min-height: 2.025rem;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.md-search__form:hover,
+.md-search__form:focus-within {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.md-search__input,
+.md-search__input::placeholder,
+.md-search__icon {
+  color: var(--agile-white);
+}
+
+.md-search__input,
+.md-search__input::placeholder {
+  font-size: 0.945rem;
+  line-height: 1.2;
+}
+
+.md-search__input::placeholder {
+  opacity: 0.85;
+}
+
+
+/* =========================================================
+   Layout principal de tres columnas
+   ========================================================= */
+
+@media screen and (min-width: 60em) {
+  .md-grid,
+  .md-main {
+    width: var(--agile-page-width);
+    max-width: none;
+
+    margin-right: auto;
+    margin-left: auto;
+  }
+}
+
+@media screen and (min-width: 76em) {
+  .md-main__inner {
+    display: grid;
+
+    grid-template-columns:
+      var(--agile-left-width)
+      minmax(0, 1fr)
+      var(--agile-right-width);
+
+    grid-template-areas:
+      "primary content secondary";
+
+    gap: var(--agile-gap);
+
+    width: 100%;
+    max-width: none;
+
+    margin: 0;
+    padding: 1.25rem 0;
+
+    align-items: start;   /* requisito para que sticky funcione en el grid */
+  }
+
+  .md-main__inner > .md-sidebar--primary   { grid-area: primary; }
+  .md-main__inner > .md-content            { grid-area: content; }
+  .md-main__inner > .md-sidebar--secondary { grid-area: secondary; }
+
+  .md-main__inner > .md-content {
+    width: auto;
+    min-width: 0;
+    max-width: none;
+
+    margin: 0;
+    padding: 0;
+  }
+}
+
+
+/* =========================================================
+   Columnas laterales: estructura común
+   ========================================================= */
+
 .md-sidebar--primary,
 .md-sidebar--secondary {
-  background: #ffffff;
+  display: block;
+  box-sizing: border-box !important;
+
+  width: var(--agile-left-width);
+  min-width: 0;
+  max-width: 100%;
+
+  margin: 0;
+  padding: 0;
+
+  background: var(--agile-sidebar) !important;
+  color: var(--agile-text) !important;
 }
 
-.md-sidebar__scrollwrap {
-  background: #f5f5f5 !important;
+.md-sidebar--secondary {
+  width: var(--agile-right-width);
+}
+
+/* Contenedores internos y navegaciones: ancho completo, sin espaciados */
+
+.md-sidebar--primary .md-sidebar__inner,
+.md-sidebar--secondary .md-sidebar__inner,
+.md-sidebar--primary .md-sidebar__scrollwrap,
+.md-sidebar--secondary .md-sidebar__scrollwrap,
+.md-sidebar--primary .md-nav,
+.md-sidebar--secondary .md-nav,
+.md-sidebar--primary .md-nav__list,
+.md-sidebar--secondary .md-nav__list,
+.md-sidebar--primary .md-nav__item,
+.md-sidebar--secondary .md-nav__item {
+  display: block;
+  box-sizing: border-box !important;
+
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  background: var(--agile-sidebar) !important;
+  background-image: none;
+  box-shadow: none;
+}
+
+
+/* =========================================================
+   Columnas laterales: fijas durante el scroll
+   =========================================================
+
+   Se pegan bajo la cabecera y acompañan al contenido central.
+   Si su contenido es más alto que la ventana, hacen scroll
+   interno con una barra fina.
+   ========================================================= */
+
+@media screen and (min-width: 60em) {
+  .md-main,
+  .md-main__inner {
+    overflow: visible !important;   /* ningún ancestro recorta el sticky */
+  }
+
+  .md-sidebar--primary,
+  .md-sidebar--secondary {
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: var(--agile-sticky-top) !important;
+
+    align-self: start !important;
+
+    height: auto !important;
+    max-height: calc(100vh - var(--agile-sticky-top) - var(--agile-sticky-gap)) !important;
+
+    overflow: visible !important;
+  }
+
+  .md-sidebar--primary .md-sidebar__scrollwrap,
+  .md-sidebar--secondary .md-sidebar__scrollwrap {
+    position: static !important;
+
+    max-height: calc(100vh - var(--agile-sticky-top) - var(--agile-sticky-gap)) !important;
+
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.25) transparent;
+  }
+
+  .md-sidebar--primary .md-sidebar__scrollwrap::-webkit-scrollbar,
+  .md-sidebar--secondary .md-sidebar__scrollwrap::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .md-sidebar--primary .md-sidebar__scrollwrap::-webkit-scrollbar-track,
+  .md-sidebar--secondary .md-sidebar__scrollwrap::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .md-sidebar--primary .md-sidebar__scrollwrap::-webkit-scrollbar-thumb,
+  .md-sidebar--secondary .md-sidebar__scrollwrap::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 4px;
+  }
+}
+
+
+/* =========================================================
+   Columnas laterales: cabeceras azules
+   ("Curso de Grafana" y "Tabla de contenidos")
+   ========================================================= */
+
+.md-sidebar--primary .md-nav--primary > .md-nav__title,
+.md-sidebar--secondary .md-nav--secondary > .md-nav__title {
+  display: block !important;
+  box-sizing: border-box !important;
+
+  position: static !important;   /* Material lo hace sticky en el TOC */
+  top: auto !important;
+  z-index: auto !important;
+
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+
+  height: auto;
+  min-height: 0;
+
+  margin: 0 !important;
+  padding: 0.65rem 0.75rem !important;
+
+  overflow: hidden;
+  white-space: normal;
+
+  background: var(--agile-primary) !important;
   background-image: none !important;
-  box-shadow: none !important;
-}
+  color: var(--agile-white) !important;
 
-.md-header,
-.md-tabs,
-.md-footer {
-  background: #057eb5;
-  color: #f5f5f5;
-}
-
-.md-tabs__item,
-.md-tabs__item:hover,
-.md-tabs__item--active,
-.md-nav__link,
-.md-nav__title,
-.md-search-result__link,
-.md-content h1,
-.md-content h2,
-.md-content h3,
-.md-content h4,
-.md-content h5,
-.md-content h6,
-.md-content p,
-.md-content li,
-.md-content strong,
-.md-content em,
-.md-content span {
-  color: #242424 !important;
-}
-
-.md-tabs__item,
-.md-tabs__item:hover,
-.md-tabs__item--active,
-.md-nav__link--active,
-.md-nav__item .md-nav__link--active,
-.md-nav__item--active > .md-nav__link,
-.md-nav__item--nested > .md-nav__link--active,
-.md-typeset a:active,
-.md-typeset a:visited {
-  background: transparent !important;
-  color: #057eb5 !important;
-  box-shadow: none !important;
+  font-size: 0.9rem;
   font-weight: 700;
+  line-height: 1.35;
+
+  box-shadow: none !important;
+  cursor: default;
+}
+
+.md-sidebar--primary .md-nav--primary > .md-nav__title span:not(.md-nav__icon),
+.md-sidebar--secondary .md-nav--secondary > .md-nav__title span:not(.md-nav__icon) {
+  display: block;
+
+  width: 100%;
+  max-width: 100%;
+
+  color: var(--agile-white) !important;
+}
+
+/* La flecha del menú móvil no se muestra en escritorio */
+
+.md-sidebar--primary .md-nav--primary > .md-nav__title .md-nav__icon,
+.md-sidebar--secondary .md-nav--secondary > .md-nav__title .md-nav__icon {
+  display: none !important;
+}
+
+
+/* =========================================================
+   Columna izquierda: elementos duplicados de la sección activa
+   =========================================================
+
+   Con navigation.tabs, la sección activa se renderiza así:
+
+   li.md-nav__item--active
+   ├── label.md-nav__link             ← enlace de la sección
+   └── nav.md-nav
+       ├── label.md-nav__title        ← título interno
+       └── li.md-nav__item--active
+           └── a.md-nav__link--active ← página real
+
+   Se ocultan el título interno y el enlace de la sección
+   cuando dentro hay un enlace activo. :not(.md-nav__container)
+   protege el caso de navigation.indexes.
+   ========================================================= */
+
+@media screen and (min-width: 60em) {
+  .md-sidebar--primary .md-nav__item > .md-nav > .md-nav__title,
+  .md-sidebar--primary
+  .md-nav__item--active:has(> .md-nav .md-nav__link--active)
+  > .md-nav__link:not(.md-nav__container) {
+    display: none !important;
+  }
+}
+
+
+/* =========================================================
+   Columnas laterales: enlaces
+   ========================================================= */
+
+.md-sidebar--primary .md-nav__link,
+.md-sidebar--secondary .md-nav__link {
+  display: block;
+  box-sizing: border-box !important;
+
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+
+  margin: 0 !important;
+  padding: 0.38rem 0.75rem !important;
+
+  background: transparent !important;
+  color: var(--agile-text) !important;
+
+  font-size: 0.86rem !important;
+  line-height: 1.35 !important;
+
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: normal;
+
+  box-shadow: none !important;
+}
+
+.md-sidebar--primary .md-nav__link:hover,
+.md-sidebar--primary .md-nav__link:focus,
+.md-sidebar--primary .md-nav__link--active,
+.md-sidebar--secondary .md-nav__link:hover,
+.md-sidebar--secondary .md-nav__link:focus,
+.md-sidebar--secondary .md-nav__link--active {
+  color: var(--agile-primary) !important;
+  font-weight: 700 !important;
+}
+
+/* navigation.indexes: el contenedor no debe sumar padding */
+
+.md-sidebar--primary .md-nav__container {
+  display: flex;
+  padding: 0 !important;
+}
+
+.md-sidebar--primary .md-nav__container > .md-nav__link {
+  flex: 1 1 auto;
+}
+
+
+/* =========================================================
+   Contenido central
+   ========================================================= */
+
+.md-content,
+.md-content__inner,
+.md-typeset {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+}
+
+.md-content__inner {
+  margin: 0;
+  padding: 0 0.5rem;
+}
+
+.md-typeset,
+.md-typeset p,
+.md-typeset li,
+.md-typeset td,
+.md-typeset th,
+.md-typeset blockquote {
+  color: var(--agile-text);
+  font-size: var(--agile-font-size);
+  line-height: 1.55;
+}
+
+.md-typeset strong,
+.md-typeset em {
+  color: var(--agile-text);
 }
 
 .md-typeset a,
-.md-typeset a:hover,
-.md-typeset a:focus,
-.md-content__button {
-  color: #057eb5;
+.md-typeset a:visited,
+.md-typeset .headerlink {
+  color: var(--agile-primary);
 }
 
-.md-typeset code {
-  background: #f5f5f5;
-  color: #242424;
+.md-typeset a:hover,
+.md-typeset a:focus {
+  color: var(--agile-primary-dark);
+}
+
+
+/* =========================================================
+   Títulos
+   ========================================================= */
+
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3,
+.md-typeset h4,
+.md-typeset h5,
+.md-typeset h6 {
+  color: var(--agile-text);
+  font-weight: 700;
+}
+
+.md-typeset h1 { font-size: 1.85625rem; line-height: 1.25; }
+.md-typeset h2 { font-size: 1.4625rem;  line-height: 1.3;  }
+.md-typeset h3 { font-size: 1.2375rem;  line-height: 1.35; }
+
+.md-typeset h4,
+.md-typeset h5,
+.md-typeset h6 {
+  font-size: 1.06875rem;
+  line-height: 1.4;
+}
+
+
+/* =========================================================
+   Código en línea
+   ========================================================= */
+
+.md-typeset :not(pre) > code {
+  display: inline;
+  box-sizing: border-box;
+
+  padding: 0.09rem 0.3375rem;
+
+  background: var(--agile-inline-bg);
+  border: 1px solid var(--agile-inline-border);
+  border-radius: 4px;
+
+  color: var(--agile-text);
+
+  font-family: var(--agile-code-font);
+  font-size: var(--agile-code-font-size);
+  line-height: inherit;
+
+  white-space: normal;
+}
+
+
+/* =========================================================
+   Bloques de código
+   ========================================================= */
+
+.md-typeset .highlight {
+  width: 100%;
+  max-width: 100%;
+
+  margin: 0.9rem 0;
+  padding: 0;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  background: var(--agile-code-bg);
+  border: 1px solid var(--agile-code-border);
+  border-radius: 6px;
+
+  box-shadow: none;
+}
+
+.md-typeset .highlight pre,
+.md-typeset pre {
+  box-sizing: border-box;
+
+  width: 100%;
+  max-width: 100%;
+
+  margin: 0;
+  padding: 0;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  background: var(--agile-code-bg);
+  border: 0;
+  border-radius: 6px;
+
+  box-shadow: none;
+  color: var(--agile-text);
+
+  font-family: var(--agile-code-font);
+  font-size: var(--agile-code-font-size);
+  line-height: var(--agile-code-line-height);
+}
+
+.md-typeset .highlight pre > code,
+.md-typeset pre > code {
+  display: block;
+  box-sizing: border-box;
+
+  width: max-content;
+  min-width: 100%;
+  max-width: none;
+
+  margin: 0;
+  padding: 0.7875rem 1.06875rem;
+
+  overflow: visible;
+
+  background: transparent;
+  color: var(--agile-text);
+
+  font-family: var(--agile-code-font);
+  font-size: var(--agile-code-font-size);
+  line-height: var(--agile-code-line-height);
+
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+.md-typeset .highlight pre > code *,
+.md-typeset pre > code * {
+  box-sizing: border-box;
+
+  background: transparent;
+  border: 0;
+  color: var(--agile-text);
+
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+
+  white-space: inherit;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+
+/* =========================================================
+   Botón de copiar código
+   ========================================================= */
+
+.md-clipboard {
+  color: #777777;
+}
+
+.md-clipboard:hover,
+.md-clipboard:focus {
+  background: var(--agile-primary-soft);
+  color: var(--agile-primary);
+}
+
+
+/* =========================================================
+   Admoniciones
+   ========================================================= */
+
+.admonition,
+.admonition p,
+.admonition li,
+.admonition strong,
+.admonition em {
+  color: var(--agile-text);
+  font-size: var(--agile-font-size);
+  line-height: 1.55;
 }
 
 .admonition {
-  background-color: #f5f5f5;
+  background: var(--agile-sidebar);
+}
+
+
+/* =========================================================
+   Tablas
+   ========================================================= */
+
+.md-typeset table {
+  width: 100%;
+  max-width: 100%;
+
+  border-collapse: collapse;
 }
 
 .md-typeset table,
 .md-typeset table th,
 .md-typeset table td {
-  background-color: #f5f5f5 !important;
-}
-
-.md-typeset__table {
-  background-color: transparent !important;
-}
-
-.md-typeset table {
   border: 1px solid #499497;
-  border-collapse: collapse;
+
+  background: var(--agile-sidebar);
+  color: var(--agile-text);
+
+  font-size: var(--agile-font-size);
+  line-height: 1.55;
 }
 
-.md-typeset table th,
-.md-typeset table td {
-  border: 1px solid #499497;
+.md-typeset table th {
+  font-weight: 700;
 }
 
-.md-typeset blockquote,
-.md-typeset blockquote * {
-  color: #242424 !important;
+
+/* =========================================================
+   Citas
+   ========================================================= */
+
+.md-typeset blockquote {
+  border-left-color: var(--agile-primary);
 }
 
-.md-nav__link,
-.md-nav__link--active,
-.md-nav__item .md-nav__link--active,
-.md-nav__item--active > .md-nav__link,
-.md-nav__item--nested > .md-nav__link--active {
-  background: transparent !important;
-  box-shadow: none !important;
+
+/* =========================================================
+   Footer
+   ========================================================= */
+
+.md-footer,
+.md-footer-meta {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+
+  font-size: var(--agile-ui-font-size);
+  line-height: 1.55;
 }
 
-.md-tabs__link,
-.md-tabs__link:hover,
-.md-tabs__link:focus,
-.md-tabs__link:active,
-.md-tabs__link:visited,
-.md-nav__title,
-.md-nav__title:hover,
-.md-nav__title:focus,
-.md-nav__title:active,
-.md-nav__title:visited {
-  color: #f5f5f5 !important;
+.md-footer {
+  background: var(--agile-primary);
 }
 
-.md-nav__title {
-  background: #057eb5 !important;
-  background-image: none !important;
-  box-shadow: none !important;
+.md-footer-meta {
+  background: var(--agile-primary-dark);
 }
 
-@media (prefers-color-scheme: dark) {
+.md-footer__inner,
+.md-footer-meta__inner {
+  width: var(--agile-page-width);
+  max-width: none;
+
+  margin-right: auto;
+  margin-left: auto;
+
+  box-sizing: border-box;
+}
+
+.md-footer,
+.md-footer-meta,
+.md-footer-meta__inner,
+.md-footer__link,
+.md-footer__title,
+.md-footer__direction,
+.md-footer .md-icon {
+  color: var(--agile-white);
+}
+
+.md-footer__link,
+.md-footer__title,
+.md-footer__direction,
+.md-footer .md-icon {
+  font-size: var(--agile-ui-font-size);
+}
+
+
+/* =========================================================
+   Pantallas grandes
+   ========================================================= */
+
+@media screen and (min-width: 100em) {
+  .md-content__inner {
+    padding-right: 2rem;
+    padding-left: 2rem;
+  }
+
+  .md-tabs__link {
+    padding-right: 0.65rem;
+    padding-left: 0.65rem;
+
+    font-size: 0.86rem;
+  }
+}
+
+
+/* =========================================================
+   Pantallas medianas
+   ========================================================= */
+
+@media screen and (min-width: 60em) and (max-width: 75.99em) {
   :root {
-    --md-default-bg-color: #ffffff;
-    --md-default-fg-color: #242424;
-    --md-default-fg-color--light: #f5f5f5;
-    --md-typeset-color: #242424;
-    --md-code-bg-color: #f5f5f5;
-    --md-code-fg-color: #242424;
-    --md-footer-bg-color: #057eb5;
-    --md-footer-fg-color: #ffffff;
+    --agile-page-width: 96vw;
+    --agile-left-width: 11rem;
+    --agile-right-width: 11rem;
+    --agile-gap: 0.75rem;
   }
 
-  body {
-    background: #ffffff;
-    color: #242424;
+  .md-typeset {
+    font-size: 0.9rem;
   }
+
+  .md-sidebar--primary .md-nav__link,
+  .md-sidebar--secondary .md-nav__link {
+    padding-right: 0.5rem !important;
+    padding-left: 0.5rem !important;
+
+    font-size: 0.78rem !important;
+  }
+}
+
+
+/* =========================================================
+   Tablets y pantallas estrechas
+   (la cabecera y las pestañas son más bajas; el sticky
+   se recalcula solo a partir de las variables)
+   ========================================================= */
+
+@media screen and (max-width: 76.24em) {
+  :root {
+    --agile-header-height: 2.8rem;
+    --agile-tabs-height: 2.25rem;
+  }
+
+  .md-header .md-logo {
+    padding: 0.15rem 0.45rem;
+  }
+
+  .md-header .md-logo img,
+  .md-header .md-logo svg {
+    height: 2.3rem;
+    max-height: 2.3rem;
+  }
+
+  .md-tabs__link {
+    padding-right: 0.63rem;
+    padding-left: 0.63rem;
+
+    font-size: 0.81rem;
+  }
+
+  .md-typeset h1 { font-size: 1.6875rem; }
+  .md-typeset h2 { font-size: 1.35rem;   }
+  .md-typeset h3 { font-size: 1.125rem;  }
+}
+
+
+/* =========================================================
+   Móviles
+   ========================================================= */
+
+@media screen and (max-width: 59.99em) {
+  :root {
+    --agile-page-width: 100%;
+  }
+
+  .md-main__inner {
+    display: block;
+
+    width: 100%;
+    margin: 0;
+    padding: 0.75rem 0;
+  }
+
+  .md-sidebar--primary,
+  .md-sidebar--secondary {
+    display: none;
+  }
+
+  .md-content {
+    margin: 0;
+    padding: 0;
+  }
+
+  .md-content__inner {
+    padding: 0 0.8rem;
+  }
+
+  .md-tabs__link {
+    padding-right: 0.5rem;
+    padding-left: 0.5rem;
+
+    font-size: 0.78rem;
+  }
+}
+
+
+/* =========================================================
+   Buscador: caja y resultados
+   ========================================================= */
+
+/* Caja del buscador dentro de la cabecera */
+.md-search__form {
+  display: flex;
+  align-items: center;
+  min-height: 2.025rem;
+
+  background: #ffffff !important;
+  border: 1px solid rgba(5, 126, 181, 0.35);
+  border-radius: 0.25rem;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* Texto introducido en el campo */
+.md-search__input {
+  color: var(--agile-text) !important;
+  caret-color: var(--agile-primary);
+}
+
+/* Texto de ayuda */
+.md-search__input::placeholder {
+  color: #66727a !important;
+  opacity: 1 !important;
+}
+
+/* Icono de búsqueda */
+.md-search__icon {
+  color: var(--agile-primary) !important;
+}
+
+/* Estado activo de la caja */
+.md-search__form:hover,
+.md-search__form:focus-within {
+  background: #ffffff !important;
+  border-color: var(--agile-primary);
+  box-shadow: 0 0 0 2px var(--agile-primary-soft);
+}
+
+/* Panel desplegable de resultados */
+.md-search__output {
+  background: var(--agile-white) !important;
+  color: var(--agile-text) !important;
+  border: 1px solid #d9e1e5;
+  border-radius: 0 0 0.35rem 0.35rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+}
+
+/* Contenedor con scroll */
+.md-search__scrollwrap {
+  background: var(--agile-white) !important;
+}
+
+/* Lista de resultados */
+.md-search-result,
+.md-search-result__list,
+.md-search-result__item,
+.md-search-result__article {
+  background: var(--agile-white) !important;
+  color: var(--agile-text) !important;
+}
+
+/* Enlaces de los resultados */
+.md-search-result__link {
+  display: block;
+
+  background: transparent !important;
+  color: var(--agile-text) !important;
+}
+
+/* Resultado al pasar el ratón */
+.md-search-result__link:hover,
+.md-search-result__link:focus {
+  background: var(--agile-primary-soft) !important;
+  color: var(--agile-primary-dark) !important;
+}
+
+/* Títulos de los resultados */
+.md-search-result__title {
+  color: var(--agile-text) !important;
+  font-weight: 700;
+}
+
+/* Texto auxiliar, ruta y fragmentos */
+.md-search-result__meta,
+.md-search-result__teaser,
+.md-search-result__article p {
+  color: #59666d !important;
+}
+
+/* Coincidencias encontradas */
+.md-search-result__teaser mark,
+.md-search-result__title mark {
+  background: #ffe58a !important;
+  color: #242424 !important;
+  padding: 0 0.12rem;
+  border-radius: 2px;
+}
+
+/* Mensaje cuando no hay resultados */
+.md-search-result__more,
+.md-search-result__more summary,
+.md-search-result__item--document {
+  color: var(--agile-text) !important;
+  background: var(--agile-white) !important;
+}
+
+/* Separadores entre resultados */
+.md-search-result__item {
+  border-bottom: 1px solid #e5ebee;
+}
+
+/* Overlay que aparece al abrir el buscador */
+.md-search__overlay {
+  background: rgba(0, 0, 0, 0.32) !important;
 }
